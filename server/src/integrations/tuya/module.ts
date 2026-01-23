@@ -1,0 +1,36 @@
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "../../config/module";
+import { ConfigService } from "../../config/config-service";
+import { TuyaContext, TuyaContextOptions } from "@tuya/tuya-connector-nodejs";
+import { TuyaCloudIntegrationService } from "./integration.service";
+
+const TuyaContextProvider = {
+  provide: TuyaContext,
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    const tuyaCloudConfig = config
+      .getConfig()
+      .integrations.find((t) => t.name === "tuya_cloud");
+    if (!tuyaCloudConfig) {
+      throw new Error("MelCloudHome integration config not found");
+    }
+
+    return new TuyaContext(tuyaCloudConfig as TuyaContextOptions);
+  },
+};
+
+const TuyaCloudIntegrationServiceProvider = {
+  provide: TuyaCloudIntegrationService,
+  inject: [TuyaContext],
+  useFactory: async (tuyaContext: TuyaContext) => {
+    return new TuyaCloudIntegrationService(tuyaContext);
+  },
+};
+
+@Module({
+  imports: [ConfigModule],
+  controllers: [],
+  providers: [TuyaContextProvider, TuyaCloudIntegrationServiceProvider],
+  exports: [TuyaCloudIntegrationServiceProvider],
+})
+export class TuyaCloudModule {}

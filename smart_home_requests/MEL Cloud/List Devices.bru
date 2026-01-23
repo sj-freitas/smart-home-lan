@@ -1,0 +1,20 @@
+meta {
+  name: List Devices
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://app.melcloud.com/Mitsubishi.Wifi.Client/User/ListDevices
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-MitsContextKey: {{ContextKey}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

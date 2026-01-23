@@ -1,0 +1,135 @@
+{
+  "integrations": [
+    {
+      "name": "tuya_cloud",
+      "baseUrl": "https://openapi.tuyaeu.com",
+      "accessKey": "{{TUYA_CLOUD_ACCESS_KEY}}",
+      "secretKey": "{{TUYA_CLOUD_SECRET_KEY}}"
+    },
+    {
+      "name": "mel_cloud_home",
+      "siteUrl": "https://melcloudhome.com",
+      "apiUrl": "https://melcloudhome.com/api",
+      "username": "{{MEL_CLOUD_HOME_USERNAME}}",
+      "password": "{{MEL_CLOUD_HOME_PASSWORD}}"
+    },
+    {
+      "name": "mi_home"
+    }
+  ],
+  "home": {
+    "name": "Palais Freitas",
+    "rooms": [
+      {
+        "id": "living_room",
+        "name": "Living Room",
+        "icon": "sofa",
+        "roomInfo": {
+          "sourceDeviceId": "living_room_ac"
+        },
+        "devices": [
+          {
+            "id": "living_room_ac",
+            "name": "Living Room AC",
+            "icon": "fan",
+            "type": "air_conditioner",
+            "integration": {
+              "name": "mel_cloud_home",
+              "deviceId": "1966b3d3-5633-4932-a82e-fb7d3b00fec3"
+            }
+          },
+          {
+            "id": "piano_light",
+            "name": "Piano Light",
+            "icon": "music_note",
+            "type": "smart_switch",
+            "integration": {
+              "name": "tuya_cloud",
+              "deviceId": "bf78bae7fcbea83154ec1o"
+            }
+          },
+          {
+            "id": "television_light",
+            "name": "Television Light",
+            "icon": "television",
+            "type": "smart_switch",
+            "integration": {
+              "name": "tuya_cloud",
+              "deviceId": "bfd8dda094e44fd190blga"
+            }
+          },
+          {
+            "id": "ceiling_light",
+            "name": "Ceiling Light",
+            "icon": "lamp",
+            "type": "smart_light",
+            "integration": {
+              "name": "mi_home",
+              "deviceTokens": ["", ""]
+            }
+          }
+        ]
+      },
+      {
+        "id": "main_bedroom",
+        "name": "Lisbon",
+        "icon": "big_bed",
+        "roomInfo": {
+          "sourceDeviceId": "main_bedroom_ac"
+        },
+        "devices": [
+          {
+            "id": "main_bedroom_ac",
+            "name": "Lisbon AC",
+            "icon": "fan",
+            "type": "air_conditioner",
+            "integration": {
+              "name": "mel_cloud_home",
+              "deviceId": "5fa0ecbf-2562-401a-be23-cd8a470d9c9d"
+            }
+          },
+          {
+            "id": "lisbon_light",
+            "name": "Tall Lamp",
+            "icon": "lamp",
+            "type": "smart_switch",
+            "integration": {
+              "name": "tuya_cloud",
+              "deviceId": "bf41724130db6241cdqsyo"
+            }
+          },
+          {
+            "id": "lisbon_ceiling_light",
+            "name": "Ceiling Light",
+            "icon": "lamp",
+            "type": "smart_light",
+            "integration": {
+              "name": "mi_home",
+              "deviceTokens": [""]
+            }
+          }
+        ]
+      },
+      {
+        "id": "guest_room",
+        "name": "Lviv",
+        "icon": "small_bed",
+        "roomInfo": {
+          "sourceDeviceId": "guest_bedroom_ac"
+        },
+        "devices": [
+          {
+            "id": "guest_bedroom_ac",
+            "name": "Lviv AC",
+            "icon": "fan",
+            "type": "air_conditioner",
+            "integration": {
+              "name": "mel_cloud_home",
+              "deviceId": "64f39725-85fc-4d31-a697-b7f6d3c3d258"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

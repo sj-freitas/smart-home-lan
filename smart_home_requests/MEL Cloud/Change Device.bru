@@ -1,0 +1,33 @@
+meta {
+  name: Change Device
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://app.melcloud.com/Mitsubishi.Wifi.Client/Device/SetAta
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-MitsContextKey: {{ContextKey}}
+}
+
+body:json {
+  {
+    "Power": true,
+    "HasPendingCommand": true,
+    "DeviceID": {{DEVICE_ID}}
+  }
+}
+
+vars:pre-request {
+  DEVICE_TYPE: 113242864
+  DEVICE_ID: 113242864
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

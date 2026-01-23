@@ -1,0 +1,16 @@
+meta {
+  name: Post Action
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3001/api/action/main_bedroom/lisbon_light/off
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

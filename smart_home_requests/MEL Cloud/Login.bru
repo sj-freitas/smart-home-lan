@@ -1,0 +1,30 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://app.melcloud.com/Mitsubishi.Wifi.Client/Login/ClientLogin3
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "AppVersion": "1.37.2.0",
+    "Email": "sjcsgfreitas@hotmail.com",
+    "Password": "xxxxxxxxx",
+    "Persist": "true"
+  }
+  
+}
+
+vars:post-response {
+  ContextKey: res.body.LoginData.ContextKey
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
