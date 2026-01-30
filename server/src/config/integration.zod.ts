@@ -1,22 +1,23 @@
 import { z } from "zod";
 
 const TUYA_CLOUD = "tuya_cloud";
-const MI_HOME = "mi_home";
+const HUE_CLOUD = "hue_cloud";
 const MEL_CLOUD_HOME = "mel_cloud_home";
 
 export const IntegrationTypeNamesZod = z.union([
   z.literal(TUYA_CLOUD),
-  z.literal(MI_HOME),
+  z.literal(HUE_CLOUD),
   z.literal(MEL_CLOUD_HOME),
 ]);
 
-export const MiHomeIntegrationZod = z.object({
-  name: z.literal(MI_HOME),
+export const HueCloudIntegrationZod = z.object({
+  name: z.literal(HUE_CLOUD),
+  clientId: z.string().readonly(),
+  clientSecret: z.string().readonly(),
 });
 
-export const MiHomeIntegrationDeviceZod = z.object({
-  name: z.literal(MI_HOME),
-  deviceTokens: z.array(z.string()),
+export const HueCloudIntegrationDeviceZod = z.object({
+  name: z.literal(HUE_CLOUD),
 });
 
 export const TuyaIntegrationZod = z.object({
@@ -47,23 +48,29 @@ export const MelCloudHomeIntegrationDeviceZod = z.object({
 export const IntegrationDeviceTypesZod = z.union([
   MelCloudHomeIntegrationDeviceZod,
   TuyaIntegrationDeviceZod,
-  MiHomeIntegrationDeviceZod,
+  HueCloudIntegrationDeviceZod,
 ]);
 
 export const IntegrationTypesZod = z.union([
   MelCloudCHomeIntegrationZod,
   TuyaIntegrationZod,
-  MiHomeIntegrationZod,
+  HueCloudIntegrationZod,
 ]);
 
 export const IntegrationsConfigZod = z.array(IntegrationTypesZod);
 
 export type TuyaIntegration = z.infer<typeof TuyaIntegrationZod>;
 export type TuyaIntegrationDevice = z.infer<typeof TuyaIntegrationDeviceZod>;
-export type MiHomeIntegration = z.infer<typeof MiHomeIntegrationZod>;
-export type MiHomeIntegrationDevice = z.infer<typeof MiHomeIntegrationDeviceZod>;
-export type MelCloudHomeIntegration = z.infer<typeof MelCloudCHomeIntegrationZod>;
-export type MelCloudHomeIntegrationDevice = z.infer<typeof MelCloudHomeIntegrationDeviceZod>;
+export type HueCloudIntegration = z.infer<typeof HueCloudIntegrationZod>;
+export type HueCloudIntegrationDevice = z.infer<
+  typeof HueCloudIntegrationDeviceZod
+>;
+export type MelCloudHomeIntegration = z.infer<
+  typeof MelCloudCHomeIntegrationZod
+>;
+export type MelCloudHomeIntegrationDevice = z.infer<
+  typeof MelCloudHomeIntegrationDeviceZod
+>;
 
 export type IntegrationTypeNames = z.infer<typeof IntegrationTypeNamesZod>;
 export type IntegrationTypes = z.infer<typeof IntegrationTypesZod>;

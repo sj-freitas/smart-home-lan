@@ -1,48 +1,82 @@
-import React, { useEffect, useState } from 'react'
-import { RootState, RoomState } from './types'
-import RoomList from './components/RoomList'
-
-const API_BASE = 'http://localhost:3001/api/rooms'
+import { useEffect, useState } from "react";
+import { Home } from "./types";
+import RoomList from "./components/RoomList";
 
 export default function App() {
-  const [state, setState] = useState<RootState | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [home, setHome] = useState<Home | null>(null);
+  const [loading, setLoading] = useState(true);
+  const API_BASE = import.meta.env.VITE_API_HOSTNAME;
 
   useEffect(() => {
-    fetch(`${API_BASE}/state`)
-      .then(r => r.json())
-      .then((data) => setState(data))
-      .finally(() => setLoading(false))
-  }, [])
+    fetch(`${API_BASE}/home`)
+      .then((r) => r.json())
+      .then((data) => setHome(data))
+      .catch((err) => {
+        console.error(err);
+        alert("Failed to load home state");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  async function patchRoom(id: string, patch: Partial<RoomState>) {
-    await fetch(`${API_BASE}/${id}/patch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch)
-    })
-    setState(prev => {
-      if (!prev) return prev
-      return { rooms: prev.rooms.map(r => (r.id === id ? { ...r, ...patch } : r)) }
-    })
+  // Update a single device state locally (after successful action)
+  function applyDeviceState(
+    roomId: string,
+    deviceId: string,
+    newState: string,
+  ) {
+    setHome((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        rooms: prev.rooms.map((r) => {
+          if (r.id !== roomId) return r;
+          return {
+            ...r,
+            devices: r.devices.map((d) =>
+              d.id === deviceId ? { ...d, state: newState } : d,
+            ),
+          };
+        }),
+      };
+    });
   }
 
-  if (loading) return <div style={{padding:20}}>Loading...</div>
-  if (!state) return <div style={{padding:20}}>No state</div>
+  if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
+  if (!home) return <div style={{ padding: 20 }}>No state</div>;
 
   return (
-    <div className='app-shell'>
-      <div className='header'>
-        <div className='logo'>SH</div>
+    <div className="app-shell">
+      <div className="header">
+        <div className="logo">SH</div>
         <div>
-          <h1>Sergio Home LAN</h1>
-          <div className='lead'>Local network control — Bedrooms & Living Room</div>
+          <h1>{home.name}</h1>
+          <div className="lead">Local network control</div>
         </div>
       </div>
 
-      <RoomList rooms={state.rooms} onPatch={patchRoom} />
-
-      <div className='footer-note'>This UI uses a local mock backend. When you integrate your API, update the server code to fetch/persist real device state.</div>
+      <RoomList
+        rooms={home.rooms}
+        onDeviceAction={async (roomId, deviceId, actionId) => {
+          try {
+            const res = await fetch(
+              `${API_BASE}/actions/${roomId}/${deviceId}/${actionId}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+            const data = await res.json();
+            if (res.ok && data.runStatus === "success") {
+              applyDeviceState(roomId, deviceId, actionId);
+            } else {
+              alert("Action failed");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Action error");
+          }
+        }}
+      />
     </div>
-  )
+  );
 }

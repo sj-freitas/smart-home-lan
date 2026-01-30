@@ -1,7 +1,11 @@
 import { TuyaIntegrationDevice } from "../../config/integration.zod";
-import { IntegrationService } from "../integrations-service";
+import {
+  IntegrationService,
+  TryRunActionResult,
+} from "../integrations-service";
 import { TuyaContext } from "@tuya/tuya-connector-nodejs";
 import { TuyaDeviceCommandResultZod, TuyaDeviceStatusZod } from "./types.zod";
+import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 
 export class TuyaCloudIntegrationService implements IntegrationService<TuyaIntegrationDevice> {
   constructor(private readonly tuyaContext: TuyaContext) {}
@@ -34,11 +38,15 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
 
   async tryRunAction(
     deviceInfo: TuyaIntegrationDevice,
-    action: string,
-  ): Promise<boolean> {
-    // Hard code the actions for now, but should change.
+    deviceType: RoomDeviceTypes,
+    actionDescription: DeviceAction,
+  ): Promise<TryRunActionResult> {
+    if (deviceType !== "smart_switch") {
+      return `Integrations for actions for Tuya devices do not support ${deviceType}.`;
+    }
+
     try {
-      if (action === "on") {
+      if (actionDescription.id === "on") {
         const response = await this.tuyaContext.request({
           path: `/v1.0/iot-03/devices/${deviceInfo.deviceId}/commands`,
           method: "POST",
@@ -46,25 +54,20 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
         });
 
         const parsedResponse = TuyaDeviceCommandResultZod.parse(response);
-        return parsedResponse.success;
+        return parsedResponse.success ? true : "Failed to turn on the device.";
       }
-      if (action === "off") {
+      if (actionDescription.id === "off") {
         const response = await this.tuyaContext.request({
           path: `/v1.0/iot-03/devices/${deviceInfo.deviceId}/commands`,
           method: "POST",
           body: { commands: [{ code: "switch_1", value: false }] },
         });
         const parsedResponse = TuyaDeviceCommandResultZod.parse(response);
-        return parsedResponse.success;
+        return parsedResponse.success ? true : "Failed to turn off the device.";
       }
     } catch (error: unknown) {
       console.error(error);
-      return false;
+      return "Tuya Cloud connection failed.";
     }
-
-    console.warn(
-      `Integrations for actions for Tuya devices do not support ${action} on ${deviceInfo.name}!`,
-    );
-    return false;
   }
 }

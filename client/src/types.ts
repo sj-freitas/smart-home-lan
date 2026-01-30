@@ -1,6 +1,19 @@
-export type ACMode = 'cooling' | 'heating'
-export type LightMode = 'warm' | 'night' | 'kinky'
-export type Switch = { id: string; name: string; on: boolean }
-export type Light = { id: string; name: string; mode: LightMode }
-export type RoomState = { id: string; name: string; hasAC: boolean; acMode?: ACMode; acOn?: boolean; switches: Switch[]; lights: Light[] }
-export type RootState = { rooms: RoomState[] }
+export type Action = { id: string; name: string }
+export type Device = {
+  id: string;
+  name: string;
+  icon?: string;
+  type: 'air_conditioner' | 'smart_switch' | 'smart_light' | string;
+  actions: Action[];
+  state?: string;
+}
+export type Room = {
+  id: string;
+  name: string;
+  temperature?: number;
+  devices: Device[];
+}
+export type Home = {
+  name: string;
+  rooms: Room[];
+}

@@ -14,7 +14,9 @@
       "password": "{{MEL_CLOUD_HOME_PASSWORD}}"
     },
     {
-      "name": "mi_home"
+      "name": "hue_cloud",
+      "clientId": "{{HUE_CLOUD_CLIENT_ID}}",
+      "clientSecret": "{{HUE_CLOUD_SECRET}}"
     }
   ],
   "home": {
@@ -25,18 +27,62 @@
         "name": "Living Room",
         "icon": "sofa",
         "roomInfo": {
-          "sourceDeviceId": "living_room_ac"
+          "sourceDeviceId": "ac"
         },
         "devices": [
           {
-            "id": "living_room_ac",
-            "name": "Living Room AC",
+            "id": "ac",
+            "name": "Air Conditioner",
             "icon": "fan",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
               "deviceId": "1966b3d3-5633-4932-a82e-fb7d3b00fec3"
-            }
+            },
+            "actions": [
+              {
+                "id": "on_heat",
+                "name": "Heat",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Heat",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "LeftCentre",
+                  "vaneVerticalDirection": "Two",
+                  "setTemperature": 27,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "on_cool",
+                "name": "Cool",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Cool",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "LeftCentre",
+                  "vaneVerticalDirection": "Two",
+                  "setTemperature": 21,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "power": false,
+                  "operationMode": null,
+                  "setFanSpeed": null,
+                  "vaneHorizontalDirection": null,
+                  "vaneVerticalDirection": null,
+                  "setTemperature": null,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              }
+            ]
           },
           {
             "id": "piano_light",
@@ -46,7 +92,17 @@
             "integration": {
               "name": "tuya_cloud",
               "deviceId": "bf78bae7fcbea83154ec1o"
-            }
+            },
+            "actions": [
+              {
+                "id": "on",
+                "name": "On"
+              },
+              {
+                "id": "off",
+                "name": "Off"
+              }
+            ]
           },
           {
             "id": "television_light",
@@ -56,7 +112,17 @@
             "integration": {
               "name": "tuya_cloud",
               "deviceId": "bfd8dda094e44fd190blga"
-            }
+            },
+            "actions": [
+              {
+                "id": "on",
+                "name": "On"
+              },
+              {
+                "id": "off",
+                "name": "Off"
+              }
+            ]
           },
           {
             "id": "ceiling_light",
@@ -64,9 +130,26 @@
             "icon": "lamp",
             "type": "smart_light",
             "integration": {
-              "name": "mi_home",
-              "deviceTokens": ["", ""]
-            }
+              "name": "hue_cloud"
+            },
+            "actions": [
+              {
+                "id": "on_bright",
+                "name": "Bright"
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim"
+              },
+              {
+                "id": "on_kinky",
+                "name": "Kinky"
+              },
+              {
+                "id": "off",
+                "name": "Off"
+              }
+            ]
           }
         ]
       },
@@ -75,38 +158,109 @@
         "name": "Lisbon",
         "icon": "big_bed",
         "roomInfo": {
-          "sourceDeviceId": "main_bedroom_ac"
+          "sourceDeviceId": "ac"
         },
         "devices": [
           {
-            "id": "main_bedroom_ac",
-            "name": "Lisbon AC",
+            "id": "ac",
+            "name": "Air Conditioner",
             "icon": "fan",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
               "deviceId": "5fa0ecbf-2562-401a-be23-cd8a470d9c9d"
-            }
+            },
+            "actions": [
+              {
+                "id": "on_heat",
+                "name": "Heat",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Heat",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "Auto",
+                  "vaneVerticalDirection": "Auto",
+                  "setTemperature": 25,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "on_cool",
+                "name": "Cool",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Cool",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "Auto",
+                  "vaneVerticalDirection": "Auto",
+                  "setTemperature": 22,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "power": false,
+                  "operationMode": null,
+                  "setFanSpeed": null,
+                  "vaneHorizontalDirection": null,
+                  "vaneVerticalDirection": null,
+                  "setTemperature": null,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              }
+            ]
           },
           {
-            "id": "lisbon_light",
+            "id": "lamp",
             "name": "Tall Lamp",
             "icon": "lamp",
             "type": "smart_switch",
             "integration": {
               "name": "tuya_cloud",
               "deviceId": "bf41724130db6241cdqsyo"
-            }
+            },
+            "actions": [
+              {
+                "id": "on",
+                "name": "On"
+              },
+              {
+                "id": "off",
+                "name": "Off"
+              }
+            ]
           },
           {
-            "id": "lisbon_ceiling_light",
+            "id": "ceiling_light",
             "name": "Ceiling Light",
             "icon": "lamp",
             "type": "smart_light",
             "integration": {
-              "name": "mi_home",
-              "deviceTokens": [""]
-            }
+              "name": "hue_cloud"
+            },
+            "actions": [
+              {
+                "id": "on_bright",
+                "name": "Bright"
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim"
+              },
+              {
+                "id": "on_kinky",
+                "name": "Kinky"
+              },
+              {
+                "id": "off",
+                "name": "Off"
+              }
+            ]
           }
         ]
       },
@@ -115,18 +269,62 @@
         "name": "Lviv",
         "icon": "small_bed",
         "roomInfo": {
-          "sourceDeviceId": "guest_bedroom_ac"
+          "sourceDeviceId": "ac"
         },
         "devices": [
           {
-            "id": "guest_bedroom_ac",
-            "name": "Lviv AC",
+            "id": "ac",
+            "name": "Air Conditioner",
             "icon": "fan",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
               "deviceId": "64f39725-85fc-4d31-a697-b7f6d3c3d258"
-            }
+            },
+            "actions": [
+              {
+                "id": "on_heat",
+                "name": "Heat",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Heat",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "Auto",
+                  "vaneVerticalDirection": "Auto",
+                  "setTemperature": 25,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "on_cool",
+                "name": "Cool",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Cool",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "Auto",
+                  "vaneVerticalDirection": "Auto",
+                  "setTemperature": 22,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "power": false,
+                  "operationMode": null,
+                  "setFanSpeed": null,
+                  "vaneHorizontalDirection": null,
+                  "vaneVerticalDirection": null,
+                  "setTemperature": null,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              }
+            ]
           }
         ]
       }

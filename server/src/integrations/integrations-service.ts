@@ -1,35 +1,69 @@
-import { IntegrationDeviceTypes, IntegrationTypeNames } from "src/config/integration.zod";
+import { DeviceAction, RoomDeviceTypes } from "../config/home.zod";
+import {
+  IntegrationDeviceTypes,
+  IntegrationTypeNames,
+} from "../config/integration.zod";
+
+export type TryRunActionResult = true | string;
 
 export interface IntegrationService<T> {
   readonly name: IntegrationTypeNames;
   getDeviceTemperature(deviceInfo: T): Promise<number>;
-  getDeviceState(deviceInfo: T): Promise<string>;
-  tryRunAction(deviceInfo: T, action: string): Promise<boolean>;
+  getDeviceState(deviceInfo: T, actionDescriptions: DeviceAction[]): Promise<string>;
+  tryRunAction(
+    deviceInfo: T,
+    deviceType: RoomDeviceTypes,
+    action: DeviceAction,
+  ): Promise<TryRunActionResult>;
+}
+
+interface DeviceContext<T> {
+  info: T;
+  type: RoomDeviceTypes;
 }
 
 export class IntegrationServiceWithContext<T> {
-  constructor(private readonly service: IntegrationService<T>, private readonly context: T) {}
+  constructor(
+    private readonly service: IntegrationService<T>,
+    private readonly context: DeviceContext<T>,
+  ) {}
 
   async getDeviceTemperature() {
-    return this.service.getDeviceTemperature(this.context);
+    return this.service.getDeviceTemperature(this.context.info);
   }
 
-  async getDeviceState() {
-    return this.service.getDeviceState(this.context);
+  async getDeviceState(actions: DeviceAction[]) {
+    return this.service.getDeviceState(this.context.info, actions);
   }
-  
-  async tryRunAction(action: string) {
-    return this.service.tryRunAction(this.context, action);
+
+  async tryRunAction(action: DeviceAction) {
+    return this.service.tryRunAction(
+      this.context.info,
+      this.context.type,
+      action,
+    );
   }
 }
 
+interface IntegrationInfo {
+  integration: IntegrationDeviceTypes;
+  deviceType: RoomDeviceTypes;
+}
+
 export class IntegrationsService {
-  getIntegration(integration: IntegrationDeviceTypes): IntegrationServiceWithContext<unknown> {
-    const found = this.integrations.find((t) => (t.name === integration.name));
+  getIntegration(
+    info: IntegrationInfo,
+  ): IntegrationServiceWithContext<unknown> {
+    const found = this.integrations.find(
+      (t) => t.name === info.integration.name,
+    );
     if (!found) {
-      throw new Error(`Integration ${integration.name} not supported.`);
+      throw new Error(`Integration ${info.integration.name} not supported.`);
     }
-    return new IntegrationServiceWithContext(found, integration);
+    return new IntegrationServiceWithContext(found, {
+      info: info.integration,
+      type: info.deviceType,
+    });
   }
 
   constructor(private readonly integrations: IntegrationService<unknown>[]) {}

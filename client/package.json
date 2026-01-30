@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --port 5174"
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview --port 5173 --host"
   },
   "dependencies": {
     "react": "^18.2.0",

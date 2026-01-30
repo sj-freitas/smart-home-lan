@@ -4,7 +4,7 @@ import { ConfigModule } from "../../config/module";
 import { ConfigService } from "../../config/config-service";
 import { MelCloudHomeClient } from "./client";
 import { getAuthorizationCookies } from "./authorization-cookies";
-import { MelCloudHomeIntegration } from "src/config/integration.zod";
+import { MelCloudHomeIntegration } from "../../config/integration.zod";
 
 // Token bit here
 let token: string | null = null;

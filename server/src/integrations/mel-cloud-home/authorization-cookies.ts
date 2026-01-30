@@ -1,4 +1,4 @@
-import { MelCloudHomeIntegration } from "src/config/integration.zod";
+import { MelCloudHomeIntegration } from "../../config/integration.zod";
 import {
   Builder,
   By,

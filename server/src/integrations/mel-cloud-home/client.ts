@@ -10,6 +10,7 @@ export interface RoomDevice {
   power: boolean;
   isConnected: boolean;
   isInError: boolean;
+  settings: Record<string, string>;
 }
 
 /**
@@ -58,6 +59,10 @@ export class MelCloudHomeClient {
         device.settings.find(
           (currSetting) => currSetting.name === "OperationMode",
         )?.value ?? "off",
+      settings: device.settings.reduce((acc, setting) => ({
+        ...acc,
+        [setting.name]: setting.value,
+      }), {}),
     }));
 
     return devices;
@@ -65,7 +70,7 @@ export class MelCloudHomeClient {
 
   async putAtAUnit(deviceId: string, stateChange: AirToAirUnitStateChange) {
     // Maybe the preset is done before? Need to think about it to look less suspicious
-    const switchResponse = await fetch(`${this.apiUrl}/ataunit/${deviceId}`, {
+    await fetch(`${this.apiUrl}/ataunit/${deviceId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -74,7 +79,6 @@ export class MelCloudHomeClient {
       },
       body: JSON.stringify(stateChange),
     });
-    console.log("Switch Response Status:", switchResponse);
     return true;
   }
 }

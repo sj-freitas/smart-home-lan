@@ -1,39 +1,60 @@
-import { Controller, Get, HttpCode, Param, Post } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { ConfigService } from "../config/config-service";
-import { HomeConfig, RoomDeviceConfig } from "../config/home.zod";
+import { DeviceAction, HomeConfig } from "../config/home.zod";
 import {
   IntegrationServiceWithContext,
   IntegrationsService,
 } from "../integrations/integrations-service";
-import { ACTIONS_BY_TYPE } from "../actions/actions.config";
+import { UserValidationService } from "../services/user-validation.service";
+import { DeviceHelper } from "../helpers/deviceHelpers";
 
-function getDevicesFromHome(home: HomeConfig): Map<string, RoomDeviceConfig> {
-  const allDevices = home.rooms.map((t) => t.devices).flatMap((t) => t);
-
-  return new Map(allDevices.map((device) => [device.id, device]));
+interface IntegratedDevice<T> {
+  integrationService: IntegrationServiceWithContext<T>;
+  actions: Map<string, DeviceAction>;
 }
 
-@Controller("action")
+@Controller("actions")
 export class ActionsController {
-  private readonly deviceMap: Map<string, RoomDeviceConfig>;
+  private readonly deviceHelper: DeviceHelper;
   private readonly homeConfig: HomeConfig;
   private readonly integrations: IntegrationsService;
+  private readonly userValidationService: UserValidationService;
 
-  constructor(config: ConfigService, integrations: IntegrationsService) {
+  constructor(
+    config: ConfigService,
+    integrations: IntegrationsService,
+    userValidationService: UserValidationService,
+  ) {
     this.homeConfig = config.getConfig().home;
-    this.deviceMap = getDevicesFromHome(this.homeConfig);
+    this.deviceHelper = new DeviceHelper(this.homeConfig);
     this.integrations = integrations;
+    this.userValidationService = userValidationService;
   }
 
-
-  private getIntegrationServiceForDevice(
+  private getIntegratedDeviceFromId(
+    roomId: string,
     deviceId: string,
-  ): IntegrationServiceWithContext<unknown> | null {
-    const deviceInfo = this.deviceMap.get(deviceId);
+  ): IntegratedDevice<unknown> | null {
+    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
     if (!deviceInfo) {
       return null;
     }
-    return this.integrations.getIntegration(deviceInfo.integration);
+
+    const deviceActions = deviceInfo.actions;
+    return {
+      integrationService: this.integrations.getIntegration({
+        integration: deviceInfo.integration,
+        deviceType: deviceInfo.type,
+      }),
+      actions: new Map(deviceActions.map((action) => [action.id, action])),
+    };
   }
 
   @Post("/:room/:deviceId/:action")
@@ -43,14 +64,42 @@ export class ActionsController {
     @Param("deviceId") deviceId: string,
     @Param("action") action: string,
   ) {
-    const device = this.getIntegrationServiceForDevice(deviceId);
-    const actionRunStatus = await device.tryRunAction(action);
-    
+    if (!this.userValidationService.isRequestAllowed()) {
+      throw new UnauthorizedException(
+        "User is not allowed to perform actions.",
+      );
+    }
+
+    const device = this.getIntegratedDeviceFromId(room, deviceId);
+    if (!device) {
+      return {
+        room,
+        deviceId: deviceId,
+        action,
+        message: `Device with id ${deviceId} not found`,
+        runStatus: "failure",
+      };
+    }
+    const actionDescription = device.actions.get(action);
+    if (!actionDescription) {
+      return {
+        room,
+        deviceId: deviceId,
+        action,
+        message: `Action ${action} not found`,
+        runStatus: "failure",
+      };
+    }
+
+    const actionRunStatus =
+      await device.integrationService.tryRunAction(actionDescription);
+
     return {
       room,
       deviceId: deviceId,
       action,
-      runStatus: actionRunStatus ? "success" : "failure",
+      message: actionRunStatus === true ? undefined : actionRunStatus,
+      runStatus: actionRunStatus === true ? "success" : "failure",
     };
   }
 }

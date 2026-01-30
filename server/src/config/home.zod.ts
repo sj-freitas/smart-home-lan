@@ -7,20 +7,37 @@ const RoomDeviceTypesZod = z.union([
   z.literal("smart_light"),
 ]);
 
+export const DeviceActionZod = z.object({
+  id: z.string().readonly(),
+  name: z.string().readonly(),
+  // Ideally we would have specific types here based on the deviceType and integrationType name
+  parameters: z
+    .unknown()
+    .readonly()
+    .describe(
+      "Parameters for the action, if any - these are only validated at run time for specific devices.",
+    )
+    .optional(),
+});
+
 export const RoomDeviceConfigZod = z.object({
   id: z.string().readonly(),
   icon: z.string().readonly(),
   name: z.string().readonly(),
   type: RoomDeviceTypesZod.readonly(),
   integration: IntegrationDeviceTypesZod.readonly(),
+  actions: z.array(DeviceActionZod).readonly(),
 });
 
 export const RoomConfigZod = z.object({
   id: z.string().readonly(),
   name: z.string().readonly(),
-  roomInfo: z.object({
-    sourceDeviceId: z.string().readonly(),
-  }).optional().readonly(),
+  roomInfo: z
+    .object({
+      sourceDeviceId: z.string().readonly(),
+    })
+    .optional()
+    .readonly(),
   devices: z.array(RoomDeviceConfigZod).readonly(),
 });
 
@@ -29,6 +46,7 @@ export const HomeConfigZod = z.object({
   rooms: z.array(RoomConfigZod).readonly(),
 });
 
+export type DeviceAction = z.infer<typeof DeviceActionZod>;
 export type RoomDeviceTypes = z.infer<typeof RoomDeviceTypesZod>;
 export type RoomDeviceConfig = z.infer<typeof RoomDeviceConfigZod>;
 export type RoomConfig = z.infer<typeof RoomConfigZod>;

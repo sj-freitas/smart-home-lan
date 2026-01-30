@@ -1,42 +1,48 @@
 import { Controller, Get } from "@nestjs/common";
 import { ConfigService } from "../config/config-service";
-import { HomeConfig, RoomDeviceConfig } from "../config/home.zod";
+import { HomeConfig } from "../config/home.zod";
 import {
   IntegrationServiceWithContext,
   IntegrationsService,
 } from "../integrations/integrations-service";
-import { ACTIONS_BY_TYPE } from "../actions/actions.config";
-
-function getDevicesFromHome(home: HomeConfig): Map<string, RoomDeviceConfig> {
-  const allDevices = home.rooms.map((t) => t.devices).flatMap((t) => t);
-
-  return new Map(allDevices.map((device) => [device.id, device]));
-}
+import { UserValidationService } from "../services/user-validation.service";
+import { DeviceHelper } from "../helpers/deviceHelpers";
 
 @Controller("home")
 export class HomeController {
-  private readonly deviceMap: Map<string, RoomDeviceConfig>;
+  private readonly deviceHelper: DeviceHelper;
   private readonly homeConfig: HomeConfig;
   private readonly integrations: IntegrationsService;
+  private readonly userValidationService: UserValidationService;
 
-  constructor(config: ConfigService, integrations: IntegrationsService) {
+  constructor(
+    config: ConfigService,
+    integrations: IntegrationsService,
+    userValidationService: UserValidationService,
+  ) {
     this.homeConfig = config.getConfig().home;
-    this.deviceMap = getDevicesFromHome(this.homeConfig);
+    this.deviceHelper = new DeviceHelper(this.homeConfig);
     this.integrations = integrations;
+    this.userValidationService = userValidationService;
   }
 
   private getIntegrationServiceForDevice(
+    roomId: string,
     deviceId: string,
   ): IntegrationServiceWithContext<unknown> | null {
-    const deviceInfo = this.deviceMap.get(deviceId);
+    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
     if (!deviceInfo) {
       return null;
     }
-    return this.integrations.getIntegration(deviceInfo.integration);
+    return this.integrations.getIntegration({
+      integration: deviceInfo.integration,
+      deviceType: deviceInfo.type,
+    });
   }
 
   @Get("/")
   public async getHomeInfo() {
+    const canPerformActions = this.userValidationService.isRequestAllowed();
     const homeInfo = {
       name: this.homeConfig.name,
       rooms: await Promise.all(
@@ -45,24 +51,31 @@ export class HomeController {
           name: room.name,
           temperature:
             (await this.getIntegrationServiceForDevice(
+              room.id,
               room.roomInfo.sourceDeviceId,
             )?.getDeviceTemperature()) ?? NaN,
           devices: await Promise.all(
             room.devices.map(async (device) => {
-              const deviceInfo = this.getIntegrationServiceForDevice(device.id);
+              const deviceInfo = this.getIntegrationServiceForDevice(
+                room.id,
+                device.id,
+              );
               const currentDeviceState =
-                deviceInfo === null ? "off" : await deviceInfo.getDeviceState();
+                deviceInfo === null
+                  ? "off"
+                  : await deviceInfo.getDeviceState(Array.from(device.actions));
 
               return {
                 id: device.id,
                 name: device.name,
                 icon: device.icon,
                 type: device.type,
-                actions:
-                  ACTIONS_BY_TYPE.get(device.type)?.map((t) => ({
-                    id: t.name,
-                    name: t.description,
-                  })) ?? [],
+                actions: canPerformActions
+                  ? (device.actions.map((t) => ({
+                      id: t.id,
+                      name: t.name,
+                    })) ?? [])
+                  : [],
                 state: currentDeviceState,
               };
             }),
@@ -74,22 +87,3 @@ export class HomeController {
     return homeInfo;
   }
 }
-
-// Based on the type we can have specific actions:
-// These can be hardcoded on the API and set as a response
-// - air_conditioner:
-//    - on_heat
-//    - on_cool
-//    - off
-// - smart_switch
-//    - on
-//    - off
-// - smart_light
-//    - on_bright
-//    - on_dim
-//    - on_kinky
-//    - off
-//
-// The controller for state change should have a path like action/{Room}/{Device}/{Action}
-// Example: /action/living_room/air_conditioner/on_heat
-// The body might not be necessary for these simple actions

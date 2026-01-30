@@ -58,10 +58,7 @@ export class ConfigService {
     const parsed = await BaseConfigZod.safeParseAsync(config);
 
     if (!parsed.success) {
-      console.error(
-        "Config parsing failed:",
-        parsed.error.format(() => ({})),
-      );
+      console.error("Config parsing failed:", parsed.error.message);
       return;
     }
 

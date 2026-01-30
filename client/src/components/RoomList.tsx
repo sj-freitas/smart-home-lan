@@ -1,12 +1,12 @@
 import React from 'react'
-import { RoomState } from '../types'
+import { Room } from '../types'
 import RoomCard from './RoomCard'
 
-export default function RoomList({ rooms, onPatch }:{rooms:RoomState[], onPatch:(id:string, patch:any)=>void}){
+export default function RoomList({ rooms, onDeviceAction }:{rooms:Room[], onDeviceAction:(roomId:string, deviceId:string, actionId:string)=>Promise<void>}){
   return (
     <div className='grid'>
       {rooms.map(r => (
-        <RoomCard key={r.id} room={r} onPatch={onPatch} />
+        <RoomCard key={r.id} room={r} onDeviceAction={onDeviceAction} />
       ))}
     </div>
   )
