@@ -1,9 +1,9 @@
-import { HueCloudIntegrationDevice } from "src/config/integration.zod";
+import { HueCloudIntegrationDevice } from "../../config/integration.zod";
 import {
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
-import { DeviceAction, RoomDeviceTypes } from "src/config/home.zod";
+import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { HueClient } from "./hue.client";
 import { LightState, LightStateZod } from "./hue.types";
 

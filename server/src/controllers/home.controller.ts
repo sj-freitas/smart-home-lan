@@ -1,90 +1,52 @@
 import { Controller, Get } from "@nestjs/common";
-import { ConfigService } from "../config/config-service";
-import { HomeConfig } from "../config/home.zod";
-import {
-  IntegrationServiceWithContext,
-  IntegrationsService,
-} from "../integrations/integrations-service";
 import { UserValidationService } from "../services/user-validation.service";
-import { DeviceHelper } from "../helpers/device-helpers";
+import {
+  ApplicationState,
+  ApplicationStateService,
+} from "../integrations/application-state.service";
+
+function removeActionsFromState(appState: ApplicationState): ApplicationState {
+  return {
+    ...appState,
+    rooms: appState.rooms.map((currRoom) => ({
+      ...currRoom,
+      devices: currRoom.devices.map((currDevice) => ({
+        ...currDevice,
+        actions: [
+          {
+            id: currDevice.state,
+            name: currDevice.actions.find((t) => t.id === currDevice.state)
+              .name,
+          },
+        ],
+      })),
+    })),
+  };
+}
 
 @Controller("home")
 export class HomeController {
-  private readonly deviceHelper: DeviceHelper;
-  private readonly homeConfig: HomeConfig;
-  private readonly integrations: IntegrationsService;
+  private readonly applicationStateService: ApplicationStateService;
   private readonly userValidationService: UserValidationService;
 
   constructor(
-    config: ConfigService,
-    integrations: IntegrationsService,
+    applicationStateService: ApplicationStateService,
     userValidationService: UserValidationService,
   ) {
-    this.homeConfig = config.getConfig().home;
-    this.deviceHelper = new DeviceHelper(this.homeConfig);
-    this.integrations = integrations;
+    this.applicationStateService = applicationStateService;
     this.userValidationService = userValidationService;
-  }
-
-  private getIntegrationServiceForDevice(
-    roomId: string,
-    deviceId: string,
-  ): IntegrationServiceWithContext<unknown> | null {
-    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
-    if (!deviceInfo) {
-      return null;
-    }
-    return this.integrations.getIntegration({
-      integration: deviceInfo.integration,
-      deviceType: deviceInfo.type,
-    });
   }
 
   @Get("/")
   public async getHomeInfo() {
     const canPerformActions = this.userValidationService.isRequestAllowed();
-    const homeInfo = {
-      name: this.homeConfig.name,
-      logo: this.homeConfig.iconUrl,
-      rooms: await Promise.all(
-        this.homeConfig.rooms.map(async (room) => ({
-          id: room.id,
-          name: room.name,
-          temperature:
-            (await this.getIntegrationServiceForDevice(
-              room.id,
-              room.roomInfo.sourceDeviceId,
-            )?.getDeviceTemperature()) ?? NaN,
-          devices: await Promise.all(
-            room.devices.map(async (device) => {
-              const deviceInfo = this.getIntegrationServiceForDevice(
-                room.id,
-                device.id,
-              );
-              const currentDeviceState =
-                deviceInfo === null
-                  ? "off"
-                  : await deviceInfo.getDeviceState(Array.from(device.actions));
+    const appState = await this.applicationStateService.getHomeState();
 
-              return {
-                id: device.id,
-                name: device.name,
-                icon: device.icon,
-                type: device.type,
-                actions: canPerformActions
-                  ? (device.actions.map((t) => ({
-                      id: t.id,
-                      name: t.name,
-                    })) ?? [])
-                  : [],
-                state: currentDeviceState,
-              };
-            }),
-          ),
-        })),
-      ),
-    };
+    if (!canPerformActions) {
+      // User is not authenticated, therefore they can't perform actions
+      return removeActionsFromState(appState);
+    }
 
-    return homeInfo;
+    return appState;
   }
 }

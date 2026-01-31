@@ -1,0 +1,99 @@
+import { DeviceHelper } from "../helpers/device-helpers";
+import { ConfigService } from "../config/config-service";
+import {
+  IntegrationServiceWithContext,
+  IntegrationsService,
+} from "./integrations-service";
+import { HomeConfig, RoomDeviceTypes } from "../config/home.zod";
+
+export interface ApplicationState {
+  name: string;
+  logo: string;
+  rooms: {
+    id: string;
+    name: string;
+    temperature: number;
+    devices: {
+      id: string;
+      name: string;
+      icon: string;
+      type: RoomDeviceTypes,
+      actions: {
+        id: string;
+        name: string;
+      }[];
+      state: string;
+    }[];
+  }[];
+}
+
+// A service that stores the application state.
+// This service also generates the state - basically what's returned by api/home.
+export class ApplicationStateService {
+  private readonly deviceHelper: DeviceHelper;
+  private readonly homeConfig: HomeConfig;
+  private readonly integrations: IntegrationsService;
+
+  constructor(config: ConfigService, integrations: IntegrationsService) {
+    this.homeConfig = config.getConfig().home;
+    this.deviceHelper = new DeviceHelper(this.homeConfig);
+    this.integrations = integrations;
+  }
+
+  private getIntegrationServiceForDevice(
+    roomId: string,
+    deviceId: string,
+  ): IntegrationServiceWithContext<unknown> | null {
+    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
+    if (!deviceInfo) {
+      return null;
+    }
+    return this.integrations.getIntegration({
+      integration: deviceInfo.integration,
+      deviceType: deviceInfo.type,
+    });
+  }
+
+  public async getHomeState(): Promise<ApplicationState> {
+    return {
+      name: this.homeConfig.name,
+      logo: this.homeConfig.iconUrl,
+      rooms: await Promise.all(
+        this.homeConfig.rooms.map(async (room) => ({
+          id: room.id,
+          name: room.name,
+          temperature:
+            (await this.getIntegrationServiceForDevice(
+              room.id,
+              room.roomInfo.sourceDeviceId,
+            )?.getDeviceTemperature()) ?? NaN,
+          devices: await Promise.all(
+            room.devices.map(async (device) => {
+              const deviceInfo = this.getIntegrationServiceForDevice(
+                room.id,
+                device.id,
+              );
+              const currentDeviceState =
+                deviceInfo === null
+                  ? "off"
+                  : await deviceInfo.getDeviceState(Array.from(device.actions));
+
+              return {
+                id: device.id,
+                name: device.name,
+                icon: device.icon,
+                type: device.type,
+                actions:
+                  device.actions.map((t) => ({
+                    id: t.id,
+                    name: t.name,
+                  })) ?? [],
+                state: currentDeviceState,
+              };
+            }),
+          ),
+        })),
+      ),
+    };
+  }
+}

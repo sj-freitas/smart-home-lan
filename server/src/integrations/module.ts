@@ -7,6 +7,15 @@ import { MelCloudHomeModule } from "./mel-cloud-home/module";
 import { TuyaCloudModule } from "./tuya/module";
 import { HueCloudIntegrationService } from "./hue-cloud/integration.service";
 import { HueCloudModule } from "./hue-cloud/module";
+import { ConfigService } from "../config/config-service";
+import { ApplicationStateService } from "./application-state.service";
+
+const ApplicationStateServiceProvider = {
+  provide: ApplicationStateService,
+  inject: [ConfigService, IntegrationsService],
+  useFactory: (config: ConfigService, integrations: IntegrationsService) =>
+    new ApplicationStateService(config, integrations),
+};
 
 const IntegrationsServiceProvider = {
   provide: IntegrationsService,
@@ -30,9 +39,10 @@ const IntegrationsServiceProvider = {
 
 @Module({
   imports: [ConfigModule, MelCloudHomeModule, TuyaCloudModule, HueCloudModule],
-  providers: [IntegrationsServiceProvider],
+  providers: [IntegrationsServiceProvider, ApplicationStateServiceProvider],
   exports: [
     IntegrationsServiceProvider,
+    ApplicationStateServiceProvider,
     MelCloudHomeModule,
     TuyaCloudModule,
     HueCloudModule,

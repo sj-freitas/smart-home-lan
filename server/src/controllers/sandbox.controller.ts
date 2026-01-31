@@ -1,5 +1,5 @@
-import { Controller, Get, Param } from "@nestjs/common";
-import { HueClient } from "src/integrations/hue-cloud/hue.client";
+import { Controller, Get } from "@nestjs/common";
+import { HueClient } from "../integrations/hue-cloud/hue.client";
 
 @Controller("sandbox")
 export class SandboxController {

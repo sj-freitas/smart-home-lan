@@ -1,4 +1,4 @@
-import { startScheduler } from "src/helpers/scheduler";
+import { startScheduler } from "../../../helpers/scheduler";
 import { HueOAuth2ClientService } from "./hue-oauth2.client.service";
 import { HueOAuth2PersistenceService } from "./hue-oauth2.persistence.service";
 

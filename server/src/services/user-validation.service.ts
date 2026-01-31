@@ -1,4 +1,4 @@
-import { HomeConfig } from "src/config/home.zod";
+import { HomeConfig } from "../config/home.zod";
 import { RequestContext } from "./request-context";
 
 // Allowed CIDR ranges (useful for local networks)

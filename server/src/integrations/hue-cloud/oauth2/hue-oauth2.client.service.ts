@@ -1,4 +1,4 @@
-import { HueCloudIntegration } from "src/config/integration.zod";
+import { HueCloudIntegration } from "../../../config/integration.zod";
 import { HueOauth2Tokens, HueOauth2TokensZod } from "./hue-oauth2.types";
 
 // There's two possible scenarios when bootstrapping the application regardless HUE tokens:

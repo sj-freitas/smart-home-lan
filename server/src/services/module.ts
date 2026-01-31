@@ -1,11 +1,11 @@
 import { Module, Scope } from "@nestjs/common";
-import { UserValidationService } from "./user-validation.service";
 import { REQUEST } from "@nestjs/core";
-import { RequestContext } from "./request-context";
-import { ConfigService } from "src/config/config-service";
-import { ConfigModule } from "src/config/module";
-import { HomeConfig } from "src/config/home.zod";
 import { Pool } from "pg";
+import { UserValidationService } from "./user-validation.service";
+import { RequestContext } from "./request-context";
+import { ConfigService } from "../config/config-service";
+import { ConfigModule } from "../config/module";
+import { HomeConfig } from "../config/home.zod";
 
 const HOME_CONFIG = "HOME_CONFIG";
 
@@ -15,9 +15,7 @@ export const PgPoolProvider = {
   useFactory: () => {
     const { DATABASE_URL } = process.env;
     if (!DATABASE_URL) {
-      throw new Error(
-        `DATABASE_URL is a required env vars!`,
-      );
+      throw new Error(`DATABASE_URL is a required env vars!`);
     }
 
     const pool = new Pool({
