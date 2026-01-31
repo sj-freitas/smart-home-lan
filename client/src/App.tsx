@@ -47,7 +47,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="header">
-        <div className="logo">SH</div>
+        <div className="logo">
+          <img src={home.logo}></img>
+        </div>
         <div>
           <h1>{home.name}</h1>
           <div className="lead">Local network control</div>

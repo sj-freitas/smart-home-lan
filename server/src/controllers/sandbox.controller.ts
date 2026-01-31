@@ -10,14 +10,8 @@ export class SandboxController {
   }
 
   @Get("/hue-lights")
-  public async getSandboxInfo() {
+  public async getHueLightsState() {
+    // Very useful to get the HUE light configs to create presets.
     return await this.hueClient.getLights();
-  }
-
-  @Get("/hue-lights/:id/on")
-  public async setLightOn(@Param("id") id: string) {
-    return await this.hueClient.setLightState(id, {
-      on: false,
-    });
   }
 }

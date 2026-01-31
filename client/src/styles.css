@@ -27,6 +27,12 @@ body{
   margin:0 auto;
 }
 
+.app-shell img {
+  max-width: 100%;
+  height: auto;
+  display: block; /* avoids inline-gap issues */
+}
+
 .header{
   display:flex;
   align-items:center;

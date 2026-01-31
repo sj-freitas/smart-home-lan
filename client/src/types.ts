@@ -15,5 +15,6 @@ export type Room = {
 }
 export type Home = {
   name: string;
+  logo?: string;
   rooms: Room[];
 }

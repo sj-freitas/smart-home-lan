@@ -45,10 +45,12 @@ Integrations are also set via the config.json, it's important to not version the
 
 ## Improvement Notes
 ### Client
+- [MEDIUM] Add icon to the UI
 - [Not Important] Collapsible cards
 
 ### Backend
 - [BUG] Be more resilient to MEL Cloud Home API failures, they are pretty bad. To be honest not sure what causes it.
+- [BUG] Some potential issue with HUE token renewal. Not sure what's going on, I think the expiration validation is wrong?
 - [MEDIUM] Websockets for automated updates
 - [MEDIUM] Host it in another machine in my home
 - [Not Important] config.json -> Add the presets (actions) to each device individually

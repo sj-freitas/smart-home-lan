@@ -24,6 +24,7 @@
   ],
   "home": {
     "name": "Palais Freitas",
+    "iconUrl": "{{APP_DOMAIN_URL}}/api/static/files/palais-freitas-logo.svg",
     "ip": "{{APP_HOME_IP}}",
     "rooms": [
       {

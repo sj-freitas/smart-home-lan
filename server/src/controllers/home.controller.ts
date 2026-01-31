@@ -45,6 +45,7 @@ export class HomeController {
     const canPerformActions = this.userValidationService.isRequestAllowed();
     const homeInfo = {
       name: this.homeConfig.name,
+      logo: this.homeConfig.iconUrl,
       rooms: await Promise.all(
         this.homeConfig.rooms.map(async (room) => ({
           id: room.id,

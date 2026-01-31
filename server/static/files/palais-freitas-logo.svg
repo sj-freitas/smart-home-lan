@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_Шар_1" data-name="Шар 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 412">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #156082;
+        stroke-miterlimit: 8;
+        stroke-width: 22.92px;
+      }
+
+      .cls-2 {
+        font-family: Arial-BoldMT, Arial;
+        font-size: 64px;
+        font-weight: 700;
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        letter-spacing: -.07em;
+      }
+    </style>
+  </defs>
+  <text class="cls-2" transform="translate(79.54 299)"><tspan class="cls-3" x="0" y="0">P</tspan><tspan x="37.94" y="0">ALAIS</tspan></text>
+  <path class="cls-1" d="M281.59,227.5h-75.09"/>
+  <path d="M310.26,241.79s-77.94-.16-91.12,0h-31.93v-96.83h-71.42v96.83h-31.58V89.21h31.58v32.83h19.92v-32.83h10v-54h11.58v4.85h29.92v28.88h-29.92v20.27h10v32.83h19.92v-32.83h31.58v82.83h42.26l49.21,69.75ZM151.5,157.76c-7.84,0-14.24,6.2-14.61,13.95h-.04v32.25h29.28v-32.25h-.04c-.37-7.75-6.77-13.95-14.61-13.95Z"/>
+  <text class="cls-2" transform="translate(79.54 356)"><tspan x="0" y="0">FREI</tspan><tspan class="cls-3" x="145.78" y="0">T</tspan><tspan x="180.12" y="0">AS</tspan></text>
+</svg>
