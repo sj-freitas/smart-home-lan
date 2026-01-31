@@ -12,12 +12,16 @@ export const IntegrationTypeNamesZod = z.union([
 
 export const HueCloudIntegrationZod = z.object({
   name: z.literal(HUE_CLOUD),
+  apiUrl: z.string().readonly(),
   clientId: z.string().readonly(),
   clientSecret: z.string().readonly(),
+  redirectUri: z.string().readonly(),
+  bridgeUsername: z.string().readonly().optional(),
 });
 
 export const HueCloudIntegrationDeviceZod = z.object({
   name: z.literal(HUE_CLOUD),
+  id: z.string().readonly(),
 });
 
 export const TuyaIntegrationZod = z.object({

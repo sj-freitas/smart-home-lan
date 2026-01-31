@@ -31,6 +31,11 @@ const IntegrationsServiceProvider = {
 @Module({
   imports: [ConfigModule, MelCloudHomeModule, TuyaCloudModule, HueCloudModule],
   providers: [IntegrationsServiceProvider],
-  exports: [IntegrationsServiceProvider],
+  exports: [
+    IntegrationsServiceProvider,
+    MelCloudHomeModule,
+    TuyaCloudModule,
+    HueCloudModule,
+  ],
 })
 export class IntegrationsModule {}

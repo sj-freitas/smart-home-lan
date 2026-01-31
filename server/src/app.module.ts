@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "./config/module";
-import { ActionsModule } from "./actions/module";
-import { HomeModule } from "./home/module";
+import { ControllersModule } from "./controllers/module";
 import { IntegrationsModule } from "./integrations/module";
 import { ServicesModule } from "./services/module";
 
@@ -9,8 +8,7 @@ import { ServicesModule } from "./services/module";
   imports: [
     ConfigModule,
     IntegrationsModule,
-    ActionsModule,
-    HomeModule,
+    ControllersModule,
     ServicesModule,
   ],
 })

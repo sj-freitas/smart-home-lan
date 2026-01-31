@@ -1,5 +1,3 @@
-import { Injectable, Scope, Inject } from "@nestjs/common";
-import { REQUEST } from "@nestjs/core";
 import type { Request } from "express";
 
 function getClientIp(req: Request): string | null {

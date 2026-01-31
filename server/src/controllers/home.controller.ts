@@ -6,7 +6,7 @@ import {
   IntegrationsService,
 } from "../integrations/integrations-service";
 import { UserValidationService } from "../services/user-validation.service";
-import { DeviceHelper } from "../helpers/deviceHelpers";
+import { DeviceHelper } from "../helpers/device-helpers";
 
 @Controller("home")
 export class HomeController {

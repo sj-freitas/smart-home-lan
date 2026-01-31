@@ -1,0 +1,29 @@
+meta {
+  name: Bridge Config
+  type: http
+  seq: 5
+}
+
+put {
+  url: https://api.meethue.com/bridge/config
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{ACCESS_TOKEN}}
+  Content-Type: application/json
+}
+
+body:json {
+  { "linkbutton": true }
+}
+
+vars:pre-request {
+  ACCESS_TOKEN: m_qPYDoWPC8UeGbJlzf6GKG9wN8
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -13,7 +13,7 @@ import {
   IntegrationsService,
 } from "../integrations/integrations-service";
 import { UserValidationService } from "../services/user-validation.service";
-import { DeviceHelper } from "../helpers/deviceHelpers";
+import { DeviceHelper } from "../helpers/device-helpers";
 
 interface IntegratedDevice<T> {
   integrationService: IntegrationServiceWithContext<T>;

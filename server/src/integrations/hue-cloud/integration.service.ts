@@ -1,14 +1,72 @@
-import {
-  HueCloudIntegrationDevice,
-} from "src/config/integration.zod";
+import { HueCloudIntegrationDevice } from "src/config/integration.zod";
 import {
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
 import { DeviceAction, RoomDeviceTypes } from "src/config/home.zod";
+import { HueClient } from "./hue.client";
+import { LightState, LightStateZod } from "./hue.types";
+
+// Order the fields by the relevance for matching. Score a match by the number of fields that match, but
+// each field has a different weight based on its relevance.
+// TODO: Change this calculation to be VALUE based and not binary, as in, make sure the value is within a margin of 100 or something
+const FIELDS_ORDERED_BY_RELEVANCE: (keyof LightState)[] = [
+  "on",
+  "hue",
+  "sat",
+  "bri",
+];
+const WEIGHTED_FIELDS_BY_RELEVANCE = FIELDS_ORDERED_BY_RELEVANCE.reverse()
+  .map(
+    (field: keyof LightState, index: number) =>
+      [2 ** index, field] as [number, keyof LightState],
+  )
+  .reverse();
+
+const MAX_MARGIN_OF_SIMILARITY = 15;
+function areFieldsMatched(field1: unknown, field2: unknown) {
+  if (typeof field1 === "boolean") {
+    return field1 === field2;
+  }
+  if (typeof field1 === "number" && typeof field2 === "number") {
+    return Math.abs(field1 - field2) <= MAX_MARGIN_OF_SIMILARITY;
+  }
+
+  // Unsupported comparison (for now)
+  return false;
+}
+
+function tryFindBestMatchingAction(
+  currentDeviceState: LightState,
+  possibleDeviceActions: Map<string, LightState>,
+): string {
+  const scoresForEachAction = Array.from(possibleDeviceActions.entries()).map(
+    ([actionId, actionParameters]) => {
+      let score = 0;
+      for (const [weight, field] of WEIGHTED_FIELDS_BY_RELEVANCE) {
+        if (areFieldsMatched(currentDeviceState[field], actionParameters[field])) {
+          score += weight;
+        }
+      }
+      return { actionId, score };
+    },
+  );
+
+  // Find the action with the highest score
+  const bestMatch = scoresForEachAction.reduce(
+    (best, current) => {
+      return current.score > best.score ? current : best;
+    },
+    { actionId: "off", score: 0 },
+  );
+
+  return bestMatch.actionId;
+}
 
 export class HueCloudIntegrationService implements IntegrationService<HueCloudIntegrationDevice> {
   public name: "hue_cloud" = "hue_cloud";
+
+  constructor(private readonly hueClient: HueClient) {}
 
   async getDeviceTemperature(
     deviceInfo: HueCloudIntegrationDevice,
@@ -20,7 +78,25 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     deviceInfo: HueCloudIntegrationDevice,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
-    return "off";
+    const lights = await this.hueClient.getLights();
+    const currDevice = lights[deviceInfo.id];
+
+    if (!currDevice) {
+      return "off";
+    }
+
+    const actionParametersMap = new Map(
+      actionDescriptions.map(
+        (t) =>
+          [t.id, LightStateZod.parse(t.parameters)] as [
+            string,
+            LightState,
+          ],
+      ),
+    );
+
+    const currentDeviceState = currDevice.state;
+    return tryFindBestMatchingAction(currentDeviceState, actionParametersMap);
   }
 
   async tryRunAction(
@@ -28,6 +104,19 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     deviceType: RoomDeviceTypes,
     action: DeviceAction,
   ): Promise<TryRunActionResult> {
-    return "Failure - not implemented yet";
+    if (deviceType !== "smart_light") {
+      return `Failed, unsupported device type for Hue`;
+    }
+
+    const state = LightStateZod.parse(action.parameters);
+
+    try {
+      const results = await this.hueClient.setLightState(deviceInfo.id, state);
+      const allValid = results.every((t) => Boolean(t.success));
+      
+      return allValid ? true : `Failed to perform some of the actions`;
+    } catch (error: any) {
+      return `Failed to set action ${action.id} on device ${deviceInfo.id}: ${error.message}`;
+    }
   }
 }

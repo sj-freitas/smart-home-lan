@@ -1,9 +1,5 @@
+import { HomeConfig } from "src/config/home.zod";
 import { RequestContext } from "./request-context";
-
-const ALLOWED_IPS = [
-  "85.242.157.131", // example single static IP (external) - I'd love to ignore this one
-  "127.0.0.1", // local loopback
-];
 
 // Allowed CIDR ranges (useful for local networks)
 const ALLOWED_CIDRS = [
@@ -34,11 +30,11 @@ function cidrContains(cidr: string, ip: string): boolean {
   }
 }
 
-function isAllowedIp(ip: string | null): boolean {
+function isAllowedIp(ip: string | null, allowedIps: string[]): boolean {
   if (!ip) return false;
 
   // direct match
-  if (ALLOWED_IPS.includes(ip)) return true;
+  if (allowedIps.includes(ip)) return true;
 
   // check each CIDR range
   for (const cidr of ALLOWED_CIDRS) {
@@ -49,10 +45,25 @@ function isAllowedIp(ip: string | null): boolean {
 }
 
 export class UserValidationService {
-  constructor(private readonly request: RequestContext) {}
+  constructor(
+    private readonly request: RequestContext,
+    private readonly config: HomeConfig,
+  ) {}
 
   public isRequestAllowed(): boolean {
-    const isLocalIp = isAllowedIp(this.request.clientIp);
+    // TODO this is only to show off the app
+    return true;
+    // TODO: Think about this logic
+    // IP is in config it means that users need to be authenticated if they are in a different network.
+    // IP doesn't exist it means that everyone is allowed.
+    if (!this.config.ip) {
+      return true;
+    }
+
+    const isLocalIp = isAllowedIp(this.request.clientIp, [
+      this.config.ip,
+      "127.0.0.1",
+    ]);
 
     return isLocalIp;
   }

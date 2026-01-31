@@ -15,12 +15,16 @@
     },
     {
       "name": "hue_cloud",
+      "apiUrl": "https://api.meethue.com",
       "clientId": "{{HUE_CLOUD_CLIENT_ID}}",
-      "clientSecret": "{{HUE_CLOUD_SECRET}}"
+      "clientSecret": "{{HUE_CLOUD_SECRET}}",
+      "redirectUri": "{{APP_DOMAIN_URL}}/api/auth/oauth2-hue",
+      "bridgeUsername": "{{HUE_CLOUD_BRIDGE_USERNAME}}"
     }
   ],
   "home": {
     "name": "Palais Freitas",
+    "ip": "{{APP_HOME_IP}}",
     "rooms": [
       {
         "id": "living_room",
@@ -130,21 +134,10 @@
             "icon": "lamp",
             "type": "smart_light",
             "integration": {
-              "name": "hue_cloud"
+              "name": "hue_cloud",
+              "id": "3"
             },
             "actions": [
-              {
-                "id": "on_bright",
-                "name": "Bright"
-              },
-              {
-                "id": "on_dim",
-                "name": "Dim"
-              },
-              {
-                "id": "on_kinky",
-                "name": "Kinky"
-              },
               {
                 "id": "off",
                 "name": "Off"
@@ -241,24 +234,46 @@
             "icon": "lamp",
             "type": "smart_light",
             "integration": {
-              "name": "hue_cloud"
+              "name": "hue_cloud",
+              "id": "1"
             },
             "actions": [
               {
                 "id": "on_bright",
-                "name": "Bright"
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 173,
+                  "hue": 7985,
+                  "sat": 107
+                }
               },
               {
                 "id": "on_dim",
-                "name": "Dim"
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
               },
               {
-                "id": "on_kinky",
-                "name": "Kinky"
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
+                }
               },
               {
                 "id": "off",
-                "name": "Off"
+                "name": "Off",
+                "parameters": {
+                  "on": false
+                }
               }
             ]
           }
@@ -322,6 +337,55 @@
                   "setTemperature": null,
                   "temperatureIncrementOverride": null,
                   "inStandbyMode": null
+                }
+              }
+            ]
+          },
+          {
+            "id": "ceiling_light",
+            "name": "Ceiling Light",
+            "icon": "lamp",
+            "type": "smart_light",
+            "integration": {
+              "name": "hue_cloud",
+              "id": "2"
+            },
+            "actions": [
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 173,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
+                }
+              },
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "on": false
                 }
               }
             ]

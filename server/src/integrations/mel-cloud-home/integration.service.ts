@@ -12,21 +12,20 @@ import {
 
 // Order the fields by the relevance for matching. Score a match by the number of fields that match, but
 // each field has a different weight based on its relevance.
-const WEIGHTED_FIELDS_BY_RELEVANCE: [number, keyof AirToAirUnitStateChange][] =
-  [
-    "power",
-    "operationMode",
-    "setTemperature",
-    "setFanSpeed",
-    "vaneHorizontalDirection",
-    "vaneVerticalDirection",
-  ]
-    .reverse()
-    .map(
-      (field: keyof AirToAirUnitStateChange, index: number) =>
-        [2 ** index, field] as [number, keyof AirToAirUnitStateChange],
-    )
-    .reverse();
+const FIELDS_ORDERED_BY_RELEVANCE: (keyof AirToAirUnitStateChange)[] = [
+  "power",
+  "operationMode",
+  "setTemperature",
+  "setFanSpeed",
+  "vaneHorizontalDirection",
+  "vaneVerticalDirection",
+];
+const WEIGHTED_FIELDS_BY_RELEVANCE = FIELDS_ORDERED_BY_RELEVANCE.reverse()
+  .map(
+    (field: keyof AirToAirUnitStateChange, index: number) =>
+      [2 ** index, field] as [number, keyof AirToAirUnitStateChange],
+  )
+  .reverse();
 
 const fanSpeedSettingsToParametersMap = {
   "0": "Auto",
@@ -99,10 +98,6 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
     deviceInfo: MelCloudHomeIntegrationDevice,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
-    if (deviceInfo.deviceId === "64f39725-85fc-4d31-a697-b7f6d3c3d258") {
-      console.log("Debug breakpoint for lviv/ac");
-    }
-
     const allDevices = await this.melCloudHomeClient.getContext();
     const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
 

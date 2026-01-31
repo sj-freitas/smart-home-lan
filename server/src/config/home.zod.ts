@@ -44,6 +44,7 @@ export const RoomConfigZod = z.object({
 export const HomeConfigZod = z.object({
   name: z.string().readonly(),
   rooms: z.array(RoomConfigZod).readonly(),
+  ip: z.string().readonly().optional(),
 });
 
 export type DeviceAction = z.infer<typeof DeviceActionZod>;

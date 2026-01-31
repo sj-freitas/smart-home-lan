@@ -54,15 +54,16 @@ Integrations are also set via the config.json, it's important to not version the
 
 ## Improvement Notes
 ### Client
-- Collapsible cards
+- [Not Important] Collapsible cards
 
 ### Backend
-- Be more resilient to MEL Cloud Home API failures, they are pretty bad.
-- IP Restriction (bypassable with eventual login) to only work within my LAN - IP Restriction is done!
-- Websockets for automated updates
-- Host it in another machine in my home
-- BREAKING: Add lights integration
-- config.json -> Add the presets (actions) to each device individually
+- [BUG] Be more resilient to MEL Cloud Home API failures, they are pretty bad. To be honest not sure what causes it.
+- [!PRIO] Store the HUE tokens on a database
+- [MEDIUM] Websockets for automated updates
+- [MEDIUM] Host it in another machine in my home
+- [Not Important] config.json -> Add the presets (actions) to each device individually
+- [Not Important] Config dynamic load (create strong auth URL on POST api/config) change config's scope to REQUEST making it much more dynamic!
+- [Not IMportant] Login for users not in the same IP + email access management
 
 ## Hosting
 FULL CONFIG
