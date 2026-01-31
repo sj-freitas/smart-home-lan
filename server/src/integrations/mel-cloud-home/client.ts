@@ -1,3 +1,4 @@
+import { MelCloudAuthCookiesPersistenceService } from "./auth-cookies.persistence.service";
 import { AirToAirUnit, AirToAirUnitStateChange } from "./types.zod";
 
 export interface RoomDevice {
@@ -20,17 +21,22 @@ export interface RoomDevice {
  */
 export class MelCloudHomeClient {
   constructor(
-    private readonly authenticationCookies: string,
+    private readonly authenticationCookies: MelCloudAuthCookiesPersistenceService,
     private readonly apiUrl: string,
   ) {}
 
   async getContext(): Promise<RoomDevice[]> {
+    const authCookie = await this.authenticationCookies.retrieveAuthCookies();
+    if (!authCookie) {
+      throw new Error(`Unexpected missing Auth cookie for MelCloud`);
+    }
+
     const response = await fetch(`${this.apiUrl}/user/context`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         "x-csrf": "1",
-        Cookie: this.authenticationCookies,
+        Cookie: authCookie,
       },
     });
 
@@ -59,23 +65,30 @@ export class MelCloudHomeClient {
         device.settings.find(
           (currSetting) => currSetting.name === "OperationMode",
         )?.value ?? "off",
-      settings: device.settings.reduce((acc, setting) => ({
-        ...acc,
-        [setting.name]: setting.value,
-      }), {}),
+      settings: device.settings.reduce(
+        (acc, setting) => ({
+          ...acc,
+          [setting.name]: setting.value,
+        }),
+        {},
+      ),
     }));
 
     return devices;
   }
 
   async putAtAUnit(deviceId: string, stateChange: AirToAirUnitStateChange) {
-    // Maybe the preset is done before? Need to think about it to look less suspicious
+    const authCookie = await this.authenticationCookies.retrieveAuthCookies();
+    if (!authCookie) {
+      throw new Error(`Unexpected missing Auth cookie for MelCloud`);
+    }
+
     await fetch(`${this.apiUrl}/ataunit/${deviceId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         "x-csrf": "1",
-        Cookie: this.authenticationCookies,
+        Cookie: authCookie,
       },
       body: JSON.stringify(stateChange),
     });

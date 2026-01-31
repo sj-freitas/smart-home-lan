@@ -8,8 +8,22 @@ import { HueCloudIntegration } from "../../config/integration.zod";
 import { HueClient } from "./hue.client";
 import { ServicesModule } from "../../services/module";
 import { Pool } from "pg";
+import { spinTokenRefresher } from "./oauth2/token-refresher";
 
 const HUE_CONFIG = "HUE_CONFIG";
+
+// Run this once.
+export const HUE_REFRESH_TOKEN = "HueRefreshToken";
+const HueRefreshTokenProvider = {
+  provide: HUE_REFRESH_TOKEN,
+  inject: [HueOAuth2ClientService, HueOAuth2PersistenceService],
+  useFactory: async (
+    hueOAuth2Client: HueOAuth2ClientService,
+    authCookiesService: HueOAuth2PersistenceService,
+  ) => {
+    return await spinTokenRefresher(hueOAuth2Client, authCookiesService);
+  },
+};
 
 const HueConfigProvider = {
   provide: HUE_CONFIG,
@@ -68,6 +82,7 @@ const HueClientProvider = {
   imports: [ConfigModule, ServicesModule],
   providers: [
     HueConfigProvider,
+    HueRefreshTokenProvider,
     HueCloudIntegrationServiceProvider,
     HueOAuth2ClientServiceProvider,
     HueOAuth2PersistenceServiceProvider,
@@ -75,6 +90,7 @@ const HueClientProvider = {
   ],
   exports: [
     HueConfigProvider,
+    HueRefreshTokenProvider,
     HueCloudIntegrationServiceProvider,
     HueOAuth2ClientServiceProvider,
     HueOAuth2PersistenceServiceProvider,

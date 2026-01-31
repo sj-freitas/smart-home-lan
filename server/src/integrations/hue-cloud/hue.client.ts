@@ -21,6 +21,13 @@ export class HueClient {
     `${this.hueCloudConfig.apiUrl}/oauth2/auth?client_id=${this.hueCloudConfig.clientId}&` +
     `response_type=code&scope=remote_control&redirect_uri=${this.hueCloudConfig.redirectUri}`;
 
+  /**
+   * In Flight to avoid multiple promises resolving the same thing.
+   * Not a very big concern but this approach only works with a single instance of the application.
+   * A more robust solution would be implementing a distributed lock.
+   */
+  private refreshInFlight: Promise<HueOauth2Tokens> | null = null;
+
   constructor(
     private readonly hueCloudConfig: HueCloudIntegration,
     private readonly hueOauth2ClientService: HueOAuth2ClientService,
@@ -44,21 +51,42 @@ export class HueClient {
       );
     }
 
+    // access token still valid?
     if (
-      !isTokenActive(
+      isTokenActive(
         Number.parseInt(currentTokens.tokens.accessTokenExpiresIn) +
           currentTokens.storedAt,
       )
     ) {
-      // Refresh the access token
-      const newTokens = await this.hueOauth2ClientService.refreshAccessToken(
-        currentTokens.tokens,
-      );
-      await this.hueOauth2PersistenceService.storeTokens(newTokens);
-      return newTokens;
+      return currentTokens.tokens;
     }
 
-    return currentTokens.tokens;
+    // If a refresh is already happening, return that promise (single-flight)
+    if (this.refreshInFlight) {
+      try {
+        return await this.refreshInFlight;
+      } catch (err) {
+        // previous refresh failed — clear and propagate
+        this.refreshInFlight = null;
+        throw err;
+      }
+    }
+
+    // Start refresh and save the promise so others can await it
+    this.refreshInFlight = (async () => {
+      try {
+        const newTokens = await this.hueOauth2ClientService.refreshAccessToken(
+          currentTokens.tokens,
+        );
+        await this.hueOauth2PersistenceService.storeTokens(newTokens);
+        return newTokens;
+      } finally {
+        // ensure we clear even on error (so future attempts can retry)
+        this.refreshInFlight = null;
+      }
+    })();
+
+    return await this.refreshInFlight;
   }
 
   public async getLights(): Promise<HueLightsResponse> {
