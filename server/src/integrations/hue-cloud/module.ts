@@ -6,6 +6,8 @@ import { HueOAuth2ClientService } from "./oauth2/hue-oauth2.client.service";
 import { HueOAuth2PersistenceService } from "./oauth2/hue-oauth2.persistence.service";
 import { HueCloudIntegration } from "../../config/integration.zod";
 import { HueClient } from "./hue.client";
+import { ServicesModule } from "../../services/module";
+import { Pool } from "pg";
 
 const HUE_CONFIG = "HUE_CONFIG";
 
@@ -42,7 +44,8 @@ const HueOAuth2ClientServiceProvider = {
 
 const HueOAuth2PersistenceServiceProvider = {
   provide: HueOAuth2PersistenceService,
-  useFactory: async () => new HueOAuth2PersistenceService(),
+  inject: [Pool],
+  useFactory: async (pool: Pool) => new HueOAuth2PersistenceService(pool),
 };
 
 const HueClientProvider = {
@@ -62,7 +65,7 @@ const HueClientProvider = {
 };
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, ServicesModule],
   providers: [
     HueConfigProvider,
     HueCloudIntegrationServiceProvider,

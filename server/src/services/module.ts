@@ -5,8 +5,30 @@ import { RequestContext } from "./request-context";
 import { ConfigService } from "src/config/config-service";
 import { ConfigModule } from "src/config/module";
 import { HomeConfig } from "src/config/home.zod";
+import { Pool } from "pg";
 
 const HOME_CONFIG = "HOME_CONFIG";
+
+export const PgPoolProvider = {
+  // TODO: Created as a singleton but I want to create a per-request transaction sub-service.
+  provide: Pool,
+  useFactory: () => {
+    const { DATABASE_URL } = process.env;
+    if (!DATABASE_URL) {
+      throw new Error(
+        `DATABASE_URL is a required env vars!`,
+      );
+    }
+
+    const pool = new Pool({
+      connectionString: DATABASE_URL,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    });
+    return pool;
+  },
+};
 
 const HomeConfigProvider = {
   provide: HOME_CONFIG,
@@ -38,7 +60,8 @@ const UserValidationServiceProvider = {
     UserValidationServiceProvider,
     RequestContextProvider,
     HomeConfigProvider,
+    PgPoolProvider,
   ],
-  exports: [UserValidationServiceProvider],
+  exports: [UserValidationServiceProvider, PgPoolProvider],
 })
 export class ServicesModule {}
