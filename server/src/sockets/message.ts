@@ -1,6 +1,5 @@
-interface ServerMessage<T> {
-  seq: number; // monotonic server-side sequence
-  ts: string; // ISO timestamp
-  type: "snapshot" | "patch" | "heartbeat";
+export interface ServerMessage<T> {
+  ts: string;
+  type: "snapshot";
   payload: T;
 }

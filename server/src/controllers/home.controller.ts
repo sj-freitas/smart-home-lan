@@ -26,16 +26,10 @@ function removeActionsFromState(appState: ApplicationState): ApplicationState {
 
 @Controller("home")
 export class HomeController {
-  private readonly applicationStateService: ApplicationStateService;
-  private readonly userValidationService: UserValidationService;
-
   constructor(
-    applicationStateService: ApplicationStateService,
-    userValidationService: UserValidationService,
-  ) {
-    this.applicationStateService = applicationStateService;
-    this.userValidationService = userValidationService;
-  }
+    private readonly applicationStateService: ApplicationStateService,
+    private readonly userValidationService: UserValidationService,
+  ) {}
 
   @Get("/")
   public async getHomeInfo() {

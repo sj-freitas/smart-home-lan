@@ -49,15 +49,14 @@ Integrations are also set via the config.json, it's important to not version the
 - [Not Important] Collapsible cards
 
 ### Backend
-- [MEDIUM] Websockets for automated updates
 - [MEDIUM] Host it in another machine in my home
-- [Not Important] config.json -> Add the presets (actions) to each device individually
 - [Not Important] Config dynamic load (create strong auth URL on POST api/config) change config's scope to REQUEST making it much more dynamic!
 - [Not IMportant] Login for users not in the same IP + email access management
 
 ## Hosting
 FULL CONFIG
 1. Create nginx conf file (currently you can check the example here: [palais.conf](/host/palais.conf))
+  1. Nginx should run here: `/opt/homebrew/etc/nginx/servers/` on Mac
 2. Make sure that the router is pointing to the correct address (very important)
 3. Create the SSL certs
   1. Install certbot
@@ -75,5 +74,5 @@ sudo certbot certonly \
 -d palais-freitas.xyz \
 -d www.palais-freitas.xyz
 ```
-4. Restart nginx server
+4. Restart nginx server: `brew services restart nginx` (On Mac)
 

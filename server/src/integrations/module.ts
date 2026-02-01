@@ -3,10 +3,13 @@ import { MelCloudHomeIntegrationService } from "./mel-cloud-home/integration.ser
 import { ConfigModule } from "../config/module";
 import { TuyaCloudIntegrationService } from "./tuya/integration.service";
 import { IntegrationsService } from "./integrations-service";
-import { MelCloudHomeModule } from "./mel-cloud-home/module";
+import {
+  MEL_CLOUD_AUTHENTICATION_COOKIES,
+  MelCloudHomeModule,
+} from "./mel-cloud-home/module";
 import { TuyaCloudModule } from "./tuya/module";
 import { HueCloudIntegrationService } from "./hue-cloud/integration.service";
-import { HueCloudModule } from "./hue-cloud/module";
+import { HUE_REFRESH_TOKEN, HueCloudModule } from "./hue-cloud/module";
 import { ConfigService } from "../config/config-service";
 import { ApplicationStateService } from "./application-state.service";
 
@@ -23,6 +26,8 @@ const IntegrationsServiceProvider = {
     MelCloudHomeIntegrationService,
     TuyaCloudIntegrationService,
     HueCloudIntegrationService,
+    MEL_CLOUD_AUTHENTICATION_COOKIES,
+    HUE_REFRESH_TOKEN,
   ],
   useFactory: async (
     melCloudIntegrationService: MelCloudHomeIntegrationService,

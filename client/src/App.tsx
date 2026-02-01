@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { Home } from "./types";
 import RoomList from "./components/RoomList";
+import { useHomeState } from "./sockets/use-home-state";
 
 export default function App() {
   const [home, setHome] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
+  const { state, connected } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
+
+  useEffect(() => {
+    setHome(state);
+  }, [state]);
 
   useEffect(() => {
     fetch(`${API_BASE}/home`)

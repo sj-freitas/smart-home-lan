@@ -1,4 +1,4 @@
-import { Module, Scope } from "@nestjs/common";
+import { Injectable, Module, OnModuleInit, Scope } from "@nestjs/common";
 import { MelCloudHomeIntegrationService } from "./integration.service";
 import { ConfigModule } from "../../config/module";
 import { ConfigService } from "../../config/config-service";
@@ -57,6 +57,9 @@ const MelCloudHomeIntegrationServiceProvider = {
     MelCloudHomeAuthenticationCookiesProvider,
     MelCloudHomeIntegrationServiceProvider,
   ],
-  exports: [MelCloudHomeIntegrationServiceProvider],
+  exports: [
+    MelCloudHomeIntegrationServiceProvider,
+    MelCloudHomeAuthenticationCookiesProvider,
+  ],
 })
 export class MelCloudHomeModule {}

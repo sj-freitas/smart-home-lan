@@ -1,4 +1,7 @@
-import { HueCloudAuthTokensZod } from "./hue-oauth2.sql.types";
+import {
+  HueCloudAuthTokens,
+  HueCloudAuthTokensZod,
+} from "./hue-oauth2.sql.types";
 import { HueOauth2Tokens } from "./hue-oauth2.types";
 import { Pool } from "pg";
 
@@ -10,7 +13,9 @@ type HueOauth2TokenStore = {
 export class HueOAuth2PersistenceService {
   constructor(private readonly pool: Pool) {}
 
-  public async storeTokens(tokens: HueOauth2Tokens): Promise<void> {
+  public async storeTokens(
+    tokens: HueOauth2Tokens,
+  ): Promise<HueCloudAuthTokens> {
     const { rows } = await this.pool.query(
       `
     INSERT INTO hue_cloud_auth_tokens (
@@ -37,17 +42,7 @@ export class HueOAuth2PersistenceService {
     const [lastToken] = rows;
     const parsedLastToken = HueCloudAuthTokensZod.parse(lastToken);
 
-    // This is useful to persist them before the database exists.
-    console.log(
-      `Last token stored = ${JSON.stringify(
-        {
-          tokens,
-          storedAt: parsedLastToken.created_at,
-        },
-        null,
-        2,
-      )}`,
-    );
+    return parsedLastToken;
   }
 
   public async retrieveTokens(): Promise<HueOauth2TokenStore> {

@@ -1,19 +1,23 @@
 import {
   Controller,
-  Get,
   HttpCode,
   Param,
   Post,
   UnauthorizedException,
 } from "@nestjs/common";
-import { ConfigService } from "../config/config-service";
-import { DeviceAction, HomeConfig } from "../config/home.zod";
+import { DeviceAction } from "../config/home.zod";
 import {
   IntegrationServiceWithContext,
   IntegrationsService,
 } from "../integrations/integrations-service";
 import { UserValidationService } from "../services/user-validation.service";
+import {
+  ApplicationState,
+  ApplicationStateService,
+} from "../integrations/application-state.service";
+import { ConfigService } from "../config/config-service";
 import { DeviceHelper } from "../helpers/device-helpers";
+import { HomeStateGateway } from "../sockets/home.state.gateway";
 
 interface IntegratedDevice<T> {
   integrationService: IntegrationServiceWithContext<T>;
@@ -23,19 +27,16 @@ interface IntegratedDevice<T> {
 @Controller("actions")
 export class ActionsController {
   private readonly deviceHelper: DeviceHelper;
-  private readonly homeConfig: HomeConfig;
-  private readonly integrations: IntegrationsService;
-  private readonly userValidationService: UserValidationService;
 
   constructor(
-    config: ConfigService,
-    integrations: IntegrationsService,
-    userValidationService: UserValidationService,
+    configService: ConfigService,
+    private readonly applicationStateService: ApplicationStateService,
+    private readonly integrations: IntegrationsService,
+    private readonly userValidationService: UserValidationService,
+    private readonly homeStateGateway: HomeStateGateway,
   ) {
-    this.homeConfig = config.getConfig().home;
-    this.deviceHelper = new DeviceHelper(this.homeConfig);
-    this.integrations = integrations;
-    this.userValidationService = userValidationService;
+    const config = configService.getConfig();
+    this.deviceHelper = new DeviceHelper(config.home);
   }
 
   private getIntegratedDeviceFromId(
@@ -70,6 +71,7 @@ export class ActionsController {
       );
     }
 
+    const currentState = await this.applicationStateService.getHomeState();
     const device = this.getIntegratedDeviceFromId(room, deviceId);
     if (!device) {
       return {
@@ -93,6 +95,29 @@ export class ActionsController {
 
     const actionRunStatus =
       await device.integrationService.tryRunAction(actionDescription);
+
+    // New state should include the action that was performed.
+    const newState: ApplicationState = {
+      ...currentState,
+      rooms: currentState.rooms.map((currRoom) => ({
+        ...currRoom,
+        devices: currRoom.devices.map((currDevice) => {
+          const isCurrDevice =
+            currDevice.id === deviceId && currRoom.id === room;
+
+          if (isCurrDevice) {
+            return {
+              ...currDevice,
+              state: action,
+            };
+          }
+
+          return currDevice;
+        }),
+      })),
+    };
+
+    this.homeStateGateway.updateState(newState);
 
     return {
       room,
