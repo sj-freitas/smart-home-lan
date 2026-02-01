@@ -3,11 +3,30 @@ import { Home } from "./types";
 import RoomList from "./components/RoomList";
 import { useHomeState } from "./sockets/use-home-state";
 
+function setFavicon(href: string | null) {
+  if (!href) return;
+  let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    document.head.appendChild(link);
+  }
+  link.href = href;
+}
+
 export default function App() {
   const [home, setHome] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
-  const { state, connected } = useHomeState();
+  const { state } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
+  const iconUrlFromServer = state?.faviconUrl;
+
+  useEffect(() => {
+    if (!iconUrlFromServer) {
+      return;
+    }
+    setFavicon(iconUrlFromServer);
+  }, [iconUrlFromServer]);
 
   useEffect(() => {
     setHome(state);

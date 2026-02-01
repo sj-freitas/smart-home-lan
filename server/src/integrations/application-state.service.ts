@@ -9,6 +9,7 @@ import { HomeConfig, RoomDeviceTypes } from "../config/home.zod";
 export interface ApplicationState {
   name: string;
   logo: string;
+  faviconUrl: string;
   rooms: {
     id: string;
     name: string;
@@ -58,6 +59,7 @@ export class ApplicationStateService {
     return {
       name: this.homeConfig.name,
       logo: this.homeConfig.iconUrl,
+      faviconUrl: this.homeConfig.faviconUrl,
       rooms: await Promise.all(
         this.homeConfig.rooms.map(async (room) => ({
           id: room.id,

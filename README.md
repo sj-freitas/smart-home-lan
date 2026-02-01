@@ -45,11 +45,11 @@ Integrations are also set via the config.json, it's important to not version the
 
 ## Improvement Notes
 ### Client
-- [MEDIUM] Dynamic favicon on index.html
 - [Not Important] Collapsible cards
 
 ### Backend
-- [MEDIUM] Host it in another machine in my home
+- [MEDIUM] Host it in the cloud
+- [MEDIUM] Consider a scenario where the state being broadcast considers if the user is logged-in.
 - [Not Important] Config dynamic load (create strong auth URL on POST api/config) change config's scope to REQUEST making it much more dynamic!
 - [Not IMportant] Login for users not in the same IP + email access management
 
