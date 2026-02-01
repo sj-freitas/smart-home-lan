@@ -76,11 +76,6 @@ export class HomeStateGateway
     this.pollHandle = null;
   }
 
-  private async pollExternalState(): Promise<ApplicationState> {
-    // TODO: Not sure what to do with this.
-    return this.state.value;
-  }
-
   public handleConnection(client: Socket) {
     console.log("new client connected", client.id);
 

@@ -45,13 +45,15 @@ Integrations are also set via the config.json, it's important to not version the
 
 ## Improvement Notes
 ### Client
-- [Not Important] Collapsible cards
+- [Not Important] Add support for more icons, maybe dynamic icons would be interesting.
 
 ### Backend
 - [MEDIUM] Host it in the cloud
+- [MEDIUM] Config animations for groups (not super relevant but a funny thing to do)
 - [MEDIUM] Consider a scenario where the state being broadcast considers if the user is logged-in.
 - [Not Important] Config dynamic load (create strong auth URL on POST api/config) change config's scope to REQUEST making it much more dynamic!
-- [Not IMportant] Login for users not in the same IP + email access management
+- [Not Important] Login for users not in the same IP + email access management
+- [Not Important] Created PerRequest Transactions for DB interactions
 
 ## Hosting
 FULL CONFIG

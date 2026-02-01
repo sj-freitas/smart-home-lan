@@ -113,3 +113,9 @@ h1{margin:0;font-size:20px;letter-spacing:0.2px}
 
 
 .device-name { font-size:14px; font-weight:600; color: #d8eefe; }
+
+.collapse-toggle { outline: none; }
+.collapse-content { transition: max-height 0.3s ease; overflow: hidden; }
+
+.collapse-content .controls { padding-top: 12px; }
+

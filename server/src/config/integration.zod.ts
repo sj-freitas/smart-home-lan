@@ -21,7 +21,7 @@ export const HueCloudIntegrationZod = z.object({
 
 export const HueCloudIntegrationDeviceZod = z.object({
   name: z.literal(HUE_CLOUD),
-  id: z.string().readonly(),
+  id: z.union([z.string(), z.array(z.string())]),
 });
 
 export const TuyaIntegrationZod = z.object({

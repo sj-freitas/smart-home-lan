@@ -48,9 +48,6 @@ async function clickSignInAndLogin(
   password: string,
 ) {
   await driver.get(melCloudHomeUrl);
-  // TODO: There's a chance that there's an error and we need to refresh the page:
-  // We should look for an error message and refresh if needed.
-  // The message is "An unhandled error has occurred. Reload"
 
   let hasError = false;
   do {

@@ -71,7 +71,6 @@ export class ActionsController {
       );
     }
 
-    const currentState = await this.applicationStateService.getHomeState();
     const device = this.getIntegratedDeviceFromId(room, deviceId);
     if (!device) {
       return {
@@ -97,6 +96,7 @@ export class ActionsController {
       await device.integrationService.tryRunAction(actionDescription);
 
     // New state should include the action that was performed.
+    const currentState = await this.applicationStateService.getHomeState();
     const newState: ApplicationState = {
       ...currentState,
       rooms: currentState.rooms.map((currRoom) => ({

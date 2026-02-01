@@ -10,7 +10,6 @@ import { HomeConfig } from "../config/home.zod";
 const HOME_CONFIG = "HOME_CONFIG";
 
 export const PgPoolProvider = {
-  // TODO: Created as a singleton but I want to create a per-request transaction sub-service.
   provide: Pool,
   useFactory: () => {
     const { DATABASE_URL } = process.env;

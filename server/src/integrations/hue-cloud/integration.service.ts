@@ -7,9 +7,15 @@ import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { HueClient } from "./hue.client";
 import { LightState, LightStateZod } from "./hue.types";
 
+function normalizeDeviceIds(deviceId: string | string[]): string[] {
+  if (Array.isArray(deviceId)) {
+    return deviceId;
+  }
+  return [deviceId];
+}
+
 // Order the fields by the relevance for matching. Score a match by the number of fields that match, but
 // each field has a different weight based on its relevance.
-// TODO: Change this calculation to be VALUE based and not binary, as in, make sure the value is within a margin of 100 or something
 const FIELDS_ORDERED_BY_RELEVANCE: (keyof LightState)[] = [
   "on",
   "hue",
@@ -44,7 +50,9 @@ function tryFindBestMatchingAction(
     ([actionId, actionParameters]) => {
       let score = 0;
       for (const [weight, field] of WEIGHTED_FIELDS_BY_RELEVANCE) {
-        if (areFieldsMatched(currentDeviceState[field], actionParameters[field])) {
+        if (
+          areFieldsMatched(currentDeviceState[field], actionParameters[field])
+        ) {
           score += weight;
         }
       }
@@ -79,7 +87,9 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
     const lights = await this.hueClient.getLights();
-    const currDevice = lights[deviceInfo.id];
+    const ids = normalizeDeviceIds(deviceInfo.id);
+    const [firstLight] = ids;
+    const currDevice = lights[firstLight];
 
     if (!currDevice) {
       return "off";
@@ -88,10 +98,7 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     const actionParametersMap = new Map(
       actionDescriptions.map(
         (t) =>
-          [t.id, LightStateZod.parse(t.parameters)] as [
-            string,
-            LightState,
-          ],
+          [t.id, LightStateZod.parse(t.parameters)] as [string, LightState],
       ),
     );
 
@@ -111,9 +118,16 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     const state = LightStateZod.parse(action.parameters);
 
     try {
-      const results = await this.hueClient.setLightState(deviceInfo.id, state);
-      const allValid = results.every((t) => Boolean(t.success));
-      
+      const deviceIds = normalizeDeviceIds(deviceInfo.id);
+      const results = await Promise.all(
+        deviceIds.map(async (currId) =>
+          this.hueClient.setLightState(currId, state),
+        ),
+      );
+      const allValid = results
+        .flatMap((t) => t)
+        .every((t) => Boolean(t.success));
+
       return allValid ? true : `Failed to perform some of the actions`;
     } catch (error: any) {
       return `Failed to set action ${action.id} on device ${deviceInfo.id}: ${error.message}`;

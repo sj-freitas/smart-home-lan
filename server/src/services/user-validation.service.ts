@@ -51,9 +51,6 @@ export class UserValidationService {
   ) {}
 
   public isRequestAllowed(): boolean {
-    // TODO this is only to show off the app
-    return true;
-    // TODO: Think about this logic
     // IP is in config it means that users need to be authenticated if they are in a different network.
     // IP doesn't exist it means that everyone is allowed.
     if (!this.config.ip) {
