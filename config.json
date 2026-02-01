@@ -24,6 +24,7 @@
   ],
   "home": {
     "name": "Palais Freitas",
+    "subTitle": "{{MY_HOME_ADDRESS_1}}\n{{MY_HOME_ADDRESS_2}}",
     "iconUrl": "{{APP_DOMAIN_URL}}/api/static/files/palais-freitas-logo.svg",
     "faviconUrl": "{{APP_DOMAIN_URL}}/api/static/files/favicon.svg",
     "rooms": [
@@ -32,13 +33,13 @@
         "name": "Living Room",
         "icon": "sofa",
         "roomInfo": {
-          "sourceDeviceId": "ac"
+          "sourceDeviceId": "living_room/ac"
         },
         "devices": [
           {
             "id": "ac",
             "name": "Air Conditioner",
-            "icon": "fan",
+            "icon": "air_conditioner",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
@@ -128,11 +129,21 @@
                 "name": "On"
               }
             ]
-          },
+          }
+        ]
+      },
+      {
+        "id": "kitchen",
+        "name": "Kitchen",
+        "icon": "pan",
+        "roomInfo": {
+          "sourceDeviceId": "living_room/ac"
+        },
+        "devices": [
           {
             "id": "kitchen_light",
             "name": "Kitchen Light",
-            "icon": "lamp",
+            "icon": "ceiling_light",
             "type": "smart_light",
             "integration": {
               "name": "hue_cloud",
@@ -183,15 +194,15 @@
       {
         "id": "main_bedroom",
         "name": "Lisbon",
-        "icon": "big_bed",
+        "icon": "double_bed",
         "roomInfo": {
-          "sourceDeviceId": "ac"
+          "sourceDeviceId": "main_bedroom/ac"
         },
         "devices": [
           {
             "id": "ac",
             "name": "Air Conditioner",
-            "icon": "fan",
+            "icon": "air_conditioner",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
@@ -245,7 +256,7 @@
           {
             "id": "lamp",
             "name": "Tall Lamp",
-            "icon": "lamp",
+            "icon": "desk_lamp",
             "type": "smart_switch",
             "integration": {
               "name": "tuya_cloud",
@@ -265,7 +276,7 @@
           {
             "id": "ceiling_light",
             "name": "Ceiling Light",
-            "icon": "lamp",
+            "icon": "ceiling_light",
             "type": "smart_light",
             "integration": {
               "name": "hue_cloud",
@@ -316,15 +327,15 @@
       {
         "id": "guest_room",
         "name": "Lviv",
-        "icon": "small_bed",
+        "icon": "single_bed",
         "roomInfo": {
-          "sourceDeviceId": "ac"
+          "sourceDeviceId": "guest_room/ac"
         },
         "devices": [
           {
             "id": "ac",
             "name": "Air Conditioner",
-            "icon": "fan",
+            "icon": "air_conditioner",
             "type": "air_conditioner",
             "integration": {
               "name": "mel_cloud_home",
@@ -378,7 +389,7 @@
           {
             "id": "ceiling_light",
             "name": "Ceiling Light",
-            "icon": "lamp",
+            "icon": "ceiling_light",
             "type": "smart_light",
             "integration": {
               "name": "hue_cloud",

@@ -2,6 +2,7 @@ export type RoomDeviceTypes = "air_conditioner" | "smart_switch" | "smart_light"
 
 export interface HomeState {
   name: string;
+  subTitle: string;
   logo: string;
   faviconUrl: string;
   rooms: {

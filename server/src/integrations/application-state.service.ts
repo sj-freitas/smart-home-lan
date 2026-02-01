@@ -10,15 +10,17 @@ export interface ApplicationState {
   name: string;
   logo: string;
   faviconUrl: string;
+  subTitle: string;
   rooms: {
     id: string;
     name: string;
+    icon: string;
     temperature: number;
     devices: {
       id: string;
       name: string;
       icon: string;
-      type: RoomDeviceTypes,
+      type: RoomDeviceTypes;
       actions: {
         id: string;
         name: string;
@@ -42,10 +44,9 @@ export class ApplicationStateService {
   }
 
   private getIntegrationServiceForDevice(
-    roomId: string,
-    deviceId: string,
+    devicePath: string,
   ): IntegrationServiceWithContext<unknown> | null {
-    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
+    const deviceInfo = this.deviceHelper.getDevice(devicePath);
     if (!deviceInfo) {
       return null;
     }
@@ -58,22 +59,22 @@ export class ApplicationStateService {
   public async getHomeState(): Promise<ApplicationState> {
     return {
       name: this.homeConfig.name,
+      subTitle: this.homeConfig.subTitle,
       logo: this.homeConfig.iconUrl,
       faviconUrl: this.homeConfig.faviconUrl,
       rooms: await Promise.all(
         this.homeConfig.rooms.map(async (room) => ({
           id: room.id,
           name: room.name,
+          icon: room.icon,
           temperature:
             (await this.getIntegrationServiceForDevice(
-              room.id,
               room.roomInfo.sourceDeviceId,
             )?.getDeviceTemperature()) ?? NaN,
           devices: await Promise.all(
             room.devices.map(async (device) => {
               const deviceInfo = this.getIntegrationServiceForDevice(
-                room.id,
-                device.id,
+                `${room.id}/${device.id}`,
               );
               const currentDeviceState =
                 deviceInfo === null

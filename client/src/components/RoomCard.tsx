@@ -1,30 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Room, Device } from "../types";
-import {
-  FiTv,
-  FiMusic,
-  FiHome,
-  FiWind,
-  FiChevronUp,
-  FiChevronDown,
-} from "react-icons/fi";
-import { LampIcon } from "../icons/lamp-icons";
-
-function iconForDevice(icon?: string) {
-  if (!icon) return <FiHome />;
-  switch (icon) {
-    case "fan":
-      return <FiWind />;
-    case "lamp":
-      return <LampIcon />;
-    case "music_note":
-      return <FiMusic />;
-    case "television":
-      return <FiTv />;
-    default:
-      return <FiHome />;
-  }
-}
+import { FiChevronUp, FiChevronDown } from "react-icons/fi";
+import { getIconFromId } from "../icons/icon-mapper";
 
 export default function RoomCard({
   room,
@@ -122,41 +99,39 @@ export default function RoomCard({
         }}
         onClick={() => isCollapsible && setIsOpen((s) => !s)}
       >
-        <h2 style={{ margin: 0 }}>
-          {room.name}{" "}
-          <span style={{ marginLeft: 8, fontSize: 13, color: "var(--muted)" }}>
-            ·{" "}
-            {typeof room.temperature === "number"
-              ? `${room.temperature}°C`
-              : ""}
-          </span>
-        </h2>
-        {isCollapsible && (
-          <button
-            className="collapse-toggle"
-            aria-expanded={isOpen}
-            aria-controls={`room-${room.id}-content`}
-            // onClick={() => setIsOpen((s) => !s)}
-            title={isOpen ? "Collapse" : "Expand"}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              color: "var(--muted)",
-              padding: 6,
-              borderRadius: 8,
-            }}
-          >
-            {isOpen ? (
-              <FiChevronUp aria-hidden />
-            ) : (
-              <FiChevronDown aria-hidden />
-            )}
-          </button>
-        )}
+        <h2 style={{ margin: 0 }}>{room.icon && getIconFromId(room.icon, "1.7rem")}{" "}{room.name}</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {typeof room.temperature === "number" && (
+            <span
+              style={{
+                fontSize: 13,
+                color: "var(--muted)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {room.temperature}°C
+            </span>
+          )}
+
+          {isCollapsible && (
+            <button
+              className="collapse-toggle"
+              aria-expanded={isOpen}
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: 6,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                color: "var(--muted)",
+                borderRadius: 8,
+              }}
+            >
+              {isOpen ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Collapsible content container */}
@@ -183,7 +158,7 @@ export default function RoomCard({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {iconForDevice(device.icon)}
+                  {getIconFromId(device.icon)}
                   <div style={{ fontWeight: 700 }} className="device-name">
                     {device.name}
                   </div>

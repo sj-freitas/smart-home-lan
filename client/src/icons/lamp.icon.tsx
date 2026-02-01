@@ -1,4 +1,4 @@
-export const LampIcon = ({ size = 18 }: { size?: number }) => (
+export const LampIcon = ({ size = 18 }: { size?: string | number }) => (
   <svg
     width={size}
     height={size}

@@ -40,10 +40,9 @@ export class ActionsController {
   }
 
   private getIntegratedDeviceFromId(
-    roomId: string,
-    deviceId: string,
+    devicePath: string,
   ): IntegratedDevice<unknown> | null {
-    const deviceInfo = this.deviceHelper.getDevice(roomId, deviceId);
+    const deviceInfo = this.deviceHelper.getDevice(devicePath);
     if (!deviceInfo) {
       return null;
     }
@@ -71,7 +70,7 @@ export class ActionsController {
       );
     }
 
-    const device = this.getIntegratedDeviceFromId(room, deviceId);
+    const device = this.getIntegratedDeviceFromId(`${room}/${deviceId}`);
     if (!device) {
       return {
         room,

@@ -20,8 +20,8 @@ export class DeviceHelper {
     this.deviceMap = getDevicesFromHome(home);
   }
 
-  public getDevice(roomId: string, deviceId: string): RoomDeviceConfig | null {
-    const deviceInfo = this.deviceMap.get(`${roomId}/${deviceId}`);
+  public getDevice(devicePath: string): RoomDeviceConfig | null {
+    const deviceInfo = this.deviceMap.get(devicePath);
     if (!deviceInfo) {
       return null;
     }

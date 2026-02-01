@@ -10,11 +10,13 @@ export type Device = {
 export type Room = {
   id: string;
   name: string;
+  icon?: string;
   temperature?: number;
   devices: Device[];
 }
 export type Home = {
   name: string;
+  subTitle?: string;
   logo?: string;
   rooms: Room[];
 }

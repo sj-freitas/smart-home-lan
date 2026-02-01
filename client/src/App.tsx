@@ -77,7 +77,7 @@ export default function App() {
         </div>
         <div>
           <h1>{home.name}</h1>
-          <div className="lead">Local network control</div>
+          <div className="lead">{home.subTitle}</div>
         </div>
       </div>
 

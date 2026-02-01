@@ -32,6 +32,7 @@ export const RoomDeviceConfigZod = z.object({
 export const RoomConfigZod = z.object({
   id: z.string().readonly(),
   name: z.string().readonly(),
+  icon: z.string().readonly().optional(),
   roomInfo: z
     .object({
       sourceDeviceId: z.string().readonly(),
@@ -43,6 +44,7 @@ export const RoomConfigZod = z.object({
 
 export const HomeConfigZod = z.object({
   name: z.string().readonly(),
+  subTitle: z.string().optional().readonly(),
   rooms: z.array(RoomConfigZod).readonly(),
   ip: z.string().readonly().optional(),
   iconUrl: z.string().readonly().optional(),
