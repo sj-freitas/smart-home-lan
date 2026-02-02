@@ -1,11 +1,11 @@
 meta {
-  name: Post Action
+  name: Get Sandbox Hue Lights
   type: http
-  seq: 1
+  seq: 3
 }
 
-post {
-  url: http://localhost:3001/api/action/main_bedroom/lamp/on
+get {
+  url: http://localhost:3001/api/sandbox/hue-lights
   body: none
   auth: inherit
 }

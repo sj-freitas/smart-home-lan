@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    platform: linux/arm64
+    restart: unless-stopped
+    shm_size: "2g"
+    ports:
+      - "4444:4444"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: server/dockerfile
+    # optionally set build args here
+    image: palais-freitas:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      selenium:
+        condition: service_healthy
+    environment:
+      # Your required environment variables (no values set here; use .env or override)
+      - MEL_CLOUD_HOME_USERNAME
+      - MEL_CLOUD_HOME_PASSWORD
+      - TUYA_CLOUD_ACCESS_KEY
+      - TUYA_CLOUD_SECRET_KEY
+      - HUE_CLOUD_CLIENT_ID
+      - HUE_CLOUD_SECRET
+      - HUE_CLOUD_OAUTH2
+      - HUE_CLOUD_BRIDGE_USERNAME
+      - APP_DOMAIN_URL
+      - APP_HOME_IP
+      - DATABASE_URL
+      - MY_HOME_ADDRESS_1
+      - MY_HOME_ADDRESS_2
+      # Useful runtime pointers
+      - CONFIG_PATH=/app/config.json
+      - SELENIUM_URL=http://selenium:4444/wd/hub
+      - PORT=3001
+    ports:
+      - "3001:3001"
+
+volumes:
+  pgdata:
+
+networks:
+  default:
+    enable_ipv6: true

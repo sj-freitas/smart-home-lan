@@ -10,6 +10,17 @@ import {
 import * as chrome from "selenium-webdriver/chrome.js";
 
 async function buildDriver(): Promise<WebDriver> {
+  const seleniumUrl = process.env.SELENIUM_URL;
+  console.log(`SELENIUM URL = ${seleniumUrl}`);
+
+  // Test connection
+  if (seleniumUrl) {
+    console.log(`Testing Selenium hosted connection:`);
+    const result = await fetch(seleniumUrl);
+
+    console.log(`Connection test result: ${result.status}`);
+  }
+
   const options = new chrome.Options();
   // Use a visible browser while developing; switch to headless if desired:
   // options.headless();
@@ -33,11 +44,16 @@ async function buildDriver(): Promise<WebDriver> {
   const prefs = new logging.Preferences();
   prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
 
-  const service = new chrome.ServiceBuilder(); // chromedriver comes from installed package
-  return new Builder()
-    .forBrowser("chrome")
+  const instance = new Builder().forBrowser("chrome");
+
+  // Depending if the SELENIUM_URL is set or not, it'll use the chrome service or the
+  // hosted server.
+  return (
+    seleniumUrl
+      ? instance.usingServer(process.env.SELENIUM_URL)
+      : instance.setChromeService(new chrome.ServiceBuilder())
+  )
     .setChromeOptions(options)
-    .setChromeService(service)
     .build();
 }
 

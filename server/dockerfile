@@ -1,0 +1,56 @@
+# ---- builder ----
+FROM node:18-alpine AS builder
+
+# Required for some native deps and chromium (if needed in build)
+RUN apk add --no-cache python3 make g++ bash
+
+WORKDIR /app
+
+# Copy package files first (cache layers)
+COPY server/package.json server/package-lock.json* ./ 
+
+# Install deps
+RUN npm ci --no-progress
+
+# Copy source and build assets
+COPY server/tsconfig.json server/ ./
+COPY server/src ./src
+COPY server/static ./static
+
+# Copy the config file from repo root (see docker-compose build context)
+# This copies the /config.json at project root into the image
+COPY config.json ./config.json
+
+# Build
+RUN npm run build
+
+# ---- runtime ----
+FROM node:18-alpine AS runner
+
+# Create non-root user
+RUN addgroup -S app && adduser -S -G app app
+
+WORKDIR /app
+
+# Copy built app from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
+
+# Install only production deps using lockfile
+RUN npm ci --only=production --no-progress
+COPY --from=builder /app/static ./static
+COPY --from=builder /app/config.json ./config.json
+
+# Install only production deps
+RUN npm ci --only=production --no-progress
+
+# Expose port used by NestJS (change if your app uses another port)
+ENV PORT=3001
+ENV CONFIG_PATH=/app/config.json
+
+# Security: run as unprivileged user
+USER app
+
+# Start (assumes package.json has a `start:prod` script that runs node dist/main.js)
+CMD ["npm", "run", "start:prod"]

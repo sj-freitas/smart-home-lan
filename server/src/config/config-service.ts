@@ -32,7 +32,7 @@ export class ConfigService {
     }
 
     // Read and validate the config
-    const configPath = process.env.CONFIG_PATH || "../config.json";
+    const configPath = process.env.CONFIG_PATH;
     const filePath = resolve(configPath);
 
     let raw = readFileSync(filePath, "utf-8");
