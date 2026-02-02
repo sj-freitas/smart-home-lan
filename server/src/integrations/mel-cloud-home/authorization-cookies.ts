@@ -11,16 +11,6 @@ import * as chrome from "selenium-webdriver/chrome.js";
 
 async function buildDriver(): Promise<WebDriver> {
   const seleniumUrl = process.env.SELENIUM_URL;
-  console.log(`SELENIUM URL = ${seleniumUrl}`);
-
-  // Test connection
-  if (seleniumUrl) {
-    console.log(`Testing Selenium hosted connection:`);
-    const result = await fetch(seleniumUrl);
-
-    console.log(`Connection test result: ${result.status}`);
-  }
-
   const options = new chrome.Options();
   // Use a visible browser while developing; switch to headless if desired:
   // options.headless();
@@ -78,6 +68,8 @@ async function clickSignInAndLogin(
     }
   } while (!hasError);
 
+  await driver.sleep(15000);
+  console.log(await driver.getPageSource());
   const signInButton = await driver.wait(
     until.elementLocated(By.xpath("//button[normalize-space()='Sign In']")),
     15000,
@@ -127,6 +119,7 @@ export async function getAuthorizationCookies(
     await driver.sleep(2000); // small pause to ensure cookies are written
     const cookies = await getMelCloudHomeSecureCookies(driver);
 
+    console.log(`[SUCCESS]: We have cookies!`);
     return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
   } catch (error) {
     console.error("Error obtaining authorization cookies:", error);
