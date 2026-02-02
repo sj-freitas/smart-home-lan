@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, Scope } from "@nestjs/common";
 import { ConfigModule } from "../../config/module";
 import { HueCloudIntegrationService } from "./integration.service";
 import { ConfigService } from "../../config/config-service";
@@ -17,6 +17,8 @@ export const HUE_REFRESH_TOKEN = "HueRefreshToken";
 const HueRefreshTokenProvider = {
   provide: HUE_REFRESH_TOKEN,
   inject: [HueOAuth2ClientService, HueOAuth2PersistenceService],
+  // TODO: Remove this, it's requesting the scheduler on the first request.
+  scope: Scope.REQUEST,
   useFactory: async (
     hueOAuth2Client: HueOAuth2ClientService,
     authCookiesService: HueOAuth2PersistenceService,

@@ -4,6 +4,7 @@ import {
   ApplicationState,
   ApplicationStateService,
 } from "../integrations/application-state.service";
+import { HomeStateGateway } from "../sockets/home.state.gateway";
 
 function removeActionsFromState(appState: ApplicationState): ApplicationState {
   return {
@@ -29,12 +30,16 @@ export class HomeController {
   constructor(
     private readonly applicationStateService: ApplicationStateService,
     private readonly userValidationService: UserValidationService,
+    private readonly homeStateGateway: HomeStateGateway,
   ) {}
 
   @Get("/")
   public async getHomeInfo() {
     const canPerformActions = this.userValidationService.isRequestAllowed();
     const appState = await this.applicationStateService.getHomeState();
+
+    // TODO: Remove this, should be resolved on the singleton.
+    this.homeStateGateway.updateState(appState);
 
     if (!canPerformActions) {
       // User is not authenticated, therefore they can't perform actions
