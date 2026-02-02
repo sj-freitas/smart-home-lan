@@ -1,7 +1,6 @@
 # Smart Home LAN — NestJS (backend) + React (frontend)
-
-This repository contains a minimal full-stack application (NestJS backend + React + Vite frontend) written in TypeScript. ChatGPT was used to generate the initial scaffold, documentation and most of the UI elements. Co-pilot was also used in the coding of a few parts.
-It is intended to run on your local network. The backend provides integrations with actual devices, the integrations are described in the [config.json](./config.json) file at the root.
+A server to integrate with your home devices. The LAN initial idea isn't really being done here, as I preferred a cloud approach but the same principle can be used.
+The reason was that Xiaomi removed LAN control of some of the devices.
 
 ## Project layout
 - [Server](./server/README.md)

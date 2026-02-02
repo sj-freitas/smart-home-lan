@@ -17,12 +17,12 @@ services:
       - "5432:5432"
 
   app:
+    platform: ${SELENIUM_PLATFORM}
     build:
-      context: ..
-      dockerfile: server/dockerfile
+      context: .
+      dockerfile: dockerfile
     image: palais-freitas:latest
     restart: unless-stopped
-    platform: ${SELENIUM_PLATFORM}
     depends_on:
       postgres:
         condition: service_healthy

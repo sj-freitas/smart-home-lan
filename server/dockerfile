@@ -1,20 +1,18 @@
+# ---- builder ----
 FROM timbru31/node-chrome:latest AS builder
 
 WORKDIR /app
 
 # Copy package files first (cache layers)
-COPY server/package.json server/package-lock.json* ./ 
+COPY package.json package-lock.json* ./
 
 # Install deps
 RUN npm ci --no-progress
 
 # Copy source and build assets
-COPY server/tsconfig.json server/ ./
-COPY server/src ./src
-COPY server/static ./static
-
-# Copy the config file from repo root (see docker-compose build context)
-# This copies the /config.json at project root into the image
+COPY tsconfig.json ./
+COPY src ./src
+COPY static ./static
 COPY config.json ./config.json
 
 # Build
@@ -35,10 +33,7 @@ RUN npm ci --only=production --no-progress
 COPY --from=builder /app/static ./static
 COPY --from=builder /app/config.json ./config.json
 
-# Install only production deps
-RUN npm ci --only=production --no-progress
-
-# Expose port used by NestJS (change if your app uses another port)
+# Expose port used by NestJS
 ENV PORT=3001
 ENV CONFIG_PATH=/app/config.json
 

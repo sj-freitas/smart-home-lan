@@ -14,6 +14,7 @@ can have their own types specified within the [integrations directory](./src/int
 The config is the unique source of truth for a home. The config can contain one Home and a Home can contain as many Rooms as you wish.
 Any room can have as many Devices as needed. Devices can be shared across rooms, but controlling it in one room will impact other rooms.
 The full config is served as a generic version on `http://localhost:3001/api/home` where the IDs are the ones specified on the config, this will be the source of truth.
+Check the example / base config at [config.json](./config.json)
 
 ### Integration
 An integration is an element that specifies what service they are using, each integration has a unique schema. Currently there are only 3 integrations supported and these
@@ -36,26 +37,26 @@ result in the state of the Device changing such as, for example, turning on some
 
 ## Env Vars
 In the `.env` please include the following Environmental Variables:
-```.env
+```shell
 # ENV Vars that do not depend on your config:
 PORT=3001 # Defaults to 3001.
 CONFIG_PATH="../config.json" # Mandatory, points to your config file. You can use the example one as a base.
 
-# You don't need these but if you use the example [config.json](../config.json) these are the specified there.
+# You don't need these but if you use the example ./config.json these are the specified there.
 # If you don't version the file you can use the values directly in it.
-MEL_CLOUD_HOME_USERNAME
-MEL_CLOUD_HOME_PASSWORD
-TUYA_CLOUD_ACCESS_KEY
-TUYA_CLOUD_SECRET_KEY
-HUE_CLOUD_CLIENT_ID
-HUE_CLOUD_SECRET
-HUE_CLOUD_OAUTH2 # This Username is obtained after completing the OAuth2 flow and it is used to retrieve the lights and perform state changes.
-HUE_CLOUD_BRIDGE_USERNAME
+MEL_CLOUD_HOME_USERNAME=""
+MEL_CLOUD_HOME_PASSWORD=""
+TUYA_CLOUD_ACCESS_KEY=""
+TUYA_CLOUD_SECRET_KEY=""
+HUE_CLOUD_CLIENT_ID=""
+HUE_CLOUD_SECRET=""
+HUE_CLOUD_OAUTH2="" # This Username is obtained after completing the OAuth2 flow and it is used to retrieve the lights and perform state changes.
+HUE_CLOUD_BRIDGE_USERNAME=""
 
 # Optional Values also dependant on the config.json
-APP_HOME_IP # It is used to enable the restricted remote mode. Allows only users within the IP to use the app, otherwise it's readonly.
-APP_DOMAIN_URL # Domain is used for OAuth2 but also for the SSL certification
-DATABASE_URL # Database is used to persist tokens and user access
+APP_HOME_IP="" # It is used to enable the restricted remote mode. Allows only users within the IP to use the app, otherwise it's readonly.
+APP_DOMAIN_URL="" # Domain is used for OAuth2 but also for the SSL certification
+DATABASE_URL="" # Database is used to persist tokens and user access
 MY_HOME_ADDRESS_1= # Address line one to be shown on the app. Please be sure to not version these to not dox yourself!
 MY_HOME_ADDRESS_2= # Address line two to be shown on the app. Please be sure to not version these to not dox yourself!
 ```
@@ -74,13 +75,14 @@ To run locally simple do `npm run start:dev`. The default port is 3001.
 ## Running Docker
 ### Before Building
 Make sure that this config inside Selenium matches your machine (or wherever you are hosting)
-```docker-file
-  selenium:
-    image: seleniarm/standalone-chromium:latest
+```yml
+  app:
     platform: linux/arm64
 ```
-You can use the current docker-compose as long as you set the SELENIUM_PLATFORM on your .env
+Or you can use the current docker-compose.yml as long as you set the SELENIUM_PLATFORM on your .env
+for Mac ARM just set to `"linux/arm64"`.
 
 ### Running
 Building: `docker compose -f docker-compose.yml --env-file .env up -d --no-deps --build`
+It'll run the server and you can access it on the same way as usual.
 
