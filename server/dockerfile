@@ -15,7 +15,7 @@ COPY server/static ./static
 
 # Copy the config file from repo root (see docker-compose build context)
 # This copies the /config.json at project root into the image
-COPY ../config.json ./config.json
+COPY config.json ./config.json
 
 # Build
 RUN npm run build
