@@ -11,6 +11,9 @@ import * as chrome from "selenium-webdriver/chrome.js";
 
 async function buildDriver(): Promise<WebDriver> {
   const seleniumUrl = process.env.SELENIUM_URL;
+
+  console.log(`Selenium URL = ${seleniumUrl}`);
+
   const options = new chrome.Options();
   // Use a visible browser while developing; switch to headless if desired:
   // options.headless();
@@ -57,6 +60,7 @@ async function clickSignInAndLogin(
 
   let hasError = false;
   do {
+    console.log(`Attempt to load page, it'll reset if error.`);
     hasError = Boolean(
       await driver.wait(until.elementLocated(By.id("blazor-error-ui")), 2000),
     );
@@ -68,7 +72,8 @@ async function clickSignInAndLogin(
     }
   } while (!hasError);
 
-  await driver.sleep(15000);
+  console.log(`Waiting for SIgn In button... waiting 15 seconds`);
+  await driver.sleep(2000);
   console.log(await driver.getPageSource());
   const signInButton = await driver.wait(
     until.elementLocated(By.xpath("//button[normalize-space()='Sign In']")),
