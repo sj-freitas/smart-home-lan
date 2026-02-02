@@ -1,4 +1,4 @@
-import { getAuthorizationCookies } from "./authorization-cookies";
+import { getAuthorizationCookies } from "./authorization-cookies-v2";
 import { MelCloudHomeIntegration } from "../../config/integration.zod";
 import { ConfigService } from "../../config/config-service";
 import { MelCloudAuthCookiesPersistenceService } from "./auth-cookies.persistence.service";

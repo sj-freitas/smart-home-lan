@@ -15,16 +15,15 @@ async function buildDriver(): Promise<WebDriver> {
   console.log(`Selenium URL = ${seleniumUrl}`);
 
   const options = new chrome.Options();
-  // Use a visible browser while developing; switch to headless if desired:
-  // options.headless();
   options.addArguments(
     "--no-sandbox",
-    "--disable-dev-shm-usage",
-    "--disable-gpu",
-    "--disable-infobars",
-    "--disable-blink-features=AutomationControlled",
-    "--window-size=1280,1024",
-    "--auto-open-devtools-for-tabs",
+    "--headless=new",
+    // "--disable-dev-shm-usage",
+    // "--disable-gpu",
+    // "--disable-infobars",
+    // "--disable-blink-features=AutomationControlled",
+    // "--window-size=1280,1024",
+    // "--auto-open-devtools-for-tabs",
   );
 
   // Optional: set a common user agent to reduce some bot-detection
@@ -39,6 +38,7 @@ async function buildDriver(): Promise<WebDriver> {
 
   const instance = new Builder().forBrowser("chrome");
 
+  console.log(`Building Chrome Builder`);
   // Depending if the SELENIUM_URL is set or not, it'll use the chrome service or the
   // hosted server.
   return (
@@ -113,23 +113,30 @@ async function getMelCloudHomeSecureCookies(
 export async function getAuthorizationCookies(
   melCloudHomeConfig: MelCloudHomeIntegration,
 ): Promise<string> {
-  const driver = await buildDriver();
   try {
-    await clickSignInAndLogin(
-      driver,
-      melCloudHomeConfig.siteUrl,
-      melCloudHomeConfig.username,
-      melCloudHomeConfig.password,
-    );
-    await driver.sleep(2000); // small pause to ensure cookies are written
-    const cookies = await getMelCloudHomeSecureCookies(driver);
+    const driver = await buildDriver();
+    console.log(`Driver built correctly!`);
+    try {
+      await clickSignInAndLogin(
+        driver,
+        melCloudHomeConfig.siteUrl,
+        melCloudHomeConfig.username,
+        melCloudHomeConfig.password,
+      );
+      await driver.sleep(2000); // small pause to ensure cookies are written
+      const cookies = await getMelCloudHomeSecureCookies(driver);
 
-    console.log(`[SUCCESS]: We have cookies!`);
-    return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-  } catch (error) {
-    console.error("Error obtaining authorization cookies:", error);
-    throw error;
-  } finally {
-    await driver.quit();
+      console.log(`[SUCCESS]: We have cookies!`);
+      return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+    } catch (error) {
+      console.error("Error obtaining authorization cookies:", error);
+      throw error;
+    } finally {
+      await driver.quit();
+    }
+  } catch (err: unknown) {
+    console.log(JSON.stringify(err, null, 2));
+    console.error(err);
+    throw err;
   }
 }

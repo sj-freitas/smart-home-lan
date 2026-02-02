@@ -1,8 +1,4 @@
-# ---- builder ----
-FROM node:18-alpine AS builder
-
-# Required for some native deps and chromium (if needed in build)
-RUN apk add --no-cache python3 make g++ bash
+FROM timbru31/node-chrome:latest AS builder
 
 WORKDIR /app
 
@@ -19,16 +15,13 @@ COPY server/static ./static
 
 # Copy the config file from repo root (see docker-compose build context)
 # This copies the /config.json at project root into the image
-COPY config.json ./config.json
+COPY ../config.json ./config.json
 
 # Build
 RUN npm run build
 
 # ---- runtime ----
-FROM node:18-alpine AS runner
-
-# Create non-root user
-RUN addgroup -S app && adduser -S -G app app
+FROM timbru31/node-chrome:latest AS runner
 
 WORKDIR /app
 
@@ -48,9 +41,6 @@ RUN npm ci --only=production --no-progress
 # Expose port used by NestJS (change if your app uses another port)
 ENV PORT=3001
 ENV CONFIG_PATH=/app/config.json
-
-# Security: run as unprivileged user
-USER app
 
 # Start (assumes package.json has a `start:prod` script that runs node dist/main.js)
 CMD ["npm", "run", "start:prod"]
