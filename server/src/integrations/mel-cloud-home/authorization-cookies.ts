@@ -1,142 +1,183 @@
 import { MelCloudHomeIntegration } from "../../config/integration.zod";
-import {
-  Builder,
-  By,
-  until,
-  WebDriver,
-  logging,
-  IWebDriverOptionsCookie,
-} from "selenium-webdriver";
-import * as chrome from "selenium-webdriver/chrome.js";
+import puppeteer, { Browser, BrowserContext, Page } from "puppeteer";
 
-async function buildDriver(): Promise<WebDriver> {
-  const seleniumUrl = process.env.SELENIUM_URL;
+const DEFAULT_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 
-  console.log(`Selenium URL = ${seleniumUrl}`);
+// const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const options = new chrome.Options();
-  options.addArguments(
-    "--no-sandbox",
-    "--headless=new",
-    // "--disable-dev-shm-usage",
-    // "--disable-gpu",
-    // "--disable-infobars",
-    // "--disable-blink-features=AutomationControlled",
-    // "--window-size=1280,1024",
-    // "--auto-open-devtools-for-tabs",
-  );
+/**
+ * Build a Browser instance.
+ * - Connects to remote Chrome if CHROME_WS_ENDPOINT is set
+ * - Otherwise launches a local headless browser
+ */
+async function buildBrowser(): Promise<Browser> {
+  const wsEndpoint = process.env.CHROME_WS_ENDPOINT;
 
-  // Optional: set a common user agent to reduce some bot-detection
-  options.addArguments(
-    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-      "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-  );
+  if (wsEndpoint) {
+    console.log(`Connecting to remote Chrome: ${wsEndpoint}`);
+    return puppeteer.connect({ browserWSEndpoint: wsEndpoint });
+  }
 
-  // Show browser logs if you want
-  const prefs = new logging.Preferences();
-  prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-
-  const instance = new Builder().forBrowser("chrome");
-
-  console.log(`Building Chrome Builder`);
-  // Depending if the SELENIUM_URL is set or not, it'll use the chrome service or the
-  // hosted server.
-  return (
-    seleniumUrl
-      ? instance.usingServer(process.env.SELENIUM_URL)
-      : instance.setChromeService(new chrome.ServiceBuilder())
-  )
-    .setChromeOptions(options)
-    .build();
+  console.log("Launching local headless Chrome");
+  return puppeteer.launch({
+    headless: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+    ],
+  });
 }
 
+/**
+ * Refreshes the page if the Blazor error overlay is detected.
+ */
+async function ensurePageHealthy(page: Page, maxAttempts = 6): Promise<void> {
+  for (let i = 1; i <= maxAttempts; i++) {
+    // await sleep(1000);
+
+    const blazorError = await page.$("#blazor-error-ui");
+    if (!(await blazorError.isVisible())) return;
+
+    console.warn(
+      `Detected #blazor-error-ui (attempt ${i}/${maxAttempts}) — refreshing`,
+    );
+
+    await page.reload({
+      waitUntil: ["domcontentloaded", "networkidle2"],
+    });
+  }
+
+  console.warn("Max health-check attempts reached; continuing anyway.");
+}
+
+/**
+ * Waits for and returns the "Sign In" button.
+ */
+// async function waitForSelector(
+//   page: Page,
+//   selector: string,
+//   timeoutMs = 15_000,
+// ) {
+//   const button = await page.waitForSelector(selector, { timeout: timeoutMs });
+
+//   if (!button) {
+//     throw new Error("Sign In button not found");
+//   }
+
+//   return button;
+// }
+
+/**
+ * Navigate to the site and perform login.
+ */
 async function clickSignInAndLogin(
-  driver: WebDriver,
+  page: Page,
   melCloudHomeUrl: string,
   email: string,
   password: string,
-) {
-  await driver.get(melCloudHomeUrl);
+): Promise<void> {
+  await page.goto(melCloudHomeUrl, {
+    waitUntil: ["domcontentloaded", "networkidle2"],
+  });
 
-  let hasError = false;
-  do {
-    console.log(`Attempt to load page, it'll reset if error.`);
-    hasError = Boolean(
-      await driver.wait(until.elementLocated(By.id("blazor-error-ui")), 2000),
-    );
+  await ensurePageHealthy(page);
 
-    if (hasError) {
-      hasError = true;
-      console.warn(`Page failure - requires refresh`);
-      await driver.navigate().refresh();
-    }
-  } while (!hasError);
-
-  console.log(`Waiting for SIgn In button... waiting 15 seconds`);
-  await driver.sleep(2000);
-  console.log(await driver.getPageSource());
-  const signInButton = await driver.wait(
-    until.elementLocated(By.xpath("//button[normalize-space()='Sign In']")),
-    15000,
-  );
-  if (!signInButton) {
-    throw new Error(
-      "Could not find SIGN IN button automatically. You may need to update selector.",
-    );
-  }
+  const signInButtonSelector = "xpath=//button[normalize-space() = 'Sign In']";
+  const signInButton = await page.waitForSelector(signInButtonSelector);
+  // const signInButton = await waitForSelector(
+  //   page,
+  //   signInButtonSelector,
+  // );
   await signInButton.click();
 
-  const emailInput = await driver.wait(
-    until.elementLocated(By.id("signInFormUsername")),
-    5000,
-  );
-  await emailInput.sendKeys(email);
-  const passwordInput = await driver.wait(
-    until.elementLocated(By.id("signInFormPassword")),
-    5000,
-  );
-  await passwordInput.sendKeys(password);
-  await passwordInput.sendKeys("\n");
+  const emailSelector = "#signInFormUsername";
+  const passwordSelector = "#signInFormPassword";
+
+  await page.waitForSelector(emailSelector, { timeout: 5000 });
+  await page.waitForSelector(passwordSelector, { timeout: 5000 });
+
+  await page.type(emailSelector, email, { delay: 30 });
+  await page.type(passwordSelector, password, { delay: 30 });
+
+  await page.keyboard.press("Enter");
+
+  // Allow login redirect + cookie write
+  // await sleep(2000);
 }
+
+/**
+ * Extract secure MELCloud cookies.
+ */
+// async function getMelCloudHomeSecureCookies(page: Page): Promise<string[]> {
+//   const cookies = await page.cookies();
+//   return cookies
+//     .filter((c) => c.name.startsWith("__Secure-monitorandcontrol"))
+//     .map((c) => `${c.name}=${c.value}`);
+// }
 
 async function getMelCloudHomeSecureCookies(
-  driver: WebDriver,
-): Promise<IWebDriverOptionsCookie[]> {
-  const allCookies = await driver.manage().getCookies();
-  const monitorCookies = allCookies.filter((c) =>
-    c.name.startsWith("__Secure-monitorandcontrol"),
-  );
-
-  return monitorCookies;
+  browser: BrowserContext,
+): Promise<string[]> {
+  const cookies = await browser.cookies();
+  return cookies
+    .filter((c) => c.name.startsWith("__Secure-monitorandcontrol"))
+    .map((c) => `${c.name}=${c.value}`);
 }
 
+/**
+ * Public API
+ */
 export async function getAuthorizationCookies(
   melCloudHomeConfig: MelCloudHomeIntegration,
 ): Promise<string> {
+  let browser: Browser | null = null;
+
   try {
-    const driver = await buildDriver();
-    console.log(`Driver built correctly!`);
+    browser = await buildBrowser();
+
+    // In Puppeteer v22+, ALL created contexts are incognito
+    const context = await browser.createBrowserContext();
+    const page = await context.newPage();
+
+    await page.setUserAgent({
+      userAgent: DEFAULT_USER_AGENT,
+    });
+    page.setDefaultTimeout(30_000);
+    page.setDefaultNavigationTimeout(60_000);
+
+    console.log("Attempting MELCloud sign-in");
+
     try {
       await clickSignInAndLogin(
-        driver,
+        page,
         melCloudHomeConfig.siteUrl,
         melCloudHomeConfig.username,
         melCloudHomeConfig.password,
       );
-      await driver.sleep(2000); // small pause to ensure cookies are written
-      const cookies = await getMelCloudHomeSecureCookies(driver);
 
-      console.log(`[SUCCESS]: We have cookies!`);
-      return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-    } catch (error) {
-      console.error("Error obtaining authorization cookies:", error);
-      throw error;
+      // await sleep(2000);
+
+      const cookies = await getMelCloudHomeSecureCookies(page.browserContext());
+
+      if (!cookies.length) {
+        console.warn("No monitor cookies found");
+        return "";
+      }
+
+      console.log("[SUCCESS] Authorization cookies retrieved");
+      return cookies.join("; ");
     } finally {
-      await driver.quit();
+      await context.close();
     }
-  } catch (err: unknown) {
-    console.log(JSON.stringify(err, null, 2));
-    console.error(err);
+  } catch (err) {
+    console.error("Failed to obtain authorization cookies:", err);
     throw err;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }

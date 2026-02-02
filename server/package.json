@@ -22,12 +22,10 @@
     "puppeteer": "^24.36.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0",
-    "selenium-webdriver": "^4.40.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",
-    "@types/selenium-webdriver": "^4.35.5",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.1.0",

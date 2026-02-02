@@ -74,12 +74,12 @@ To run locally simple do `npm run start:dev`. The default port is 3001.
 
 ## Running Docker
 ### Before Building
-Make sure that this config inside Selenium matches your machine (or wherever you are hosting)
+Make sure that this config matches your machine's platform (or wherever you are hosting)
 ```yml
   app:
     platform: linux/arm64
 ```
-Or you can use the current docker-compose.yml as long as you set the SELENIUM_PLATFORM on your .env
+Or you can use the current docker-compose.yml as long as you set the HOST_PLATFORM on your .env
 for Mac ARM just set to `"linux/arm64"`.
 
 ### Running
