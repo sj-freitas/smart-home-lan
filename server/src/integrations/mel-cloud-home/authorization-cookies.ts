@@ -1,6 +1,6 @@
+import puppeteer, { Browser, BrowserContext, Cookie, Page } from "puppeteer";
 import { sleep } from "../../helpers/sleep";
 import { MelCloudHomeIntegration } from "../../config/integration.zod";
-import puppeteer, { Browser, BrowserContext, Cookie, Page } from "puppeteer";
 
 const DEFAULT_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +

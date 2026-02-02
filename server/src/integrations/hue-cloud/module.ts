@@ -17,8 +17,6 @@ export const HUE_REFRESH_TOKEN = "HueRefreshToken";
 const HueRefreshTokenProvider = {
   provide: HUE_REFRESH_TOKEN,
   inject: [HueOAuth2ClientService, HueOAuth2PersistenceService],
-  // TODO: Remove this, it's requesting the scheduler on the first request.
-  scope: Scope.REQUEST,
   useFactory: async (
     hueOAuth2Client: HueOAuth2ClientService,
     authCookiesService: HueOAuth2PersistenceService,

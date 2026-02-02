@@ -28,17 +28,17 @@ export class HomeStateGateway
   // Effectively state is an in-memory cache as the updates always trigger a change in it.
   // The state gets updated every POLLING_INTERVAL (20s) to sync it. This would not work
   // so well if we had multiple backend instances but that isn't the case.
-  private state: BehaviorSubject<ApplicationState | { empty: true }>; //TODO: Change this line to private state: BehaviorSubject<ApplicationState
+  private state: BehaviorSubject<ApplicationState>;
   private activeConnections = 0;
   private pollHandle: NodeJS.Timeout | null = null;
 
-  constructor(readonly applicationStateService: ApplicationStateService) {
-    this.state = new BehaviorSubject({ empty: true }); // TODO: Remove this step from the constructor
-  }
+  constructor(readonly applicationStateService: ApplicationStateService) {}
 
   async afterInit(server: Server) {
     this.server = server;
-    this.state = new BehaviorSubject({ empty: true }); // TODO set this back to this.state = new BehaviorSubject(await this.applicationStateService.getHomeState());
+    this.state = new BehaviorSubject(
+      await this.applicationStateService.getHomeState(),
+    );
     this.state.subscribe((state) => this.broadcastSnapshot(state));
   }
 

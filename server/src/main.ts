@@ -12,8 +12,6 @@ async function bootstrap() {
   const port = process.env.PORT ?? DEFAULT_PORT;
   await app.listen(port, "0.0.0.0");
 
-  // TODO: Init the stuff here
-
   console.log(`Server listening on http://0.0.0.0:${process.env.PORT}`);
 }
 

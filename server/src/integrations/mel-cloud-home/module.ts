@@ -17,8 +17,6 @@ export const MEL_CLOUD_AUTHENTICATION_COOKIES =
   "MelCloudHomeAuthenticationCookies";
 const MelCloudHomeAuthenticationCookiesProvider = {
   provide: MEL_CLOUD_AUTHENTICATION_COOKIES,
-  // TODO: Remove this, it's requesting the scheduler on the first request.
-  scope: Scope.REQUEST,
   inject: [ConfigService, MelCloudAuthCookiesPersistenceService],
   useFactory: async (
     config: ConfigService,

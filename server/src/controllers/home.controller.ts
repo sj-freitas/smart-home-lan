@@ -38,9 +38,6 @@ export class HomeController {
     const canPerformActions = this.userValidationService.isRequestAllowed();
     const appState = await this.applicationStateService.getHomeState();
 
-    // TODO: Remove this, should be resolved on the singleton.
-    this.homeStateGateway.updateState(appState);
-
     if (!canPerformActions) {
       // User is not authenticated, therefore they can't perform actions
       return removeActionsFromState(appState);
