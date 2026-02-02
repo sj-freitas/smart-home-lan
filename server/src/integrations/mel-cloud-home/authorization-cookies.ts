@@ -1,17 +1,11 @@
+import { sleep } from "../../helpers/sleep";
 import { MelCloudHomeIntegration } from "../../config/integration.zod";
-import puppeteer, { Browser, BrowserContext, Page } from "puppeteer";
+import puppeteer, { Browser, BrowserContext, Cookie, Page } from "puppeteer";
 
 const DEFAULT_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 
-// const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/**
- * Build a Browser instance.
- * - Connects to remote Chrome if CHROME_WS_ENDPOINT is set
- * - Otherwise launches a local headless browser
- */
 async function buildBrowser(): Promise<Browser> {
   const wsEndpoint = process.env.CHROME_WS_ENDPOINT;
 
@@ -33,13 +27,14 @@ async function buildBrowser(): Promise<Browser> {
 
 /**
  * Refreshes the page if the Blazor error overlay is detected.
+ * Initially the MEL Cloud Home page can have an error message requesting us to refresh.
  */
 async function ensurePageHealthy(page: Page, maxAttempts = 6): Promise<void> {
   for (let i = 1; i <= maxAttempts; i++) {
-    // await sleep(1000);
-
     const blazorError = await page.$("#blazor-error-ui");
-    if (!(await blazorError.isVisible())) return;
+    if (!(await blazorError.isVisible())) {
+      return;
+    }
 
     console.warn(
       `Detected #blazor-error-ui (attempt ${i}/${maxAttempts}) — refreshing`,
@@ -53,26 +48,6 @@ async function ensurePageHealthy(page: Page, maxAttempts = 6): Promise<void> {
   console.warn("Max health-check attempts reached; continuing anyway.");
 }
 
-/**
- * Waits for and returns the "Sign In" button.
- */
-// async function waitForSelector(
-//   page: Page,
-//   selector: string,
-//   timeoutMs = 15_000,
-// ) {
-//   const button = await page.waitForSelector(selector, { timeout: timeoutMs });
-
-//   if (!button) {
-//     throw new Error("Sign In button not found");
-//   }
-
-//   return button;
-// }
-
-/**
- * Navigate to the site and perform login.
- */
 async function clickSignInAndLogin(
   page: Page,
   melCloudHomeUrl: string,
@@ -87,10 +62,7 @@ async function clickSignInAndLogin(
 
   const signInButtonSelector = "xpath=//button[normalize-space() = 'Sign In']";
   const signInButton = await page.waitForSelector(signInButtonSelector);
-  // const signInButton = await waitForSelector(
-  //   page,
-  //   signInButtonSelector,
-  // );
+
   await signInButton.click();
 
   const emailSelector = "#signInFormUsername";
@@ -103,43 +75,25 @@ async function clickSignInAndLogin(
   await page.type(passwordSelector, password, { delay: 30 });
 
   await page.keyboard.press("Enter");
-
-  // Allow login redirect + cookie write
-  // await sleep(2000);
 }
 
-/**
- * Extract secure MELCloud cookies.
- */
-// async function getMelCloudHomeSecureCookies(page: Page): Promise<string[]> {
-//   const cookies = await page.cookies();
-//   return cookies
-//     .filter((c) => c.name.startsWith("__Secure-monitorandcontrol"))
-//     .map((c) => `${c.name}=${c.value}`);
-// }
-
 async function getMelCloudHomeSecureCookies(
-  browser: BrowserContext,
+  cookies: Cookie[],
 ): Promise<string[]> {
-  const cookies = await browser.cookies();
   return cookies
     .filter((c) => c.name.startsWith("__Secure-monitorandcontrol"))
     .map((c) => `${c.name}=${c.value}`);
 }
 
-/**
- * Public API
- */
 export async function getAuthorizationCookies(
   melCloudHomeConfig: MelCloudHomeIntegration,
 ): Promise<string> {
   let browser: Browser | null = null;
+  let context: BrowserContext | null = null;
 
   try {
     browser = await buildBrowser();
-
-    // In Puppeteer v22+, ALL created contexts are incognito
-    const context = await browser.createBrowserContext();
+    context = await browser.createBrowserContext();
     const page = await context.newPage();
 
     await page.setUserAgent({
@@ -148,36 +102,31 @@ export async function getAuthorizationCookies(
     page.setDefaultTimeout(30_000);
     page.setDefaultNavigationTimeout(60_000);
 
-    console.log("Attempting MELCloud sign-in");
+    await clickSignInAndLogin(
+      page,
+      melCloudHomeConfig.siteUrl,
+      melCloudHomeConfig.username,
+      melCloudHomeConfig.password,
+    );
 
-    try {
-      await clickSignInAndLogin(
-        page,
-        melCloudHomeConfig.siteUrl,
-        melCloudHomeConfig.username,
-        melCloudHomeConfig.password,
-      );
-
-      // await sleep(2000);
-
-      const cookies = await getMelCloudHomeSecureCookies(page.browserContext());
-
-      if (!cookies.length) {
-        console.warn("No monitor cookies found");
-        return "";
-      }
-
-      console.log("[SUCCESS] Authorization cookies retrieved");
-      return cookies.join("; ");
-    } finally {
-      await context.close();
+    await sleep(2000);
+    const cookies = await context.cookies();
+    const melCloudHomeCookies = await getMelCloudHomeSecureCookies(cookies);
+    if (!melCloudHomeCookies.length) {
+      throw new Error("[FAILURE] No monitor cookies found");
     }
+
+    console.log("[SUCCESS] Authorization cookies retrieved");
+    return melCloudHomeCookies.join("; ");
   } catch (err) {
     console.error("Failed to obtain authorization cookies:", err);
     throw err;
   } finally {
-    if (browser) {
-      await browser.close();
-    }
+    // Put into an array of promises to make sure both close are executed regardless of one another
+    await Promise.all(
+      [browser, context]
+        .filter((t) => t !== null)
+        .map(async (t) => await t.close()),
+    );
   }
 }
