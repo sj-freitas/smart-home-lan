@@ -14,4 +14,12 @@ export class SandboxController {
     // Very useful to get the HUE light configs to create presets.
     return await this.hueClient.getLights();
   }
+
+  @Get("/health")
+  public async health() {
+    // Very useful to get the HUE light configs to create presets.
+    return {
+      healthy: true,
+    };
+  }
 }
