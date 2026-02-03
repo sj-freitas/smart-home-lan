@@ -37,55 +37,6 @@
         },
         "devices": [
           {
-            "id": "ceiling_light",
-            "name": "Ceiling Light",
-            "icon": "ceiling_light",
-            "type": "smart_light",
-            "integration": {
-              "name": "hue_cloud",
-              "id": ["4", "5"]
-            },
-            "actions": [
-              {
-                "id": "off",
-                "name": "Off",
-                "parameters": {
-                  "on": false
-                }
-              },
-              {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
-                "id": "on_dim",
-                "name": "Dim",
-                "parameters": {
-                  "on": true,
-                  "bri": 44,
-                  "hue": 7985,
-                  "sat": 107
-                }
-              },
-              {
-                "id": "on_romantic",
-                "name": "Romantic",
-                "parameters": {
-                  "on": true,
-                  "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
-                }
-              }
-            ]
-          },
-          {
             "id": "ac",
             "name": "Air Conditioner",
             "icon": "air_conditioner",
@@ -135,6 +86,55 @@
                   "setTemperature": 21,
                   "temperatureIncrementOverride": null,
                   "inStandbyMode": null
+                }
+              }
+            ]
+          },
+          {
+            "id": "ceiling_light",
+            "name": "Ceiling Light",
+            "icon": "ceiling_light",
+            "type": "smart_light",
+            "integration": {
+              "name": "hue_cloud",
+              "id": ["4", "5"]
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "on": false
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
+                }
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
                 }
               }
             ]

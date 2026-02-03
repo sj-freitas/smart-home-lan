@@ -14,7 +14,7 @@ import {
   ApplicationStateService,
 } from "../integrations/application-state.service";
 
-const POLLING_INTERVAL = 20_000;
+const POLLING_INTERVAL = 5_000;
 
 @WebSocketGateway({
   namespace: "/api/state",
