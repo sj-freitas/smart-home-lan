@@ -1,3 +1,4 @@
+import { withRetries } from "../../../helpers/retry";
 import { startScheduler } from "../../../helpers/scheduler";
 import { HueOAuth2ClientService } from "./hue-oauth2.client.service";
 import { HueOAuth2PersistenceService } from "./hue-oauth2.persistence.service";
@@ -10,7 +11,10 @@ const createRefreshTokensFunction =
   ) =>
   async () => {
     const currentTokens = await hueOAuthTokensStore.retrieveTokens();
-    const tokens = await client.refreshAccessToken(currentTokens.tokens);
+    const refreshAccessTokenWithRetries = withRetries(
+      client.refreshAccessToken.bind(client),
+    );
+    const tokens = await refreshAccessTokenWithRetries(currentTokens.tokens);
     await hueOAuthTokensStore.storeTokens(tokens);
   };
 

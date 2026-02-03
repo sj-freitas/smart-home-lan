@@ -10,6 +10,9 @@ import {
   HueLightsStateResponsesZod,
   LightState,
 } from "./hue.types";
+import { withRetries } from "src/helpers/retry";
+
+const fetchWithRetries = withRetries(fetch);
 
 export class HueClient {
   /**
@@ -98,7 +101,7 @@ export class HueClient {
     }
 
     const { accessToken } = await this.getOrRefreshAccessTokenIfNeeded();
-    const response = await fetch(
+    const response = await fetchWithRetries(
       `${this.hueCloudConfig.apiUrl}/bridge/${this.hueCloudConfig.bridgeUsername}/lights`,
       {
         method: "GET",
@@ -111,7 +114,7 @@ export class HueClient {
     const lights = await response.json();
     const parsedLights = HueLightsResponseZod.parse(lights);
 
-    return parsedLights;
+    return lights;
   }
 
   public async setLightState(
@@ -126,7 +129,7 @@ export class HueClient {
     }
 
     const { accessToken } = await this.getOrRefreshAccessTokenIfNeeded();
-    const response = await fetch(
+    const response = await fetchWithRetries(
       `${this.hueCloudConfig.apiUrl}/bridge/${this.hueCloudConfig.bridgeUsername}/lights/${lightId}/state`,
       {
         method: "PUT",

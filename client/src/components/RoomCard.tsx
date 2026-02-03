@@ -174,7 +174,6 @@ export default function RoomCard({
                         onClick={() => runAction(device, a.id)}
                       >
                         {a.name}
-                        {loadingDevice === device.id && "…"}
                       </button>
                     );
                   })}

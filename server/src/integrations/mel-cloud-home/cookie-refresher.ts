@@ -1,8 +1,11 @@
+import { MelCloudAuthCookiesPersistenceService } from "./auth-cookies.persistence.service";
 import { getAuthorizationCookies } from "./authorization-cookies";
 import { MelCloudHomeIntegration } from "../../config/integration.zod";
 import { ConfigService } from "../../config/config-service";
-import { MelCloudAuthCookiesPersistenceService } from "./auth-cookies.persistence.service";
 import { startScheduler } from "../../helpers/scheduler";
+import { withRetries } from "../../helpers/retry";
+
+const getAuthorizationCookiesWithRetry = withRetries(getAuthorizationCookies);
 
 const ONE_HOUR_MS = 1000 * 60 * 60 * 1;
 const createRefreshAuthCookiesFunction =
@@ -11,7 +14,7 @@ const createRefreshAuthCookiesFunction =
     authCookiesService: MelCloudAuthCookiesPersistenceService,
   ) =>
   async () => {
-    const cookie = await getAuthorizationCookies(melCloudHomeConfig);
+    const cookie = await getAuthorizationCookiesWithRetry(melCloudHomeConfig);
     await authCookiesService.storeAuthCookies(cookie);
   };
 
