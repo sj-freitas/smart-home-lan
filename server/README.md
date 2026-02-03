@@ -1,4 +1,3 @@
-
 # Important
 The backend reads the config file, store the file anywhere, you can set the path to it using CONFIG_PATH, it needs to be a JSON file,
 the schema is written in zod here: [base-config.zod.ts](./src/config/base-config.zod.ts) the types are all referenced there. Each integration

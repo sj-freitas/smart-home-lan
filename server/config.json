@@ -24,6 +24,7 @@
   ],
   "home": {
     "name": "Palais Freitas",
+    "ip": "{{APP_HOME_IP}}",
     "subTitle": "{{MY_HOME_ADDRESS_1}}\n{{MY_HOME_ADDRESS_2}}",
     "iconUrl": "{{APP_DOMAIN_URL}}/api/static/files/palais-freitas-logo.svg",
     "faviconUrl": "{{APP_DOMAIN_URL}}/api/static/files/favicon.svg",
