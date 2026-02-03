@@ -10,7 +10,7 @@ import {
   HueLightsStateResponsesZod,
   LightState,
 } from "./hue.types";
-import { withRetries } from "src/helpers/retry";
+import { withRetries } from "../../helpers/retry";
 
 const fetchWithRetries = withRetries(fetch);
 

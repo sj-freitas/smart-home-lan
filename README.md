@@ -12,7 +12,6 @@ The reason was that Xiaomi removed LAN control of some of the devices.
 - [MEDIUM] Add tests (collapsible flow etc.)
 
 ### Backend
-- [IMPORTANT] Add retry to outbound requests - things fail, 2-3 retries with exponential backoff goes a long way to make this more resilient.
 - [IMPORTANT] (Ongoing) Write documentation on the README.md files. Hard to keep progress but ongoing.
 - [MEDIUM] Config animations for groups (not super relevant but a funny thing to do)
 - [MEDIUM] Consider a scenario where the state being broadcast considers if the user is logged-in.

@@ -369,13 +369,33 @@
                 }
               },
               {
-                "id": "on",
-                "name": "On",
+                "id": "on_bright",
+                "name": "Bright",
                 "parameters": {
                   "on": true,
                   "bri": 254,
                   "hue": 6924,
                   "sat": 129
+                }
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
                 }
               }
             ]
