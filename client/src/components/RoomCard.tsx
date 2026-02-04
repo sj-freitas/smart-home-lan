@@ -5,15 +5,19 @@ import { getIconFromId } from "../icons/icon-mapper";
 
 export default function RoomCard({
   room,
+  setStateSuppressSocket,
   onDeviceAction,
+  setDeviceState,
   collapsedByDefault = false,
 }: {
   room: Room;
+  setStateSuppressSocket: (value: boolean) => void,
   onDeviceAction: (
     roomId: string,
     deviceId: string,
     actionId: string,
   ) => Promise<void>;
+  setDeviceState: (roomId: string, deviceId: string, actionId: string) => void;
   /** When true, the card will start collapsed. */
   collapsedByDefault?: boolean;
 }) {
@@ -24,9 +28,17 @@ export default function RoomCard({
   const cardRef = useRef<HTMLDivElement | null>(null);
 
   async function runAction(device: Device, actionId: string) {
+    // We lock the device to avoid changing the state before it changes, this avoids confusion
+    // with the actual device state.
     setLoadingDevice(device.id);
     try {
+      // We set the state right away to make it snappier
+      setDeviceState(room.id, device.id, actionId);
+      // This makes the UI a lot snappier and avoids weird "rollbacks" from state snapshots
+      // The request always results in a full state snapshot anyway.
+      setStateSuppressSocket(true);
       await onDeviceAction(room.id, device.id, actionId);
+      setStateSuppressSocket(false);
     } finally {
       setLoadingDevice(null);
     }
@@ -99,7 +111,9 @@ export default function RoomCard({
         }}
         onClick={() => isCollapsible && setIsOpen((s) => !s)}
       >
-        <h2 style={{ margin: 0 }}>{room.icon && getIconFromId(room.icon, "1.7rem")}{" "}{room.name}</h2>
+        <h2 style={{ margin: 0 }}>
+          {room.icon && getIconFromId(room.icon, "1.7rem")} {room.name}
+        </h2>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {typeof room.temperature === "number" && (
             <span

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { HomeState, ServerMessage } from "./types";
 
@@ -7,6 +7,10 @@ export function useHomeState() {
   const [connected, setConnected] = useState(false);
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
   const SOCKET_URL = `${API_BASE}/state`;
+  const suppressRef = useRef<boolean>(false);
+  const setStateSuppressSocket = useCallback((suppress = true) => {
+    suppressRef.current = suppress;
+  }, []);
 
   const socketRef = useRef<Socket | null>(null);
   const lastSeqRef = useRef<number | null>(null);
@@ -16,7 +20,7 @@ export function useHomeState() {
       transports: ["websocket"],
       autoConnect: true,
       reconnection: true,
-      path: '/api/socket.io',
+      path: "/api/socket.io",
     });
 
     socketRef.current = socket;
@@ -32,6 +36,11 @@ export function useHomeState() {
     });
 
     socket.on("state:update", (msg: ServerMessage<HomeState>) => {
+      if (suppressRef.current) {
+        console.log(`Suppressed state update due to pending call.`, msg);
+        return;
+      }
+
       setState(msg.payload);
     });
 
@@ -40,5 +49,5 @@ export function useHomeState() {
     };
   }, []);
 
-  return { state, connected };
+  return { state, connected, setStateSuppressSocket };
 }

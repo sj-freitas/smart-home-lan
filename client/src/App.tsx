@@ -5,7 +5,8 @@ import { useHomeState } from "./sockets/use-home-state";
 
 function setFavicon(href: string | null) {
   if (!href) return;
-  let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+  let link: HTMLLinkElement | null =
+    document.querySelector("link[rel~='icon']");
   if (!link) {
     link = document.createElement("link");
     link.rel = "icon";
@@ -17,7 +18,7 @@ function setFavicon(href: string | null) {
 export default function App() {
   const [home, setHome] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
-  const { state } = useHomeState();
+  const { state, setStateSuppressSocket } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
   const iconUrlFromServer = state?.faviconUrl;
 
@@ -83,6 +84,10 @@ export default function App() {
 
       <RoomList
         rooms={home.rooms}
+        setStateSuppressSocket={setStateSuppressSocket}
+        setDeviceState={(roomId, deviceId, actionId) => {
+          applyDeviceState(roomId, deviceId, actionId);
+        }}
         onDeviceAction={async (roomId, deviceId, actionId) => {
           try {
             const res = await fetch(
