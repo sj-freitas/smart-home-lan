@@ -68,12 +68,6 @@ export class ActionsController {
     @Param("deviceId") deviceId: string,
     @Param("action") action: string,
   ) {
-    if (!this.userValidationService.isRequestAllowedBasedOnIP()) {
-      throw new UnauthorizedException(
-        "User is not allowed to perform actions.",
-      );
-    }
-
     const device = this.getIntegratedDeviceFromId(`${room}/${deviceId}`);
     if (!device) {
       return {

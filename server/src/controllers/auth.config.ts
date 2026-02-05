@@ -1,5 +1,5 @@
 export class AuthConfig {
   get setSecureCookie(): boolean {
-    return process.env.SET_SECURE_COOKIE === "true";
+    return process.env.AUTH_SET_SECURE_COOKIE === "true";
   }
 }
