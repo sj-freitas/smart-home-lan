@@ -5,7 +5,8 @@ import {
 } from "../integrations-service";
 import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { HueClient } from "./hue.client";
-import { LightState, LightStateZod } from "./hue.types";
+import { LightState, LightStateZod } from "./hue.types.zod";
+import { Memoizer } from "../../services/memoizer";
 
 function normalizeDeviceIds(deviceId: string | string[]): string[] {
   if (Array.isArray(deviceId)) {
@@ -71,22 +72,25 @@ function tryFindBestMatchingAction(
   return bestMatch.actionId;
 }
 
+const HUE_STATE_CACHE_KEY = Symbol("HUE_STATE_CACHE_KEY");
+
 export class HueCloudIntegrationService implements IntegrationService<HueCloudIntegrationDevice> {
   public name: "hue_cloud" = "hue_cloud";
 
   constructor(private readonly hueClient: HueClient) {}
 
-  async getDeviceTemperature(
-    deviceInfo: HueCloudIntegrationDevice,
-  ): Promise<number> {
+  async getDeviceTemperature(): Promise<number> {
     return NaN;
   }
 
   async getDeviceState(
+    memoizationContext: Memoizer,
     deviceInfo: HueCloudIntegrationDevice,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
-    const lights = await this.hueClient.getLights();
+    const lights = await memoizationContext.run(HUE_STATE_CACHE_KEY, async () =>
+      this.hueClient.getLights(),
+    );
     const ids = normalizeDeviceIds(deviceInfo.id);
     const [firstLight] = ids;
     const currDevice = lights[firstLight];
@@ -107,6 +111,7 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
   }
 
   async tryRunAction(
+    _: Memoizer,
     deviceInfo: HueCloudIntegrationDevice,
     deviceType: RoomDeviceTypes,
     action: DeviceAction,

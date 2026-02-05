@@ -1,3 +1,4 @@
+import { Memoizer } from "../../services/memoizer";
 import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { MelCloudHomeIntegrationDevice } from "../../config/integration.zod";
 import {
@@ -77,15 +78,23 @@ function tryFindBestMatchingAction(
   return bestMatch.actionId;
 }
 
+const MEL_CLOUD_HOME_CONTEXT_CACHE_KEY = Symbol(
+  "MEL_CLOUD_HOME_CONTEXT_CACHE_KEY",
+);
+
 export class MelCloudHomeIntegrationService implements IntegrationService<MelCloudHomeIntegrationDevice> {
   constructor(private readonly melCloudHomeClient: MelCloudHomeClient) {}
 
   public name: "mel_cloud_home" = "mel_cloud_home";
 
   async getDeviceTemperature(
+    memoizationContext: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
   ): Promise<number> {
-    const allDevices = await this.melCloudHomeClient.getContext();
+    const allDevices = await memoizationContext.run(
+      MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
+      async () => await this.melCloudHomeClient.getContext(),
+    );
     const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
     if (!foundDevice) {
       console.log(`Device not found: ${deviceInfo.deviceId}`);
@@ -95,10 +104,14 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
     return foundDevice.room.temperature;
   }
   async getDeviceState(
+    memoizationContext: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
-    const allDevices = await this.melCloudHomeClient.getContext();
+    const allDevices = await memoizationContext.run(
+      MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
+      async () => await this.melCloudHomeClient.getContext(),
+    );
     const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
 
     if (!foundDevice) {
@@ -122,6 +135,7 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
   }
 
   async tryRunAction(
+    _: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
     deviceType: RoomDeviceTypes,
     actionDescription: DeviceAction,

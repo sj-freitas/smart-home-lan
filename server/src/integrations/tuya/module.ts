@@ -21,9 +21,9 @@ const TuyaContextProvider = {
 
 const TuyaCloudIntegrationServiceProvider = {
   provide: TuyaCloudIntegrationService,
-  inject: [TuyaContext],
-  useFactory: async (tuyaContext: TuyaContext) => {
-    return new TuyaCloudIntegrationService(tuyaContext);
+  inject: [TuyaContext, ConfigService],
+  useFactory: async (tuyaContext: TuyaContext, config: ConfigService) => {
+    return new TuyaCloudIntegrationService(tuyaContext, config);
   },
 };
 

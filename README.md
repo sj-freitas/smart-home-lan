@@ -10,6 +10,7 @@ The reason was that Xiaomi removed LAN control of some of the devices.
 ## Backlog
 ### Client
 - [MEDIUM] Add tests (collapsible flow etc.)
+- [IMPORTANT] Add Auth to the client
 
 ### Backend
 - [EASY] Created PerRequest Transactions for DB interactions

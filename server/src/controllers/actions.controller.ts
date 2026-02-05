@@ -4,13 +4,14 @@ import {
   Param,
   Post,
   UnauthorizedException,
+  UseGuards,
 } from "@nestjs/common";
 import { DeviceAction } from "../config/home.zod";
 import {
   IntegrationServiceWithContext,
   IntegrationsService,
 } from "../integrations/integrations-service";
-import { UserValidationService } from "../services/user-validation.service";
+import { IpValidationService } from "../services/ip-validation.service";
 import {
   ApplicationState,
   ApplicationStateService,
@@ -18,6 +19,8 @@ import {
 import { ConfigService } from "../config/config-service";
 import { DeviceHelper } from "../helpers/device-helpers";
 import { HomeStateGateway } from "../sockets/home.state.gateway";
+import { AuthGuard } from "../services/auth-guard";
+import { Memoizer } from "../services/memoizer";
 
 interface IntegratedDevice<T> {
   integrationService: IntegrationServiceWithContext<T>;
@@ -32,7 +35,7 @@ export class ActionsController {
     configService: ConfigService,
     private readonly applicationStateService: ApplicationStateService,
     private readonly integrations: IntegrationsService,
-    private readonly userValidationService: UserValidationService,
+    private readonly userValidationService: IpValidationService,
     private readonly homeStateGateway: HomeStateGateway,
   ) {
     const config = configService.getConfig();
@@ -57,6 +60,7 @@ export class ActionsController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Post("/:room/:deviceId/:action")
   @HttpCode(200)
   public async performAction(
@@ -64,7 +68,7 @@ export class ActionsController {
     @Param("deviceId") deviceId: string,
     @Param("action") action: string,
   ) {
-    if (!this.userValidationService.isRequestAllowed()) {
+    if (!this.userValidationService.isRequestAllowedBasedOnIP()) {
       throw new UnauthorizedException(
         "User is not allowed to perform actions.",
       );
@@ -91,8 +95,10 @@ export class ActionsController {
       };
     }
 
-    const actionRunStatus =
-      await device.integrationService.tryRunAction(actionDescription);
+    const actionRunStatus = await device.integrationService.tryRunAction(
+      new Memoizer(),
+      actionDescription,
+    );
 
     // New state should include the action that was performed.
     const currentState = await this.applicationStateService.getHomeState();

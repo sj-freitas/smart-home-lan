@@ -1,4 +1,4 @@
-import { Module, Scope } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { ConfigModule } from "../../config/module";
 import { HueCloudIntegrationService } from "./integration.service";
 import { ConfigService } from "../../config/config-service";

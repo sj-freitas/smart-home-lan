@@ -1,6 +1,6 @@
 import { HueCloudIntegration } from "../../config/integration.zod";
 import { HueOAuth2PersistenceService } from "./oauth2/hue-oauth2.persistence.service";
-import { HueOauth2Tokens } from "./oauth2/hue-oauth2.types";
+import { HueOauth2Tokens } from "./oauth2/hue-oauth2.types.zod";
 import { isTokenActive } from "../../helpers/token-expiration-checker";
 import { HueOAuth2ClientService } from "./oauth2/hue-oauth2.client.service";
 import {
@@ -9,7 +9,7 @@ import {
   HueLightsStateResponses,
   HueLightsStateResponsesZod,
   LightState,
-} from "./hue.types";
+} from "./hue.types.zod";
 import { withRetries } from "../../helpers/retry";
 
 const fetchWithRetries = withRetries(fetch);
@@ -114,7 +114,7 @@ export class HueClient {
     const lights = await response.json();
     const parsedLights = HueLightsResponseZod.parse(lights);
 
-    return lights;
+    return parsedLights;
   }
 
   public async setLightState(

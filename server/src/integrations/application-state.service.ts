@@ -5,6 +5,7 @@ import {
   IntegrationsService,
 } from "./integrations-service";
 import { HomeConfig, RoomDeviceTypes } from "../config/home.zod";
+import { Memoizer } from "../services/memoizer";
 
 export interface ApplicationState {
   name: string;
@@ -57,6 +58,8 @@ export class ApplicationStateService {
   }
 
   public async getHomeState(): Promise<ApplicationState> {
+    const memoizationContext = new Memoizer();
+
     return {
       name: this.homeConfig.name,
       subTitle: this.homeConfig.subTitle,
@@ -70,7 +73,7 @@ export class ApplicationStateService {
           temperature:
             (await this.getIntegrationServiceForDevice(
               room.roomInfo.sourceDeviceId,
-            )?.getDeviceTemperature()) ?? NaN,
+            )?.getDeviceTemperature(memoizationContext)) ?? NaN,
           devices: await Promise.all(
             room.devices.map(async (device) => {
               const deviceInfo = this.getIntegrationServiceForDevice(
@@ -79,7 +82,7 @@ export class ApplicationStateService {
               const currentDeviceState =
                 deviceInfo === null
                   ? "off"
-                  : await deviceInfo.getDeviceState(Array.from(device.actions));
+                  : await deviceInfo.getDeviceState(memoizationContext, Array.from(device.actions));
 
               return {
                 id: device.id,

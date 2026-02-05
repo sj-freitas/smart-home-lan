@@ -1,5 +1,5 @@
 import { HueCloudIntegration } from "../../../config/integration.zod";
-import { HueOauth2Tokens, HueOauth2TokensZod } from "./hue-oauth2.types";
+import { HueOauth2Tokens, HueOauth2TokensZod } from "./hue-oauth2.types.zod";
 
 // There's two possible scenarios when bootstrapping the application regardless HUE tokens:
 // 1. RefreshToken is fine

@@ -8,8 +8,15 @@ import { ActionsController } from "./actions.controller";
 import { AuthController } from "./auth.controller";
 import { SandboxController } from "./sandbox.controller";
 import { StaticController } from "./static.controller";
+import { AuthConfig } from "./auth.config";
+
+const AuthConfigProvider = {
+  provide: AuthConfig,
+  useFactory: () => new AuthConfig(),
+};
 
 @Module({
+  providers: [AuthConfigProvider],
   imports: [ConfigModule, IntegrationsModule, ServicesModule, SocketsModule],
   controllers: [
     HomeController,

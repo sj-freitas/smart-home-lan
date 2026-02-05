@@ -1,4 +1,4 @@
-import { Injectable, Module, OnModuleInit, Scope } from "@nestjs/common";
+import { Module, Scope } from "@nestjs/common";
 import { MelCloudHomeIntegrationService } from "./integration.service";
 import { ConfigModule } from "../../config/module";
 import { ConfigService } from "../../config/config-service";

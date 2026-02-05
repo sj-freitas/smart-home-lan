@@ -44,13 +44,14 @@ function isAllowedIp(ip: string | null, allowedIps: string[]): boolean {
   return false;
 }
 
-export class UserValidationService {
+export class IpValidationService {
   constructor(
     private readonly request: RequestContext,
     private readonly config: HomeConfig,
   ) {}
 
-  public isRequestAllowed(): boolean {
+  public isRequestAllowedBasedOnIP(): boolean {
+    // return false; // Hackyyyy TODO remove
     // IP is in config it means that users need to be authenticated if they are in a different network.
     // IP doesn't exist it means that everyone is allowed.
     if (!this.config.ip) {

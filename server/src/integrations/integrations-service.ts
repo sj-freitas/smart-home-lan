@@ -1,3 +1,4 @@
+import { Memoizer } from "../services/memoizer";
 import { DeviceAction, RoomDeviceTypes } from "../config/home.zod";
 import {
   IntegrationDeviceTypes,
@@ -8,9 +9,17 @@ export type TryRunActionResult = true | string;
 
 export interface IntegrationService<T> {
   readonly name: IntegrationTypeNames;
-  getDeviceTemperature(deviceInfo: T): Promise<number>;
-  getDeviceState(deviceInfo: T, actionDescriptions: DeviceAction[]): Promise<string>;
+  getDeviceTemperature(
+    memoizationContext: Memoizer,
+    deviceInfo: T,
+  ): Promise<number>;
+  getDeviceState(
+    memoizationContext: Memoizer,
+    deviceInfo: T,
+    actionDescriptions: DeviceAction[],
+  ): Promise<string>;
   tryRunAction(
+    memoizationContext: Memoizer,
     deviceInfo: T,
     deviceType: RoomDeviceTypes,
     action: DeviceAction,
@@ -28,16 +37,24 @@ export class IntegrationServiceWithContext<T> {
     private readonly context: DeviceContext<T>,
   ) {}
 
-  async getDeviceTemperature() {
-    return this.service.getDeviceTemperature(this.context.info);
+  async getDeviceTemperature(memoizationContext: Memoizer) {
+    return this.service.getDeviceTemperature(
+      memoizationContext,
+      this.context.info,
+    );
   }
 
-  async getDeviceState(actions: DeviceAction[]) {
-    return this.service.getDeviceState(this.context.info, actions);
+  async getDeviceState(memoizationContext: Memoizer, actions: DeviceAction[]) {
+    return this.service.getDeviceState(
+      memoizationContext,
+      this.context.info,
+      actions,
+    );
   }
 
-  async tryRunAction(action: DeviceAction) {
+  async tryRunAction(memoizationContext: Memoizer, action: DeviceAction) {
     return this.service.tryRunAction(
+      memoizationContext,
       this.context.info,
       this.context.type,
       action,

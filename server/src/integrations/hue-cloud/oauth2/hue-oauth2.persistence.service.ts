@@ -1,8 +1,8 @@
 import {
   HueCloudAuthTokens,
   HueCloudAuthTokensZod,
-} from "./hue-oauth2.sql.types";
-import { HueOauth2Tokens } from "./hue-oauth2.types";
+} from "./hue-oauth2.sql.types.zod";
+import { HueOauth2Tokens } from "./hue-oauth2.types.zod";
 import { Pool } from "pg";
 
 type HueOauth2TokenStore = {

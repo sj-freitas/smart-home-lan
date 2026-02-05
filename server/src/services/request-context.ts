@@ -30,4 +30,12 @@ export class RequestContext {
   get clientIp(): string | null {
     return getClientIp(this.req);
   }
+
+  get authorizationHeader(): string | undefined {
+    return this.req.headers["authorization"] as string | undefined;
+  }
+
+  get sessionCookie(): string | undefined {
+    return this.req.cookies?.session;
+  }
 }

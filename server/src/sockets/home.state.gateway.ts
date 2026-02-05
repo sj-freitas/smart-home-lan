@@ -14,7 +14,9 @@ import {
   ApplicationStateService,
 } from "../integrations/application-state.service";
 
-const POLLING_INTERVAL = 5_000;
+// Unfortunately there are many restrictions on integrations that have polling limits.
+// This is the case with HUE (50k per day) and even worse with Tuya (30k per month)
+const POLLING_INTERVAL = 120_000;
 
 @WebSocketGateway({
   namespace: "/api/state",
@@ -26,7 +28,7 @@ export class HomeStateGateway
 {
   private server: Server;
   // Effectively state is an in-memory cache as the updates always trigger a change in it.
-  // The state gets updated every POLLING_INTERVAL (20s) to sync it. This would not work
+  // The state gets updated every POLLING_INTERVAL (120s) to sync it. This would not work
   // so well if we had multiple backend instances but that isn't the case.
   private state: BehaviorSubject<ApplicationState>;
   private activeConnections = 0;
