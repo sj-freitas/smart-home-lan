@@ -38,7 +38,7 @@ export class AuthGoogleController {
       clientSecret,
       authUrl,
       clientBaseUrl,
-      apiBaseUrl,
+      cookieDomain: apiBaseUrl,
     } = this.config;
     const params = new URLSearchParams({
       code,
