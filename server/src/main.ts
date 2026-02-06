@@ -36,13 +36,6 @@ async function bootstrap() {
       "X-Requested-With",
     ],
   });
-
-  if (process.env.NODE_ENV !== "production") {
-    app.enableCors({
-      origin: process.env.AUTH_CLIENT_BASE,
-      credentials: true,
-    });
-  }
   app.use(cookieParser());
   app.setGlobalPrefix("api");
 
