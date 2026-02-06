@@ -6,10 +6,15 @@ const DEFAULT_PORT = "3001";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const authClientBase = process.env.AUTH_CLIENT_BASE;
   const allowedOrigins = [
-    process.env.AUTH_CLIENT_BASE,
+    authClientBase,
+    authClientBase.indexOf("www.") >= 0
+      ? authClientBase.replace("www.", "")
+      : "",
+    ,
     process.env.APP_DOMAIN_URL,
-  ];
+  ].filter(Boolean);
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -19,7 +24,7 @@ async function bootstrap() {
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      return callback(new Error("CORS not allowed"), false);
+      return callback(null, false);
     },
     credentials: true,
   });
