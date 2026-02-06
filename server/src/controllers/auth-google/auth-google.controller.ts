@@ -32,8 +32,14 @@ export class AuthGoogleController {
       throw new BadRequestException("Missing code");
     }
 
-    const { clientId, redirectUri, clientSecret, authUrl, clientBaseUrl } =
-      this.config;
+    const {
+      clientId,
+      redirectUri,
+      clientSecret,
+      authUrl,
+      clientBaseUrl,
+      apiBaseUrl,
+    } = this.config;
     const params = new URLSearchParams({
       code,
       client_id: clientId,
@@ -83,8 +89,10 @@ export class AuthGoogleController {
 
     response.cookie("session", session.sessionId, {
       httpOnly: true,
-      sameSite: "lax",
       secure: this.authConfig.setSecureCookie,
+      sameSite: "none",
+      domain: apiBaseUrl,
+      path: "/",
     });
 
     return response.redirect(clientBaseUrl);

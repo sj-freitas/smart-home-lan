@@ -46,4 +46,13 @@ export class GoogleAuthConfig {
 
     return clientBaseUrl;
   }
+
+  get apiBaseUrl(): string {
+    const apiBaseUrl = process.env.APP_DOMAIN_URL;
+    if (!apiBaseUrl) {
+      throw new Error("APP_DOMAIN_URL needs to be set in .env file!");
+    }
+
+    return apiBaseUrl;
+  }
 }
