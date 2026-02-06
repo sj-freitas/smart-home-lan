@@ -1,12 +1,6 @@
 {
   "integrations": [
     {
-      "name": "tuya_cloud",
-      "baseUrl": "https://openapi.tuyaeu.com",
-      "accessKey": "{{TUYA_CLOUD_ACCESS_KEY}}",
-      "secretKey": "{{TUYA_CLOUD_SECRET_KEY}}"
-    },
-    {
       "name": "mel_cloud_home",
       "siteUrl": "https://melcloudhome.com",
       "apiUrl": "https://melcloudhome.com/api",
@@ -146,8 +140,8 @@
             "icon": "music_note",
             "type": "smart_switch",
             "integration": {
-              "name": "tuya_cloud",
-              "deviceId": "bf78bae7fcbea83154ec1o"
+              "name": "hue_cloud",
+              "id": "13"
             },
             "actions": [
               {
@@ -166,8 +160,8 @@
             "icon": "television",
             "type": "smart_switch",
             "integration": {
-              "name": "tuya_cloud",
-              "deviceId": "bfd8dda094e44fd190blga"
+              "name": "hue_cloud",
+              "id": "14"
             },
             "actions": [
               {
@@ -198,6 +192,55 @@
             "integration": {
               "name": "hue_cloud",
               "id": "3"
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "on": false
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
+                }
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
+                }
+              }
+            ]
+          },
+          {
+            "id": "table_light",
+            "name": "Table Light",
+            "icon": "ceiling_light",
+            "type": "smart_light",
+            "integration": {
+              "name": "hue_cloud",
+              "id": "12"
             },
             "actions": [
               {
@@ -520,8 +563,8 @@
             "icon": "desk_lamp",
             "type": "smart_switch",
             "integration": {
-              "name": "tuya_cloud",
-              "deviceId": "bf41724130db6241cdqsyo"
+              "name": "hue_cloud",
+              "id": "11"
             },
             "actions": [
               {

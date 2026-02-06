@@ -1,17 +1,9 @@
-import {
-  Controller,
-  HttpCode,
-  Param,
-  Post,
-  UnauthorizedException,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, HttpCode, Param, Post, UseGuards } from "@nestjs/common";
 import { DeviceAction } from "../config/home.zod";
 import {
   IntegrationServiceWithContext,
   IntegrationsService,
 } from "../integrations/integrations-service";
-import { IpValidationService } from "../services/ip-validation.service";
 import {
   ApplicationState,
   ApplicationStateService,
@@ -35,7 +27,6 @@ export class ActionsController {
     configService: ConfigService,
     private readonly applicationStateService: ApplicationStateService,
     private readonly integrations: IntegrationsService,
-    private readonly userValidationService: IpValidationService,
     private readonly homeStateGateway: HomeStateGateway,
   ) {
     const config = configService.getConfig();

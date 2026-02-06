@@ -20,9 +20,7 @@ export class HueClient {
    * This will generate a code and the user needs to hit the /api/auth/oauth2-hue endpoint with that code.
    * The code will be automatically exchanged for tokens.
    */
-  private readonly HUE_OAUTH2_URL =
-    `${this.hueCloudConfig.apiUrl}/oauth2/auth?client_id=${this.hueCloudConfig.clientId}&` +
-    `response_type=code&scope=remote_control&redirect_uri=${this.hueCloudConfig.redirectUri}`;
+  private readonly HUE_OAUTH2_URL: string;
 
   /**
    * In Flight to avoid multiple promises resolving the same thing.
@@ -35,7 +33,11 @@ export class HueClient {
     private readonly hueCloudConfig: HueCloudIntegration,
     private readonly hueOauth2ClientService: HueOAuth2ClientService,
     private readonly hueOauth2PersistenceService: HueOAuth2PersistenceService,
-  ) {}
+  ) {
+    this.HUE_OAUTH2_URL =
+      `${this.hueCloudConfig.apiUrl}/oauth2/auth?client_id=${this.hueCloudConfig.clientId}&` +
+      `response_type=code&scope=remote_control&redirect_uri=${this.hueCloudConfig.redirectUri}`;
+  }
 
   private async getOrRefreshAccessTokenIfNeeded(): Promise<HueOauth2Tokens> {
     const currentTokens =

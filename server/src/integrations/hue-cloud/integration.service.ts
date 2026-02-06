@@ -86,28 +86,38 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: HueCloudIntegrationDevice,
+    deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
-    const lights = await memoizationContext.run(HUE_STATE_CACHE_KEY, async () =>
-      this.hueClient.getLights(),
+    const hueDevices = await memoizationContext.run(
+      HUE_STATE_CACHE_KEY,
+      async () => this.hueClient.getLights(),
     );
     const ids = normalizeDeviceIds(deviceInfo.id);
-    const [firstLight] = ids;
-    const currDevice = lights[firstLight];
+    const [firstDevice] = ids;
+    const currDevice = hueDevices[firstDevice];
 
     if (!currDevice) {
       return "off";
     }
 
-    const actionParametersMap = new Map(
-      actionDescriptions.map(
-        (t) =>
-          [t.id, LightStateZod.parse(t.parameters)] as [string, LightState],
-      ),
-    );
+    if (deviceType === "smart_light") {
+      const actionParametersMap = new Map(
+        actionDescriptions.map(
+          (t) =>
+            [t.id, LightStateZod.parse(t.parameters)] as [string, LightState],
+        ),
+      );
 
-    const currentDeviceState = currDevice.state;
-    return tryFindBestMatchingAction(currentDeviceState, actionParametersMap);
+      const currentDeviceState = currDevice.state;
+      return tryFindBestMatchingAction(currentDeviceState, actionParametersMap);
+    }
+
+    if (deviceType === "smart_switch") {
+      return currDevice.state.on ? "on" : "off";
+    }
+
+    return "off";
   }
 
   async tryRunAction(
@@ -116,26 +126,47 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     deviceType: RoomDeviceTypes,
     action: DeviceAction,
   ): Promise<TryRunActionResult> {
-    if (deviceType !== "smart_light") {
-      return `Failed, unsupported device type for Hue`;
+    const deviceIds = normalizeDeviceIds(deviceInfo.id);
+    if (deviceType === "smart_light") {
+      const state = LightStateZod.parse(action.parameters);
+
+      try {
+        const results = await Promise.all(
+          deviceIds.map(async (currId) =>
+            this.hueClient.setLightState(currId, state),
+          ),
+        );
+        const allValid = results
+          .flatMap((t) => t)
+          .every((t) => Boolean(t.success));
+
+        return allValid ? true : `Failed to perform some of the actions`;
+      } catch (error: any) {
+        return `Failed to set action ${action.id} on device ${deviceInfo.id}: ${error.message}`;
+      }
     }
 
-    const state = LightStateZod.parse(action.parameters);
+    if (deviceType === "smart_switch") {
+      const newState = {
+        on: action.id === "on",
+      };
 
-    try {
-      const deviceIds = normalizeDeviceIds(deviceInfo.id);
-      const results = await Promise.all(
-        deviceIds.map(async (currId) =>
-          this.hueClient.setLightState(currId, state),
-        ),
-      );
-      const allValid = results
-        .flatMap((t) => t)
-        .every((t) => Boolean(t.success));
+      try {
+        const results = await Promise.all(
+          deviceIds.map(async (currId) =>
+            this.hueClient.setLightState(currId, newState),
+          ),
+        );
+        const allValid = results
+          .flatMap((t) => t)
+          .every((t) => Boolean(t.success));
 
-      return allValid ? true : `Failed to perform some of the actions`;
-    } catch (error: any) {
-      return `Failed to set action ${action.id} on device ${deviceInfo.id}: ${error.message}`;
+        return allValid ? true : `Failed to perform some of the actions`;
+      } catch (error: any) {
+        return `Failed to set action ${action.id} on device ${deviceInfo.id}: ${error.message}`;
+      }
     }
+
+    return `Failed, unsupported device type for Hue`;
   }
 }

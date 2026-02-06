@@ -12,7 +12,7 @@ const TuyaContextProvider = {
       .getConfig()
       .integrations.find((t) => t.name === "tuya_cloud");
     if (!tuyaCloudConfig) {
-      throw new Error("MelCloudHome integration config not found");
+      throw new Error("TuyaCloudConfig integration config not found");
     }
 
     return new TuyaContext(tuyaCloudConfig as TuyaContextOptions);

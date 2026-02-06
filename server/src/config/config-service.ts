@@ -26,7 +26,7 @@ export class ConfigService {
     return this.config;
   }
 
-  public static async create(): Promise<ConfigService> {
+  public static create(): ConfigService {
     if (existingInstance) {
       return existingInstance;
     }
@@ -55,7 +55,7 @@ export class ConfigService {
     }, raw);
 
     const config = JSON.parse(templatedRaw);
-    const parsed = await BaseConfigZod.safeParseAsync(config);
+    const parsed = BaseConfigZod.safeParse(config);
 
     if (!parsed.success) {
       console.error("Config parsing failed:", parsed.error.message);

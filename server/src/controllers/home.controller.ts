@@ -1,6 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
 import { ApplicationStateService } from "../integrations/application-state.service";
-import { AuthorizationService } from "../services/auth/authorization.service";
 
 @Controller("home")
 export class HomeController {

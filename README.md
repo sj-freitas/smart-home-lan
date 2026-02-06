@@ -10,16 +10,14 @@ The reason was that Xiaomi removed LAN control of some of the devices.
 ## Backlog
 ### Client
 - [MEDIUM] Add tests (collapsible flow etc.)
-- [IMPORTANT] Add Auth to the client
 
 ### Backend
-- [EASY] Created PerRequest Transactions for DB interactions
-- [IMPORTANT] Add API Key support for the requests (This allows Siri requests to bypass login and JWT)
-- [IMPORTANT] Login for users not in the same IP + email access management
-
-- [MEDIUM] Consider a scenario where the state being broadcast considers if the user is logged-in.
 - [MEDIUM] (Ongoing) Write documentation on the README.md files. Hard to keep progress but ongoing.
 - [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
-- [MEDIUM] Config animations for groups (not super relevant but a funny thing to do)
-- [Not Important] Config runtime load (create strong auth URL on POST api/config) change config's scope to REQUEST making it much more dynamic! Read is already dynamic.
+- [MEDIUM] Change humidity and temperature sensors to not use Xiaomi. Looking for options. Current temperature via AC is OK. Humidity isn't.
+- [MEDIUM] Bathroom lights maybe (?)
+- [MEDIUM] Custom Scripts for devices via EVAL (plugin system) for example runScript: {PATH_TO_SCRIPT} -> Runs that code with the device context. Allows the script to do several things like animations. Need to think of the API design for this. Actions can also trigger scripts.
+- [LOW] Back-office page, manage devices and access
 
+### Misc
+- [IMPORTANT] Siri Shortcut factory via the /api/home request.

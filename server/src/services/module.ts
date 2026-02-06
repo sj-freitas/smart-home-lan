@@ -12,7 +12,9 @@ import { EmailsPersistenceService } from "./auth/emails.persistence.service";
 import { GoogleAuthService } from "./auth/google-auth.service";
 import { AuthorizationService } from "./auth/authorization.service";
 import { AuthorizationHeaderVerificationService } from "./auth/authorization-header-verification.service";
-import { SessionCookieService } from "./auth/session-cookie.service";
+import { GoogleSessionService } from "./auth/google-session.service";
+import { SessionsPersistenceService } from "./auth/sessions.persistence.service";
+import { GoogleAuthConfig } from "./auth/google-auth";
 
 const HOME_CONFIG = "HOME_CONFIG";
 
@@ -34,47 +36,49 @@ export const PgPoolProvider = {
   },
 };
 
+const GoogleAuthConfigProvider = {
+  provide: GoogleAuthConfig,
+  useFactory: () => new GoogleAuthConfig(),
+};
+
 // Ideally the Auth provider can be set in the config but as that's a bit too complex
 // and out of the scope of this project we keep the API strongly tied with Google Auth -
 // Everyone has a Google Account and custom providers wouldn't justify the hassle.
 const OAuth2ClientProvider = {
   provide: OAuth2Client,
-  useFactory: () => {
-    const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      throw new Error(
-        `Missing Env Var AUTH_GOOGLE_CLIENT_ID please make sure to setup the App on Google Cloud Platform with Auth.`,
-      );
-    }
-    return new OAuth2Client(clientId);
+  inject: [GoogleAuthConfig],
+  useFactory: (googleAuthConfig: GoogleAuthConfig) => {
+    return new OAuth2Client(googleAuthConfig.clientId);
   },
 };
 
-const SessionCookieServiceProvider = {
-  provide: SessionCookieService,
-  inject: [RequestContext],
-  useFactory: (request: RequestContext) => {
-    const sessionSecret = process.env.AUTH_SESSION_SECRET;
-    if (!sessionSecret) {
-      throw new Error(
-        `Missing Env Var AUTH_SESSION_SECRET please generate a secret for the app.`,
-      );
-    }
-    return new SessionCookieService(sessionSecret, request);
+const SessionsPersistenceServiceProvider = {
+  provide: SessionsPersistenceService,
+  inject: [Pool],
+  useFactory: (pool: Pool) => {
+    return new SessionsPersistenceService(pool);
+  },
+};
+
+const GoogleSessionServiceProvider = {
+  provide: GoogleSessionService,
+  inject: [GoogleAuthService, SessionsPersistenceService],
+  useFactory: (
+    googleAuthService: GoogleAuthService,
+    persistenceService: SessionsPersistenceService,
+  ) => {
+    return new GoogleSessionService(googleAuthService, persistenceService);
   },
 };
 
 const GoogleAuthServiceProvider = {
   provide: GoogleAuthService,
-  inject: [OAuth2Client],
-  useFactory: (oAuth2Client: OAuth2Client) => {
-    const clientId = process.env.AUTH_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      throw new Error(
-        `Missing Env Var AUTH_GOOGLE_CLIENT_ID please make sure to setup the App on Google Cloud Platform with Auth.`,
-      );
-    }
-    return new GoogleAuthService(oAuth2Client, clientId);
+  inject: [OAuth2Client, GoogleAuthConfig],
+  useFactory: (
+    oAuth2Client: OAuth2Client,
+    googleAuthConfig: GoogleAuthConfig,
+  ) => {
+    return new GoogleAuthService(oAuth2Client, googleAuthConfig);
   },
 };
 
@@ -93,26 +97,26 @@ const EmailsPersistenceServiceProvider = {
 const AuthorizationServiceProvider = {
   provide: AuthorizationService,
   inject: [
+    RequestContext,
     IpValidationService,
     AuthorizationHeaderVerificationService,
-    SessionCookieService,
-    GoogleAuthService,
+    GoogleSessionService,
     ApiKeysPersistenceService,
     EmailsPersistenceService,
   ],
   useFactory: (
+    requestContext: RequestContext,
     ipValidationService: IpValidationService,
     authorizationHeaderVerificationService: AuthorizationHeaderVerificationService,
-    sessionCookieService: SessionCookieService,
-    googleAuthService: GoogleAuthService,
+    googleSessionService: GoogleSessionService,
     apiKeysPersistenceService: ApiKeysPersistenceService,
     emailsPersistenceService: EmailsPersistenceService,
   ) =>
     new AuthorizationService(
+      requestContext,
       ipValidationService,
       authorizationHeaderVerificationService,
-      sessionCookieService,
-      googleAuthService,
+      googleSessionService,
       apiKeysPersistenceService,
       emailsPersistenceService,
     ),
@@ -154,10 +158,12 @@ const IPValidationServiceProvider = {
   imports: [ConfigModule],
   providers: [
     OAuth2ClientProvider,
+    GoogleAuthConfigProvider,
     GoogleAuthServiceProvider,
-    SessionCookieServiceProvider,
+    GoogleSessionServiceProvider,
     IPValidationServiceProvider,
     ApiKeysPersistenceServiceProvider,
+    SessionsPersistenceServiceProvider,
     AuthorizationHeaderVerificationServiceProvider,
     EmailsPersistenceServiceProvider,
     AuthorizationServiceProvider,
@@ -168,9 +174,11 @@ const IPValidationServiceProvider = {
   exports: [
     OAuth2ClientProvider,
     GoogleAuthServiceProvider,
-    SessionCookieServiceProvider,
+    GoogleAuthConfigProvider,
+    GoogleSessionServiceProvider,
     IPValidationServiceProvider,
     ApiKeysPersistenceServiceProvider,
+    SessionsPersistenceServiceProvider,
     AuthorizationHeaderVerificationServiceProvider,
     EmailsPersistenceServiceProvider,
     AuthorizationServiceProvider,

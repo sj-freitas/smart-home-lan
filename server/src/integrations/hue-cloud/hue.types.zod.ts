@@ -80,8 +80,61 @@ export const LightObjectZod = z.object({
   productid: z.string().readonly(),
 });
 
+export const SmartPlugStateZod = z.object({
+  on: z.boolean().readonly(),
+  alert: z.string().readonly(),
+  mode: z.string().readonly(),
+  reachable: z.boolean().readonly(),
+});
+
+export const SmartPlugSwUpdateZod = z.object({
+  state: z.string().readonly(),
+  lastinstall: z.string().readonly(),
+});
+
+export const SmartPlugCapabilitiesControlZod = z.object({});
+
+export const SmartPlugCapabilitiesStreamingZod = z.object({
+  renderer: z.boolean().readonly(),
+  proxy: z.boolean().readonly(),
+});
+
+export const SmartPlugCapabilitiesZod = z.object({
+  certified: z.boolean().readonly(),
+  control: SmartPlugCapabilitiesControlZod.readonly(),
+  streaming: SmartPlugCapabilitiesStreamingZod.readonly(),
+});
+
+export const SmartPlugConfigStartupZod = z.object({
+  mode: z.string().readonly(),
+  configured: z.boolean().readonly(),
+});
+
+export const SmartPlugConfigZod = z.object({
+  archetype: z.string().readonly(),
+  function: z.string().readonly(),
+  direction: z.string().readonly(),
+  startup: SmartPlugConfigStartupZod.readonly(),
+});
+
+export const SmartPlugObjectZod = z.object({
+  state: SmartPlugStateZod.readonly(),
+  swupdate: SmartPlugSwUpdateZod.readonly(),
+  type: z.string().readonly(),
+  name: z.string().readonly(),
+  modelid: z.string().readonly(),
+  manufacturername: z.string().readonly(),
+  productname: z.string().readonly(),
+  capabilities: SmartPlugCapabilitiesZod.readonly(),
+  config: SmartPlugConfigZod.readonly(),
+  uniqueid: z.string().readonly(),
+  swversion: z.string().readonly(),
+  swconfigid: z.string().readonly(),
+  productid: z.string().readonly(),
+});
+
 export const HueLightsResponseZod = z
-  .record(z.string(), LightObjectZod)
+  .record(z.string(), z.union([LightObjectZod, SmartPlugObjectZod]))
   .readonly();
 
 export const HueLightStateResponseZod = z.object({
@@ -96,4 +149,6 @@ export type Capabilities = z.infer<typeof CapabilitiesZod>;
 export type Config = z.infer<typeof ConfigZod>;
 export type LightObject = z.infer<typeof LightObjectZod>;
 export type HueLightsResponse = z.infer<typeof HueLightsResponseZod>;
-export type HueLightsStateResponses = z.infer<typeof HueLightsStateResponsesZod>;
+export type HueLightsStateResponses = z.infer<
+  typeof HueLightsStateResponsesZod
+>;

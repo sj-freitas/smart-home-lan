@@ -90,7 +90,12 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
   async getDeviceTemperature(
     memoizationContext: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
+    deviceType: RoomDeviceTypes,
   ): Promise<number> {
+    if (deviceType !== "air_conditioner") {
+      return NaN;
+    }
+
     const allDevices = await memoizationContext.run(
       MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
       async () => await this.melCloudHomeClient.getContext(),
@@ -106,8 +111,12 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
+    deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
   ): Promise<string> {
+    if (deviceType !== "air_conditioner") {
+      return "off";
+    }
     const allDevices = await memoizationContext.run(
       MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
       async () => await this.melCloudHomeClient.getContext(),

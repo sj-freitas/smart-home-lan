@@ -7,16 +7,16 @@ import { EmailsPersistenceService } from "../services/auth/emails.persistence.se
 @Controller("sandbox")
 export class SandboxController {
   constructor(
-    // private readonly hueClient: HueClient,
+    private readonly hueClient: HueClient,
     private readonly apiKeysPersistenceService: ApiKeysPersistenceService,
     private readonly emailsPersistenceService: EmailsPersistenceService,
   ) {}
 
-  // @Get("/hue-lights")
-  // public async getHueLightsState() {
-  //   // Very useful to get the HUE light configs to create presets.
-  //   return await this.hueClient.getLights();
-  // }
+  @Get("/hue-lights")
+  public async getHueLightsState() {
+    // Very useful to get the HUE light configs to create presets.
+    return await this.hueClient.getLights();
+  }
 
   @Get("/health")
   public async health() {

@@ -57,7 +57,12 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: TuyaIntegrationDevice,
+    deviceType: RoomDeviceTypes,
   ): Promise<string> {
+    if (deviceType !== "smart_switch") {
+      return "off";
+    }
+
     try {
       const deviceIds = this.allTuyaDeviceIds.map((t) => t.deviceId);
       const unparsedBatchedResponse = await memoizationContext.run(
@@ -137,5 +142,6 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
       console.error(error);
       return "Tuya Cloud connection failed.";
     }
+    return "Tuya Cloud connection failed.";
   }
 }

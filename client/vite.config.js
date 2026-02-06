@@ -10,6 +10,6 @@ export default defineConfig({
       "palais-freitas.xyz",
       "website-4gnq.onrender.com",
       "www.website-4gnq.onrender.com",
-    ],
+    ]
   },
 });

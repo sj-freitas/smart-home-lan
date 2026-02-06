@@ -1,21 +1,20 @@
-import { TokenPayload } from "google-auth-library";
 import { hashApiKey } from "../../helpers/crypto.helper";
 import { IpValidationService } from "../ip-validation.service";
 import { ApiKeysPersistenceService } from "./api-keys.persistence.service";
-import { GoogleAuthService } from "./google-auth.service";
 import { AuthorizationHeaderVerificationService } from "./authorization-header-verification.service";
 import { EmailsPersistenceService } from "./emails.persistence.service";
-import { SessionCookieService } from "./session-cookie.service";
+import { GoogleSessionService } from "./google-session.service";
+import { RequestContext } from "../request-context";
 
 export function isJwt(token: string): boolean {
-  return token.indexOf('.') >= 0;
+  return token.indexOf(".") >= 0;
 }
 
 // These map to the following status codes:
 export type AuthorizationResult =
   | "Authorized" // 200
   | "NeedsLogIn" // 401 Needs either a login or an API key (Authorization Header most likely not found)
-  | "Unauthorized"; // 403
+  | "Forbidden"; // 403
 
 /**
  * Service that can inform whichever context it's inserted in regarding of the current request
@@ -29,14 +28,14 @@ export type AuthorizationResult =
  *  3.2 API Key -> If it exists in the system it is authorized if not expired.
  *  3.3 JWT -> If it is valid using GoogleAuth
  *    3.3.1 -> Check if the email is in the DB hasn't expired access
- * 4. If all flows fail the user is Unauthorized
+ * 4. If all flows fail the user is Forbidden
  */
 export class AuthorizationService {
   constructor(
+    private readonly requestContext: RequestContext,
     private readonly ipValidationService: IpValidationService,
     private readonly authorizationHeaderVerificationService: AuthorizationHeaderVerificationService,
-    private readonly sessionCookieService: SessionCookieService,
-    private readonly googleAuthService: GoogleAuthService,
+    private readonly sessionService: GoogleSessionService,
     private readonly apiKeysPersistenceService: ApiKeysPersistenceService,
     private readonly emailsPersistenceService: EmailsPersistenceService,
   ) {}
@@ -47,20 +46,27 @@ export class AuthorizationService {
       await this.apiKeysPersistenceService.validateApiKey(hashedApiKey);
 
     if (!matchingKey) {
-      return "Unauthorized";
+      return "Forbidden";
     }
 
     console.log(`API Key access from ${matchingKey.owner} detected.`);
     return "Authorized";
   }
 
-  private async isValidJwt(jwt: string): Promise<TokenPayload> {
-    const googleToken = await this.googleAuthService.verifyIdToken(jwt);
-    if (!googleToken) {
-      return null;
+  private async validateSession(
+    sessionId: string,
+  ): Promise<AuthorizationResult> {
+    const session = await this.sessionService.validateSession(sessionId);
+    if (session === null) {
+      // Session doesn't exist or has expired and there's no refresh token.
+      return "NeedsLogIn";
     }
 
-    return googleToken;
+    const { email } = session;
+    // Validate the email
+    const isEmailValid =
+      await this.emailsPersistenceService.validateEmail(email);
+    return isEmailValid ? "Authorized" : "Forbidden";
   }
 
   public async isUserAuthorized(): Promise<AuthorizationResult> {
@@ -69,10 +75,11 @@ export class AuthorizationService {
       return "Authorized";
     }
 
-    // Check the cookie to bypass this flow
-    const isSessionCookieValid = this.sessionCookieService.verifySessionToken();
-    if (isSessionCookieValid) {
-      return "Authorized";
+    // Check the session to bypass this flow
+    // We aren't doing JWT anymore.
+    const sessionCookie = this.requestContext.sessionCookie;
+    if (sessionCookie) {
+      return await this.validateSession(this.requestContext.sessionCookie);
     }
 
     // No session token and no bearer -> login requested.
@@ -82,24 +89,6 @@ export class AuthorizationService {
       return "NeedsLogIn";
     }
 
-    if (!isJwt(token)) {
-      // Verify the API key
-      return await this.isValidApiKey(token);
-    }
-
-    // Verify the JWT
-    const parsedToken = await this.isValidJwt(token);
-    if (!parsedToken || !parsedToken.email) {
-      return "Unauthorized";
-    }
-    const isEmailValid = await this.emailsPersistenceService.validateEmail(
-      parsedToken.email,
-    );
-    if (!isEmailValid) {
-      return "Unauthorized";
-    }
-
-    console.log(`Email access from ${parsedToken.email} detected.`);
-    return "Authorized";
+    return await this.isValidApiKey(token);
   }
 }

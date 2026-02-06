@@ -4,11 +4,13 @@ import RoomCard from "./RoomCard";
 
 export default function RoomList({
   rooms,
+  readonly,
   setStateSuppressSocket,
   onDeviceAction,
   setDeviceState,
 }: {
   rooms: Room[];
+  readonly: boolean;
   setStateSuppressSocket: (value: boolean) => void,
   onDeviceAction: (
     roomId: string,
@@ -23,6 +25,7 @@ export default function RoomList({
         <RoomCard
           key={r.id}
           room={r}
+          readonly={readonly}
           setStateSuppressSocket={setStateSuppressSocket}
           onDeviceAction={onDeviceAction}
           setDeviceState={setDeviceState}

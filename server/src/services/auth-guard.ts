@@ -1,6 +1,5 @@
 import {
   CanActivate,
-  ExecutionContext,
   ForbiddenException,
   Injectable,
   UnauthorizedException,
@@ -9,9 +8,7 @@ import { AuthorizationService } from "./auth/authorization.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly authorizationService: AuthorizationService,
-  ) {}
+  constructor(private readonly authorizationService: AuthorizationService) {}
 
   async canActivate(): Promise<boolean> {
     const result = await this.authorizationService.isUserAuthorized();

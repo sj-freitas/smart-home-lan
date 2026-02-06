@@ -50,8 +50,13 @@ export class IpValidationService {
     private readonly config: HomeConfig,
   ) {}
 
+  /**
+   * Validates if a user is able to access the API based only on their IP.
+   * If not, returns false.
+   * 
+   * @returns {Boolean} whether a user is able to access the API based only on their IP.
+   */
   public isRequestAllowedBasedOnIP(): boolean {
-    // return false; // Hackyyyy TODO remove
     // IP is in config it means that users need to be authenticated if they are in a different network.
     // IP doesn't exist it means that everyone is allowed.
     if (!this.config.ip) {

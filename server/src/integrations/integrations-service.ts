@@ -12,10 +12,12 @@ export interface IntegrationService<T> {
   getDeviceTemperature(
     memoizationContext: Memoizer,
     deviceInfo: T,
+    deviceType: RoomDeviceTypes,
   ): Promise<number>;
   getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: T,
+    deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
   ): Promise<string>;
   tryRunAction(
@@ -41,6 +43,7 @@ export class IntegrationServiceWithContext<T> {
     return this.service.getDeviceTemperature(
       memoizationContext,
       this.context.info,
+      this.context.type,
     );
   }
 
@@ -48,6 +51,7 @@ export class IntegrationServiceWithContext<T> {
     return this.service.getDeviceState(
       memoizationContext,
       this.context.info,
+      this.context.type,
       actions,
     );
   }

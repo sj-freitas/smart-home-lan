@@ -5,13 +5,15 @@ import { getIconFromId } from "../icons/icon-mapper";
 
 export default function RoomCard({
   room,
+  readonly,
   setStateSuppressSocket,
   onDeviceAction,
   setDeviceState,
   collapsedByDefault = false,
 }: {
   room: Room;
-  setStateSuppressSocket: (value: boolean) => void,
+  readonly: boolean;
+  setStateSuppressSocket: (value: boolean) => void;
   onDeviceAction: (
     roomId: string,
     deviceId: string,
@@ -184,7 +186,7 @@ export default function RoomCard({
                       <button
                         key={a.id}
                         className={"btn " + (active ? "" : "btn-ghost")}
-                        disabled={loadingDevice === device.id}
+                        disabled={readonly || loadingDevice === device.id}
                         onClick={() => runAction(device, a.id)}
                       >
                         {a.name}

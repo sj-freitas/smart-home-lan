@@ -21,6 +21,8 @@ function getClientIp(req: Request): string | null {
 }
 
 export class RequestContext {
+  public static readonly SESSION_COOKIE_NAME = "session";
+
   constructor(private readonly req: Request) {}
 
   get requestId(): string | undefined {
@@ -36,6 +38,6 @@ export class RequestContext {
   }
 
   get sessionCookie(): string | undefined {
-    return this.req.cookies?.session;
+    return this.req.cookies?.[RequestContext.SESSION_COOKIE_NAME];
   }
 }

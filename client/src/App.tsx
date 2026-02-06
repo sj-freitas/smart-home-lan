@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Home } from "./types";
 import RoomList from "./components/RoomList";
 import { useHomeState } from "./sockets/use-home-state";
+import { useAuthentication } from "./auth/use-auth";
 
 function setFavicon(href: string | null) {
   if (!href) return;
@@ -21,6 +22,7 @@ export default function App() {
   const { state, setStateSuppressSocket } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
   const iconUrlFromServer = state?.faviconUrl;
+  const [appMode, shouldRenderLogoutButton, logout] = useAuthentication();
 
   useEffect(() => {
     if (!iconUrlFromServer) {
@@ -34,7 +36,9 @@ export default function App() {
   }, [state]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/home`)
+    fetch(`${API_BASE}/home`, {
+      credentials: "include",
+    })
       .then((r) => r.json())
       .then((data) => setHome(data))
       .catch((err) => {
@@ -84,6 +88,7 @@ export default function App() {
 
       <RoomList
         rooms={home.rooms}
+        readonly={appMode === "Readonly"}
         setStateSuppressSocket={setStateSuppressSocket}
         setDeviceState={(roomId, deviceId, actionId) => {
           applyDeviceState(roomId, deviceId, actionId);
@@ -95,6 +100,7 @@ export default function App() {
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
               },
             );
             const data = await res.json();
@@ -109,6 +115,8 @@ export default function App() {
           }
         }}
       />
+
+      {shouldRenderLogoutButton && <button onClick={logout}>Logout</button>}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { ConfigService } from "./config-service";
 
 const ConfigServiceProvider = {
   provide: ConfigService,
-  useFactory: async () => ConfigService.create(),
+  useFactory: () => ConfigService.create(),
 };
 
 @Module({
