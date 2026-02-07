@@ -1,7 +1,7 @@
 import { Controller, Get } from "@nestjs/common";
 import { ApplicationStateService } from "../integrations/application-state.service";
 
-@Controller("home")
+@Controller("api/home")
 export class HomeController {
   constructor(
     private readonly applicationStateService: ApplicationStateService,

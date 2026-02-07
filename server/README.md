@@ -129,4 +129,5 @@ for Mac ARM just set to `"linux/arm64"`.
 ### Running
 
 Building: `docker compose -f docker-compose.yml --env-file .env up -d --no-deps --build`
-It'll run the server and you can access it on the same way as usual.
+It'll run the server and you can access it on the same way as usual. This will run both server and API on port 3001.
+Make sure that the `.env.production` of the client dir is using the docker correct values otherwise it'll use production values.

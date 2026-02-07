@@ -19,7 +19,7 @@ interface IntegratedDevice<T> {
   actions: Map<string, DeviceAction>;
 }
 
-@Controller("actions")
+@Controller("api/actions")
 export class ActionsController {
   private readonly deviceHelper: DeviceHelper;
 

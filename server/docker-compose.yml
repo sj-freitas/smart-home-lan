@@ -19,8 +19,8 @@ services:
   app:
     platform: ${HOST_PLATFORM}
     build:
-      context: .
-      dockerfile: dockerfile
+      context: ..
+      dockerfile: server/dockerfile
     image: palais-freitas:latest
     restart: unless-stopped
     depends_on:
@@ -40,9 +40,22 @@ services:
       - DATABASE_URL
       - MY_HOME_ADDRESS_1
       - MY_HOME_ADDRESS_2
+      - AUTH_API_KEY_SECRET
+      - AUTH_GOOGLE_CLIENT_ID
+      - AUTH_GOOGLE_CLIENT_SECRET
+      - AUTH_GOOGLE_URL
+      - AUTH_CLIENT_BASE="http://localhost:3001
+      - AUTH_SET_SECURE_COOKIE
+      - AUTH_SET_DOMAIN_COOKIE
+      - AUTH_SET_SAME_SITE_COOKIE
+      - AUTH_ALWAYS_DISALLOW_THE_IP
       # Useful runtime pointers
       - CONFIG_PATH=/app/config.json
       - PORT=3001
+      # Client Env Vars
+      - VITE_API_HOSTNAME="http://localhost:3001/api"
+      - VITE_APP_ENV="production"
+      - VITE_GOOGLE_CLIENT_ID=${AUTH_GOOGLE_CLIENT_ID}
     ports:
       - "3001:3001"
 

@@ -14,7 +14,7 @@ import { AuthConfig } from "../auth.config";
 import { RequestContext } from "../../services/request-context";
 import { GoogleAuthService } from "../../services/auth/google-auth.service";
 
-@Controller("auth/google")
+@Controller("api/auth/google")
 export class AuthGoogleController {
   constructor(
     private readonly googleAuthService: GoogleAuthService,

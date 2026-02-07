@@ -5,7 +5,7 @@ import { ApiKeysPersistenceService } from "../services/auth/api-keys.persistence
 import { EmailsPersistenceService } from "../services/auth/emails.persistence.service";
 import { MelCloudHomeClient } from "../integrations/mel-cloud-home/client";
 
-@Controller("sandbox")
+@Controller("api/sandbox")
 export class SandboxController {
   constructor(
     private readonly hueClient: HueClient,

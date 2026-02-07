@@ -2,7 +2,7 @@ import { Controller, Get, HttpCode, Query } from "@nestjs/common";
 import { HueOAuth2ClientService } from "../../integrations/hue-cloud/oauth2/hue-oauth2.client.service";
 import { HueOAuth2PersistenceService } from "../../integrations/hue-cloud/oauth2/hue-oauth2.persistence.service";
 
-@Controller("auth/oauth2-hue")
+@Controller("api/auth/oauth2-hue")
 export class AuthHueController {
   constructor(
     private readonly hueOauth2Service: HueOAuth2ClientService,

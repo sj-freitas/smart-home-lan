@@ -1,21 +1,43 @@
-# ---- builder ----
-FROM timbru31/node-chrome:latest AS builder
+# ---- client-builder ----
+FROM node:18 AS client-builder
+
+WORKDIR /client
+
+# copy client package files first for layer caching
+COPY client/package.json client/package-lock.json* ./
+
+RUN npm ci --no-progress
+
+# copy client source and build
+COPY client/ .
+
+# build the Vite React app (output to client/dist by default)
+RUN npm run build
+
+# ---- server-builder ----
+FROM timbru31/node-chrome:latest AS server-builder
 
 WORKDIR /app
 
-# Copy package files first (cache layers)
-COPY package.json package-lock.json* ./
+# copy server package files first
+COPY server/package.json server/package-lock.json* ./
 
-# Install deps
+# install server deps for build
 RUN npm ci --no-progress
 
-# Copy source and build assets
-COPY tsconfig.json ./
-COPY src ./src
-COPY static ./static
-COPY config.json ./config.json
+# copy server sources
+COPY server/ .
 
-# Build
+# copy the built client (from client-builder) into the server build context
+# we'll expose these static assets at runtime from /app/public
+COPY --from=client-builder /client/dist ./public
+
+# copy other static/config if you keep them in server/
+# (optional; keep if you use /server/static or /server/config.json)
+COPY server/static ./static
+COPY server/config.json ./config.json
+
+# build Nest server to /app/dist
 RUN npm run build
 
 # ---- runtime ----
@@ -23,19 +45,24 @@ FROM timbru31/node-chrome:latest AS runner
 
 WORKDIR /app
 
-# Copy built app from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/package-lock.json ./package-lock.json
-
-# Install only production deps using lockfile
-RUN npm ci --only=production --no-progress
-COPY --from=builder /app/static ./static
-COPY --from=builder /app/config.json ./config.json
-
-# Expose port used by NestJS
+ENV NODE_ENV=production
 ENV PORT=3001
 ENV CONFIG_PATH=/app/config.json
 
-# Start (assumes package.json has a `start:prod` script that runs node dist/main.js)
+# copy compiled server
+COPY --from=server-builder /app/dist ./dist
+COPY --from=server-builder /app/package.json ./package.json
+COPY --from=server-builder /app/package-lock.json ./package-lock.json
+
+# copy static/public (client build) and other static assets
+COPY --from=server-builder /app/public ./public
+COPY --from=server-builder /app/static ./static
+COPY --from=server-builder /app/config.json ./config.json
+
+# install only production deps
+RUN npm ci --only=production --no-progress
+
+EXPOSE 3001
+
+# start app (expects a start:prod script that runs node dist/main.js)
 CMD ["npm", "run", "start:prod"]

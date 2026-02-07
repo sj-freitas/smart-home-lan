@@ -37,7 +37,6 @@ async function bootstrap() {
     ],
   });
   app.use(cookieParser());
-  app.setGlobalPrefix("api");
 
   const port = process.env.PORT ?? DEFAULT_PORT;
   await app.listen(port, "0.0.0.0");

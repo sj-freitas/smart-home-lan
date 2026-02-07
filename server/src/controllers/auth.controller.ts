@@ -2,7 +2,7 @@ import { Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../services/auth-guard";
 import { IpValidationService } from "../services/ip-validation.service";
 
-@Controller("auth")
+@Controller("api/auth")
 export class AuthController {
   constructor(private readonly ipValidationService: IpValidationService) {}
 
