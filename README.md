@@ -21,7 +21,7 @@ These are used internally to track development features. Can move these to a bet
 
 ### Backend
 
-- [IMPORTANT] Test token flows
+- [MEDIUM] Add `"offline": true` to the api/home response whenever a device is not available for some reason.
 - [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
 - [MEDIUM] Change humidity and temperature sensors to not use Xiaomi. Looking for options. Current temperature via AC is OK. Humidity isn't.
 - [MEDIUM] Custom Scripts for devices via EVAL (plugin system) for example runScript: {PATH_TO_SCRIPT} -> Runs that code with the device context. Allows the script to do several things like animations. Need to think of the API design for this. Actions can also trigger scripts.

@@ -41,7 +41,7 @@ export class GoogleSessionService {
 
     const refreshedToken = await this.googleAuthService.refreshToken(
       currentSession.refreshToken,
-    )
+    );
     if (!refreshedToken) {
       // Error happened!
       return null;
@@ -69,11 +69,15 @@ export class GoogleSessionService {
   public async createSession(
     email: string,
     accessToken: string,
-    expiresIn?: number,
+    _?: number,
     refreshToken?: string,
   ): Promise<ApplicationSession> {
+    const TEN_YEARS = 10 * 365 * 24 * 60 * 60 * 1000;
     const expiresAt = new Date(
-      Date.now() + (expiresIn ? expiresIn * 1000 : 55 * 60 * 1000),
+      // In theory sessions don't need to expire. A user's email is always their email forever
+      // The only check we need is if the email is still valid in our system and we already do a DB read
+      // for every action a user performs.
+      Date.now() + TEN_YEARS,
     );
 
     const sessionId = await this.sessionsPersistenceService.create({
