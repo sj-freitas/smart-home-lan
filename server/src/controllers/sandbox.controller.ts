@@ -3,7 +3,7 @@ import { HueClient } from "../integrations/hue-cloud/hue.client";
 import { generateApiKey, hashApiKey } from "../helpers/crypto.helper";
 import { ApiKeysPersistenceService } from "../services/auth/api-keys.persistence.service";
 import { EmailsPersistenceService } from "../services/auth/emails.persistence.service";
-import { MelCloudHomeClient } from "src/integrations/mel-cloud-home/client";
+import { MelCloudHomeClient } from "../integrations/mel-cloud-home/client";
 
 @Controller("sandbox")
 export class SandboxController {
