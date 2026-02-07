@@ -57,6 +57,13 @@ export class IpValidationService {
    * @returns {Boolean} whether a user is able to access the API based only on their IP.
    */
   public isRequestAllowedBasedOnIP(): boolean {
+    const AUTH_BYPASS_IP_CHECK = process.env.AUTH_BYPASS_IP_CHECK === "true";
+    if (AUTH_BYPASS_IP_CHECK) {
+      // false means that all requests must be validated regardless of IP. In
+      // production we don't want this behavior.
+      return false;
+    }
+
     // IP is in config it means that users need to be authenticated if they are in a different network.
     // IP doesn't exist it means that everyone is allowed.
     if (!this.config.ip) {

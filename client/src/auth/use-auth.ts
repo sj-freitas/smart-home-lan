@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const DEFAULT_SCOPE = ["openid", "email", "profile"];
 const GOOGLE_AUTH_V2_URL = "https://accounts.google.com/o/oauth2/v2";
-
 type AppModes = "Readonly" | "FullAccess" | "LoggedOut" | "Error";
 
 function buildGoogleAuthUrl(
@@ -17,73 +16,82 @@ function buildGoogleAuthUrl(
     scope: scope.join(" "),
     access_type: "offline",
     prompt: "consent",
-    state: Math.random().toString(36).slice(2), // lightweight client-side state token (optional)
+    state: Math.random().toString(36).slice(2),
   });
   return `${GOOGLE_AUTH_V2_URL}/auth?${params.toString()}`;
 }
 
-export type UseAuthenticationReturnType = [
-  AppModes,
-  boolean,
-  () => Promise<void>,
-];
+export type UseAuthenticationReturnType = {
+  appMode: AppModes;
+  shouldRenderLogoutButton: boolean;
+  logout: () => Promise<void>;
+  startLogin: () => void; // call from "Sign in" button
+  triggerAuthCheck: () => void; // optional: programmatic re-check
+};
 
-export const useAuthentication: () => UseAuthenticationReturnType = () => {
+export const useAuthentication = (): UseAuthenticationReturnType => {
   const API_BASE = `${import.meta.env.VITE_API_HOSTNAME}/auth`;
   const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
   const [appMode, setAppMode] = useState<AppModes>("Readonly");
   const [shouldRenderLogoutButton, setShouldRenderLogoutButton] =
     useState<boolean>(false);
 
-  useEffect(() => {
-    // On boot check session
-    (async () => {
-      try {
-        // Test request to make sure that the user has access to the resource.
-        const res = await fetch(`${API_BASE}/check`, {
-          method: "GET",
-          credentials: "include",
-        });
+  const runCheck = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/check`, {
+        method: "GET",
+        credentials: "include",
+      });
 
-        if (res.status === 401) {
-          // User is not logged-in, requires authentication
-          setAppMode("LoggedOut");
-
-          const redirectUri = `${API_BASE}/google/callback`;
-          const googleUrl = buildGoogleAuthUrl(CLIENT_ID, redirectUri);
-
-          if (typeof window !== "undefined") {
-            window.location.replace(googleUrl);
-          }
-          return;
-        }
-
-        if (res.status === 403) {
-          // User is successfully logged in but doesn't have permission.
-          setShouldRenderLogoutButton(true);
-          return setAppMode("Readonly");
-        }
-
-        if (res.status !== 200) {
-          throw new Error(
-            `Unexpected flow, status code is neither 200, 401 nor 403`,
-          );
-        }
-
-        const response = await res.json();
+      if (res.status === 200) {
+        const body = await res.json();
         setAppMode("FullAccess");
-
-        // The check function will set this value in the case the client is in the same
-        // network, meaning that no login was actually performed.
-        setShouldRenderLogoutButton(response.shouldRenderLogoutButton);
-      } catch (err: any) {
-        console.error("Unexpected error happened:", err);
-        setAppMode("Error");
+        setShouldRenderLogoutButton(body.shouldRenderLogoutButton);
+        return;
       }
-    })();
-  }, [appMode]);
 
-  const logout = async () => {
+      if (res.status === 403) {
+        setAppMode("Readonly");
+        setShouldRenderLogoutButton(true);
+        return;
+      }
+
+      if (res.status === 401) {
+        setAppMode("LoggedOut");
+        setShouldRenderLogoutButton(false);
+        return;
+      }
+
+      // unexpected
+      setAppMode("Error");
+    } catch (err) {
+      console.error("Auth check error:", err);
+      setAppMode("Error");
+    }
+  };
+
+  // run once on mount
+  useEffect(() => {
+    runCheck();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const startLogin = useCallback(() => {
+    // TODO maybe remove?
+    // Mark "auth in progress" to avoid accidental double-redirects or loopbacks.
+    try {
+      localStorage.setItem("auth_in_progress", Date.now().toString());
+    } catch (e) {
+      // ignore localStorage errors
+    }
+
+    const redirectUri = `${API_BASE}/google/callback`;
+    const url = buildGoogleAuthUrl(CLIENT_ID, redirectUri);
+    window.location.href = url;
+  }, [API_BASE, CLIENT_ID]);
+
+  const logout = useCallback(async () => {
     try {
       await fetch(`${API_BASE}/google/logout`, {
         method: "POST",
@@ -93,8 +101,19 @@ export const useAuthentication: () => UseAuthenticationReturnType = () => {
       console.warn("logout failed", e);
     } finally {
       setAppMode("LoggedOut");
+      // startLogin();
     }
-  };
+  }, [API_BASE]);
 
-  return [appMode, shouldRenderLogoutButton, logout];
+  const triggerAuthCheck = useCallback(() => {
+    runCheck();
+  }, [runCheck]);
+
+  return {
+    appMode,
+    shouldRenderLogoutButton,
+    logout,
+    startLogin,
+    triggerAuthCheck,
+  };
 };

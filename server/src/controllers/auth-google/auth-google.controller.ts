@@ -90,8 +90,8 @@ export class AuthGoogleController {
     response.cookie("session", session.sessionId, {
       httpOnly: true,
       secure: this.authConfig.setSecureCookie,
-      sameSite: "none",
-      domain: apiBaseUrl,
+      sameSite: this.authConfig.sameSiteCookie,
+      domain: this.authConfig.domainCookie,
       path: "/",
     });
 

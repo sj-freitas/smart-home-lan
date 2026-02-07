@@ -22,7 +22,14 @@ export default function App() {
   const { state, setStateSuppressSocket } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
   const iconUrlFromServer = state?.faviconUrl;
-  const [appMode, shouldRenderLogoutButton, logout] = useAuthentication();
+  const { appMode, shouldRenderLogoutButton, logout, startLogin } =
+    useAuthentication();
+
+  useEffect(() => {
+    if (appMode === "LoggedOut") {
+      startLogin();
+    }
+  }, [appMode, startLogin]);
 
   useEffect(() => {
     if (!iconUrlFromServer) {
@@ -88,7 +95,7 @@ export default function App() {
 
       <RoomList
         rooms={home.rooms}
-        readonly={appMode === "Readonly"}
+        readonly={appMode !== "FullAccess"}
         setStateSuppressSocket={setStateSuppressSocket}
         setDeviceState={(roomId, deviceId, actionId) => {
           applyDeviceState(roomId, deviceId, actionId);
