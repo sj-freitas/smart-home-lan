@@ -48,20 +48,37 @@ export const useAuthentication = (): UseAuthenticationReturnType => {
 
   const runCheck = async () => {
     try {
-      if (appMode !== "LoggedOut") {
-        return;
-      }
+      if (appMode !== "LoggedOut") return;
 
       const res = await fetch(`${API_BASE}/check`, {
         method: "GET",
         credentials: "include",
+        mode: "cors",
+        cache: "no-store",
       });
 
+      console.log("AUTH CHECK: res", res.status, res.statusText, [
+        ...res.headers.entries(),
+      ]);
+
+      const text = await res.text().catch((err) => {
+        console.error("Failed to read body as text", err);
+        return null;
+      });
+
+      console.log("AUTH CHECK: body text:", text);
+
       if (res.status === 200) {
-        const body = await res.json();
-        setAppMode("AuthFullAccess");
-        setShouldRenderLogoutButton(body.shouldRenderLogoutButton);
-        return;
+        try {
+          const body = text ? JSON.parse(text) : {};
+          setAppMode("AuthFullAccess");
+          setShouldRenderLogoutButton(body.shouldRenderLogoutButton);
+          return;
+        } catch (e) {
+          console.error("JSON parse error for 200:", e);
+          setAppMode("AuthRestricted");
+          return;
+        }
       }
 
       if (res.status === 403) {
@@ -76,11 +93,10 @@ export const useAuthentication = (): UseAuthenticationReturnType => {
         return;
       }
 
-      // unexpected, still give restricted access
-      console.warn(`Unexpected flow, status code is not 403, 401 or 200.`);
+      console.warn(`Unexpected flow, status code is ${res.status}`);
       setAppMode("AuthRestricted");
     } catch (err) {
-      console.error("Auth check error:", err);
+      console.error("Auth check error (caught):", err, err && (err as Error).stack);
       setAppMode("AuthRestricted");
     }
   };

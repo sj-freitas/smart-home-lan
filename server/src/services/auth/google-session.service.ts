@@ -7,7 +7,7 @@ export interface ApplicationSession {
   email: string;
 }
 
-const TEN_YEARS = 10 * 365 * 24 * 60 * 60 * 1000;
+const TWO_WEEKS = 2 * 24 * 60 * 60 * 1000;
 
 export class GoogleSessionService {
   constructor(
@@ -57,7 +57,7 @@ export class GoogleSessionService {
         // In theory sessions don't need to expire. A user's email is always their email forever
         // The only check we need is if the email is still valid in our system and we already do a DB read
         // for every action a user performs.
-        Date.now() + TEN_YEARS,
+        Date.now() + TWO_WEEKS,
       ),
     });
 
@@ -78,7 +78,7 @@ export class GoogleSessionService {
       // In theory sessions don't need to expire. A user's email is always their email forever
       // The only check we need is if the email is still valid in our system and we already do a DB read
       // for every action a user performs.
-      Date.now() + TEN_YEARS,
+      Date.now() + TWO_WEEKS,
     );
 
     const sessionId = await this.sessionsPersistenceService.create({
