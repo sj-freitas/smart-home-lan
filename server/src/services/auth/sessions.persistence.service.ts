@@ -77,15 +77,14 @@ export class SessionsPersistenceService {
     const uuid = toUuid(sessionId);
     await this.pool.query(
       `
-    UPDATE ${SESSIONS_TABLE_NAME} (
-      SET email = $1,
-      SET access_token = $2,
-      SET refresh_token = $3,
-      SET expires_at = $4
-    )
+    UPDATE ${SESSIONS_TABLE_NAME} SET
+      email = $1,
+      access_token = $2,
+      refresh_token = $3,
+      expires_at = $4
     WHERE id = $5
     `,
-      [email, accessToken, refreshToken, expiresAt, uuid],
+      [email, accessToken, refreshToken ?? null, expiresAt, uuid],
     );
   }
 
