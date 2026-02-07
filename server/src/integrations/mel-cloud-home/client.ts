@@ -40,6 +40,11 @@ export class MelCloudHomeClient {
       },
     });
 
+    if (response.status !== 200) {
+      console.warn(`MelCloudError`, await response.text());
+      return [];
+    }
+
     const jsonResponse = await response.json();
     const airToAirUnits: AirToAirUnit[] =
       jsonResponse.buildings[0]?.airToAirUnits ?? [];
