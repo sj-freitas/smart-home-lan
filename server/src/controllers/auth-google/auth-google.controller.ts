@@ -53,8 +53,21 @@ export class AuthGoogleController {
       path: "/",
     });
 
-    return response.status(HttpStatus.OK).send("logged in");
-    // return response.redirect(this.authConfig.clientBaseUrl);
+    return response.status(200).type("html").send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Signing in…</title>
+  </head>
+  <body>
+    <script>
+      window.location.replace("${this.authConfig.clientBaseUrl}");
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url="${this.authConfig.clientBaseUrl}">
+    </noscript>
+  </body>
+</html>`);
   }
 
   @Post("logout")
