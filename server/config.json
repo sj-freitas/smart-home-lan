@@ -285,11 +285,70 @@
           {
             "id": "corridor_light",
             "name": "Corridor Light",
-            "icon": "ceiling_light",
+            "icon": "recessed_light",
             "type": "smart_light",
             "integration": {
               "name": "hue_cloud",
               "id": ["7", "8", "9", "10"]
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "on": false
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
+                }
+              },
+              {
+                "id": "on_dim",
+                "name": "Dim",
+                "parameters": {
+                  "on": true,
+                  "bri": 44,
+                  "hue": 7985,
+                  "sat": 107
+                }
+              },
+              {
+                "id": "on_romantic",
+                "name": "Romantic",
+                "parameters": {
+                  "on": true,
+                  "bri": 115,
+                  "hue": 62965,
+                  "sat": 254
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "bathroom",
+        "name": "Bathroom",
+        "icon": "bathtub",
+        "roomInfo": {
+          "sourceDeviceId": "living_room/ac"
+        },
+        "devices": [
+          {
+            "id": "ceiling_lights",
+            "name": "Lights",
+            "icon": "recessed_light",
+            "type": "smart_light",
+            "integration": {
+              "name": "hue_cloud",
+              "id": ["15", "16", "17"]
             },
             "actions": [
               {

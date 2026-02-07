@@ -9,6 +9,8 @@ import { PanIcon } from "./pan.icon";
 import { SofaIcon } from "./sofa.icon";
 import { DoubleBedIcon } from "./double-bed.icon";
 import { SingleBedIcon } from "./single-bed.icon";
+import { BathtubIcon } from "./bathtub.icon";
+import { RecessedLightIcon } from "./recessed_light";
 
 export function getIconFromId(icon?: string, size: string = "18") {
   if (!icon) {
@@ -41,6 +43,10 @@ export function getIconFromId(icon?: string, size: string = "18") {
       return <AirConditionerIcon size={size} />;
     case "fan":
       return <FanIcon size={size} />;
+    case "bathtub":
+      return <BathtubIcon size={size} />
+    case "recessed_light":
+      return <RecessedLightIcon size={size} />
     default:
       return <FiHome size={size} />;
   }
