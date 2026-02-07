@@ -3,11 +3,13 @@ import { HueClient } from "../integrations/hue-cloud/hue.client";
 import { generateApiKey, hashApiKey } from "../helpers/crypto.helper";
 import { ApiKeysPersistenceService } from "../services/auth/api-keys.persistence.service";
 import { EmailsPersistenceService } from "../services/auth/emails.persistence.service";
+import { MelCloudHomeClient } from "src/integrations/mel-cloud-home/client";
 
 @Controller("sandbox")
 export class SandboxController {
   constructor(
     private readonly hueClient: HueClient,
+    private readonly melCloudHomeClient: MelCloudHomeClient,
     private readonly apiKeysPersistenceService: ApiKeysPersistenceService,
     private readonly emailsPersistenceService: EmailsPersistenceService,
   ) {}
@@ -16,6 +18,11 @@ export class SandboxController {
   public async getHueLightsState() {
     // Very useful to get the HUE light configs to create presets.
     return await this.hueClient.getLights();
+  }
+
+  @Get("/mel-cloud-home-context")
+  public async getMelCloudHomeContext() {
+    return await this.melCloudHomeClient.getContext();
   }
 
   @Get("/health")

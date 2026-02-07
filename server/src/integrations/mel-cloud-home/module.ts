@@ -26,8 +26,8 @@ const MelCloudHomeAuthenticationCookiesProvider = {
   },
 };
 
-const MelCloudHomeIntegrationServiceProvider = {
-  provide: MelCloudHomeIntegrationService,
+const MelCloudHomeClientProvider = {
+  provide: MelCloudHomeClient,
   inject: [MelCloudAuthCookiesPersistenceService, ConfigService],
   useFactory: async (
     melCloudAuthCookiesPersistenceService: MelCloudAuthCookiesPersistenceService,
@@ -40,12 +40,20 @@ const MelCloudHomeIntegrationServiceProvider = {
       throw new Error("MelCloudHome integration config not found");
     }
 
-    return new MelCloudHomeIntegrationService(
-      new MelCloudHomeClient(
-        melCloudAuthCookiesPersistenceService,
-        melCloudHomeConfig.apiUrl,
-      ),
+    return new MelCloudHomeClient(
+      melCloudAuthCookiesPersistenceService,
+      melCloudHomeConfig.apiUrl,
     );
+  },
+};
+
+const MelCloudHomeIntegrationServiceProvider = {
+  provide: MelCloudHomeIntegrationService,
+  inject: [MelCloudHomeClient],
+  useFactory: async (
+    client: MelCloudHomeClient,
+  ) => {
+    return new MelCloudHomeIntegrationService(client);
   },
 };
 
@@ -56,10 +64,12 @@ const MelCloudHomeIntegrationServiceProvider = {
     MelCloudAuthCookiesPersistenceServiceProvider,
     MelCloudHomeAuthenticationCookiesProvider,
     MelCloudHomeIntegrationServiceProvider,
+    MelCloudHomeClientProvider,
   ],
   exports: [
     MelCloudHomeIntegrationServiceProvider,
     MelCloudHomeAuthenticationCookiesProvider,
+    MelCloudHomeClientProvider,
   ],
 })
 export class MelCloudHomeModule {}
