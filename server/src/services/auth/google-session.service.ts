@@ -19,7 +19,6 @@ export class GoogleSessionService {
   ): Promise<ApplicationSession | null> {
     // Store the session
     const currentSession = await this.sessionsPersistenceService.get(sessionId);
-
     if (!currentSession) {
       return null;
     }

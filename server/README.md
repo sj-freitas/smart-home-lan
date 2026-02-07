@@ -18,7 +18,8 @@ Check the example / base config at [config.json](./config.json)
 ### Integration
 An integration is an element that specifies what service they are using, each integration has a unique schema. Currently there are only 3 integrations supported and these
 are tied to the code, maybe in the future I'll have a different repo for each integration and add them as NPM packages. However this isn't really very important right now,
-any fork of this repo can add as many integrations as necessary.
+any fork of this repo can add as many integrations as necessary. Once the API bootstraps the modules are loaded dynamically depending on the `config.json` integrations section,
+if the integration isn't specified there, it's not loaded.
 
 Currently these are the supported integrations:
 - [Philips Hue](./src/integrations/hue-cloud/README.md)
@@ -33,6 +34,20 @@ The device has a list of presets called Actions.
 An action is the operation you can do through a device, Actions are performed through a route such as `http://localhost:3001/{room_id}/{device_id}/{actiomn_id}` and these are all
 the ones defined in the config file. Once an Action is performed, the specific Integration will run that action based on the parameters in the config file. This should successfully
 result in the state of the Device changing such as, for example, turning on some lights or switching their color.
+
+### Authorization
+The API supports 3 ways to access the resources:
+1. As long as you are within the same network / IP as the home, make sure to have ip set in the config and AUTH_ALWAYS_DISALLOW_THE_IP=false (default).
+2. API Keys are supported using the `Authorization: Bearer {API_KEY}` header, the keys can be generated via a sandbox path `GET 'http://localhost:3001/api/sandbox/generate-api-key'` but then need to be stored individually in the database. Eventually there'll be a back-office or request to do this.
+3. Google Auth using the code flow which then stores the access and refresh tokens into the database.
+For either Google Auth or API Key the access can expire, in the case of Google Auth there needs to be an email access set.
+
+For more details see:
+- [AuthorizationService](./src/services/auth/authorization.service.ts) Has the core of the authorization logic and integrates with the other services.
+- [AuthGuard](./src/services/auth-guard.ts) A [NestJS Guard](https://docs.nestjs.com/guards) that calls the [AuthorizationService](./src/services/auth/authorization.service.ts).
+- [GoogleAuthService](./src/services/auth/google-auth.service.ts) Manages the Google integration layer directly with its API or the [Google Auth Library](https://www.npmjs.com/package/google-auth-library).
+- [GoogleSessionService](./src/services/auth/google-session.service.ts) Manages the refresh and validation flow of the sessions including storing them via [another service](./src/services/auth/google-session.service.ts).
+- [AuthGoogleController](./src/controllers/auth-google/auth-google.controller.ts) Handles the callback and logout flows from the client.
 
 ## Env Vars
 In the `.env` please include the following Environmental Variables:
@@ -51,6 +66,18 @@ HUE_CLOUD_CLIENT_ID=""
 HUE_CLOUD_SECRET=""
 HUE_CLOUD_OAUTH2="" # This Username is obtained after completing the OAuth2 flow and it is used to retrieve the lights and perform state changes.
 HUE_CLOUD_BRIDGE_USERNAME=""
+
+# Authorization and Authentication env vars, need to be configured.
+# However the whole process can be bypassed with AUTH_ALWAYS_DISALLOW_THE_IP="false" locally and in prod. As the local addresses are always allowed without Auth.
+AUTH_ALWAYS_DISALLOW_THE_IP="false" # If true it'll always bypass the IP check, meaning that the rest of the Auth will run. Should only be set to true when testing Auth locally.
+AUTH_API_KEY_SECRET="" # Used to store and validate API keys.
+AUTH_GOOGLE_CLIENT_ID="" # The Google Auth ID check https://console.cloud.google.com/auth/overview
+AUTH_GOOGLE_CLIENT_SECRET="" # Google Auth Secret for the Backend only.
+AUTH_GOOGLE_URL="https://oauth2.googleapis.com" # The Google Auth API
+AUTH_CLIENT_BASE="http://localhost:5173" # The client address.
+AUTH_SET_SECURE_COOKIE="false" # Cookie options. Set true in prod
+AUTH_SET_DOMAIN_COOKIE="localhost" # Cookie options. Set to the app domain in prod.
+AUTH_SET_SAME_SITE_COOKIE="lax" # Cookie options. Set to none in prod.
 
 # Optional Values also dependant on the config.json
 APP_HOME_IP="" # It is used to enable the restricted remote mode. Allows only users within the IP to use the app, otherwise it's readonly.

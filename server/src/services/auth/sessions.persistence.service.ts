@@ -7,7 +7,7 @@ export const SessionZod = z
     id: z.string().readonly(),
     email: z.string().readonly(),
     access_token: z.string().readonly(),
-    refresh_token: z.string().optional().readonly(),
+    refresh_token: z.string().nullable().readonly(),
     expires_at: z.date().readonly(),
     created_at: z.date().readonly(),
   })

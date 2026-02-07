@@ -11,6 +11,15 @@ Vite uses a `.env` naming convention:
 - `.env.local`: Sets the local development env vars. `VITE_APP_ENV="development"`
 - `.env.production`: Sets the production development env vars: `VITE_APP_ENV="production"`
 - `VITE_API_HOSTNAME:` The API hostname, locally should be `"http://localhost:3001/api"`
+- `VITE_GOOGLE_CLIENT_ID:` The Client Id for authentication. This flow can be bypassed if the API has AUTH_ALWAYS_DISALLOW_THE_IP set to "false".
+
+## Auth
+The application requests a GET: `curl 'https://smart-home-lan.onrender.com/api/auth/check'` to make sure that the user has access to the API.
+This request can return a 401, the app handles the login, 403, the app shows the state but should run in ReadOnly mode. 200, all the actions can be executed normally.
+The login is handled by Google by redirecting the page to the login page, once the flow is complete the API will set a `session` cookie. The API will persist the cookies
+in the database. So the client doesn't need to handle any of the session logic as long as the `credentials` are sent to the API.
+
+To test locally the VITE_GOOGLE_CLIENT_ID can be set but you'll need to create a GoogleAuth Client.
 
 ## Building and Running
 To run locally simply do `npm run dev` and it loads the `.env.local` file.

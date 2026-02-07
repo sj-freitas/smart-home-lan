@@ -1,6 +1,8 @@
-# Smart Home LAN — NestJS (backend) + React (frontend)
-A server to integrate with your home devices. The LAN initial idea isn't really being done here, as I preferred a cloud approach but the same principle can be used.
-The reason was that Xiaomi removed LAN control of some of the devices.
+# Smart Home Management
+*This can run on LAN but it's currently designed for the Cloud as well.*
+A server to integrate with your home devices. The main design principle is to not require any user within your home to login and download to several different apps but instead having a centralized location.
+Another motivation is to restrict the control a user has on the devices, instead of having to set the AC mode, temperature, etc they only need to press a Heat or Cool button.
+The whole system is highly modifiable with a config file as the source of truth, see more on [config file section](./server/README.md#Config).
 
 ## Project layout
 - [Server](./server/README.md)
@@ -8,10 +10,15 @@ The reason was that Xiaomi removed LAN control of some of the devices.
 - [Bruno Requests](./smart_home_requests/README.md)
 
 ## Backlog
+These are used internally to track development features. Can move these to a better tool within Github.
+
 ### Client
 - [MEDIUM] Add tests (collapsible flow etc.)
 
 ### Backend
+- [IMPORTANT] Investigate MEL Cloud Errors: Added a log
+- [IMPORTANT] Test token flows
+- [IMPORTANT] Add migrations to create the initial tables
 - [MEDIUM] (Ongoing) Write documentation on the README.md files. Hard to keep progress but ongoing.
 - [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
 - [MEDIUM] Change humidity and temperature sensors to not use Xiaomi. Looking for options. Current temperature via AC is OK. Humidity isn't.
