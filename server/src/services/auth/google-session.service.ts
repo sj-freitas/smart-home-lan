@@ -7,6 +7,8 @@ export interface ApplicationSession {
   email: string;
 }
 
+const TEN_YEARS = 10 * 365 * 24 * 60 * 60 * 1000;
+
 export class GoogleSessionService {
   constructor(
     private readonly googleAuthService: GoogleAuthService,
@@ -52,10 +54,10 @@ export class GoogleSessionService {
       accessToken: refreshedToken.accessToken,
       refreshToken: refreshedToken.refreshToken,
       expiresAt: new Date(
-        Date.now() +
-          (refreshedToken.expiresIn
-            ? refreshedToken.expiresIn * 1000
-            : 55 * 60 * 1000),
+        // In theory sessions don't need to expire. A user's email is always their email forever
+        // The only check we need is if the email is still valid in our system and we already do a DB read
+        // for every action a user performs.
+        Date.now() + TEN_YEARS,
       ),
     });
 
@@ -72,7 +74,6 @@ export class GoogleSessionService {
     _?: number,
     refreshToken?: string,
   ): Promise<ApplicationSession> {
-    const TEN_YEARS = 10 * 365 * 24 * 60 * 60 * 1000;
     const expiresAt = new Date(
       // In theory sessions don't need to expire. A user's email is always their email forever
       // The only check we need is if the email is still valid in our system and we already do a DB read

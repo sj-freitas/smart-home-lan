@@ -26,7 +26,7 @@ export default function App() {
     useAuthentication();
 
   useEffect(() => {
-    if (appMode === "LoggedOut") {
+    if (appMode === "NeedsLogIn") {
       startLogin();
     }
   }, [appMode, startLogin]);
@@ -95,7 +95,7 @@ export default function App() {
 
       <RoomList
         rooms={home.rooms}
-        readonly={appMode !== "FullAccess"}
+        readonly={appMode !== "AuthFullAccess"}
         setStateSuppressSocket={setStateSuppressSocket}
         setDeviceState={(roomId, deviceId, actionId) => {
           applyDeviceState(roomId, deviceId, actionId);
