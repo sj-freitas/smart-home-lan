@@ -53,7 +53,8 @@ export class AuthGoogleController {
       path: "/",
     });
 
-    return response.redirect(this.authConfig.clientBaseUrl);
+    return response.status(HttpStatus.OK).send("logged in");
+    // return response.redirect(this.authConfig.clientBaseUrl);
   }
 
   @Post("logout")
