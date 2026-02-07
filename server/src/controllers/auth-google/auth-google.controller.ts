@@ -8,19 +8,16 @@ import {
   Query,
   Res,
 } from "@nestjs/common";
-import { OAuth2Client as AuthGoogleOAuth2Client } from "google-auth-library";
 import { Response } from "express";
-import { GoogleAuthConfig } from "../../services/auth/google-auth";
 import { GoogleSessionService } from "../../services/auth/google-session.service";
 import { AuthConfig } from "../auth.config";
 import { RequestContext } from "../../services/request-context";
-import { GoogleOAuth2TokenZod } from "../../services/auth/google-auth.types.zod";
+import { GoogleAuthService } from "../../services/auth/google-auth.service";
 
 @Controller("auth/google")
 export class AuthGoogleController {
   constructor(
-    private readonly config: GoogleAuthConfig,
-    private readonly client: AuthGoogleOAuth2Client,
+    private readonly googleAuthService: GoogleAuthService,
     private readonly sessionService: GoogleSessionService,
     private readonly authConfig: AuthConfig,
     private readonly requestContext: RequestContext,
@@ -32,59 +29,20 @@ export class AuthGoogleController {
       throw new BadRequestException("Missing code");
     }
 
-    const {
-      clientId,
-      redirectUri,
-      clientSecret,
-      authUrl,
-      clientBaseUrl,
-      cookieDomain: apiBaseUrl,
-    } = this.config;
-    const params = new URLSearchParams({
-      code,
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      grant_type: "authorization_code",
-    });
-
-    const tokenResp = await fetch(`${authUrl}/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
-    });
-
-    if (!tokenResp.ok) {
-      const data = await tokenResp.text();
-      throw new BadRequestException(
-        `Token exchange failed: ${tokenResp.status} ${tokenResp.statusText} - ${data}`,
-      );
-    }
-
-    const unparsedResponseJsonBody = await tokenResp.json();
-    const { idToken, accessToken, refreshToken, expiresIn } =
-      GoogleOAuth2TokenZod.parse(unparsedResponseJsonBody);
-
-    if (!idToken) {
+    const token = await this.googleAuthService.getToken(code);
+    if (!token?.idToken) {
       throw new BadRequestException("No id_token returned by Google");
     }
-
-    // Is this required? I mean yes but the Lib does this differently.
-    // TODO: Extract this to GoogleAuthService instead.
-    const ticket = await this.client.verifyIdToken({
-      idToken: idToken,
-      audience: clientId,
-    });
-    const payload = ticket.getPayload();
+    const payload = await this.googleAuthService.verifyIdToken(token.idToken);
     if (!payload) {
       throw new BadRequestException("Invalid id_token");
     }
 
     const session = await this.sessionService.createSession(
       payload.email,
-      accessToken,
-      expiresIn,
-      refreshToken,
+      token.accessToken,
+      token.expiresIn,
+      token.refreshToken,
     );
 
     response.cookie("session", session.sessionId, {
@@ -95,7 +53,7 @@ export class AuthGoogleController {
       path: "/",
     });
 
-    return response.redirect(clientBaseUrl);
+    return response.redirect(this.authConfig.clientBaseUrl);
   }
 
   @Post("logout")

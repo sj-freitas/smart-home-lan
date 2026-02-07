@@ -37,16 +37,6 @@ export class GoogleAuthConfig {
     return `${apiDomain}/api/auth/google/callback`;
   }
 
-  get clientBaseUrl(): string {
-    // This config has nothing to do with Google Auth specifically but it's part of the same flow.
-    const clientBaseUrl = process.env.AUTH_CLIENT_BASE;
-    if (!clientBaseUrl) {
-      throw new Error("AUTH_CLIENT_BASE needs to be set in .env file!");
-    }
-
-    return clientBaseUrl;
-  }
-
   get cookieDomain(): string {
     const apiBaseUrl = process.env.APP_DOMAIN_URL;
     if (!apiBaseUrl) {

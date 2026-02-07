@@ -2,6 +2,7 @@ export class AuthConfig {
   get setSecureCookie(): boolean {
     return process.env.AUTH_SET_SECURE_COOKIE === "true";
   }
+
   get sameSiteCookie(): "lax" | "none" | "strict" | boolean {
     switch (process.env.AUTH_SET_SAME_SITE_COOKIE) {
       case "lax":
@@ -18,7 +19,17 @@ export class AuthConfig {
         return "lax";
     }
   }
+
   get domainCookie(): string {
     return process.env.AUTH_SET_DOMAIN_COOKIE ?? "localhost";
+  }
+
+  get clientBaseUrl(): string {
+    const clientBaseUrl = process.env.AUTH_CLIENT_BASE;
+    if (!clientBaseUrl) {
+      throw new Error("AUTH_CLIENT_BASE needs to be set in .env file!");
+    }
+
+    return clientBaseUrl;
   }
 }

@@ -1,6 +1,9 @@
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { GoogleAuthConfig } from "./google-auth";
-import { GoogleOAuth2TokenZod } from "./google-auth.types.zod";
+import {
+  GoogleOAuth2Token,
+  GoogleOAuth2TokenZod,
+} from "./google-auth.types.zod";
 
 export class GoogleAuthService {
   constructor(
@@ -8,7 +11,7 @@ export class GoogleAuthService {
     private readonly googleAuthConfig: GoogleAuthConfig,
   ) {}
 
-  async verifyIdToken(idToken: string): Promise<TokenPayload> {
+  async verifyIdToken(idToken: string): Promise<TokenPayload | null> {
     try {
       const ticket = await this.client.verifyIdToken({
         idToken,
@@ -27,22 +30,58 @@ export class GoogleAuthService {
     }
   }
 
-  async refreshToken(refreshToken: string) {
-    // Would be nice to actually use the OAuth2Client here instead.
-    const tokenUrl = "https://oauth2.googleapis.com/token";
-    const params = new URLSearchParams();
-    params.append("refresh_token", refreshToken);
-    params.append("client_id", this.googleAuthConfig.clientId);
-    params.append("client_secret", this.googleAuthConfig.clientSecret);
-    params.append("grant_type", "refresh_token");
-    const response = await fetch(tokenUrl, {
-      method: "POST",
-      body: params.toString(),
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  async getToken(code: string): Promise<GoogleOAuth2Token | null> {
+    const params = new URLSearchParams({
+      code,
+      client_id: this.googleAuthConfig.clientId,
+      client_secret: this.googleAuthConfig.clientSecret,
+      redirect_uri: this.googleAuthConfig.redirectUri,
+      grant_type: "authorization_code",
     });
+    const tokenResponse = await fetch(
+      `${this.googleAuthConfig.authUrl}/token`,
+      {
+        method: "POST",
+        body: params.toString(),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      },
+    );
 
-    // Handle errors
-    const json = await response.json();
+    if (tokenResponse.status !== 200) {
+      const errorMessage = await tokenResponse.text();
+      console.error(errorMessage);
+      return null;
+    }
+
+    const json = await tokenResponse.json();
+    const parsed = GoogleOAuth2TokenZod.parse(json);
+
+    return parsed;
+  }
+
+  async refreshToken(refreshToken: string): Promise<GoogleOAuth2Token | null> {
+    const params = new URLSearchParams({
+      refresh_token: refreshToken,
+      client_id: this.googleAuthConfig.clientId,
+      client_secret: this.googleAuthConfig.clientSecret,
+      grant_type: "refresh_token",
+    });
+    const tokenResponse = await fetch(
+      `${this.googleAuthConfig.authUrl}/token`,
+      {
+        method: "POST",
+        body: params.toString(),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      },
+    );
+
+    if (tokenResponse.status !== 200) {
+      const errorMessage = await tokenResponse.text();
+      console.error(errorMessage);
+      return null;
+    }
+
+    const json = await tokenResponse.json();
     const parsed = GoogleOAuth2TokenZod.parse(json);
 
     return parsed;

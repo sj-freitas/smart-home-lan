@@ -42,7 +42,12 @@ export class GoogleSessionService {
 
     const refreshedToken = await this.googleAuthService.refreshToken(
       currentSession.refreshToken,
-    );
+    )
+    if (!refreshedToken) {
+      // Error happened!
+      return null;
+    }
+
     await this.sessionsPersistenceService.update(sessionId, {
       email: currentSession.email,
       accessToken: refreshedToken.accessToken,
