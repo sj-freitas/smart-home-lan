@@ -6,6 +6,10 @@ import {
 } from "../config/integration.zod";
 
 export type TryRunActionResult = true | string;
+export interface DeviceState {
+  online: boolean;
+  state: "off" | string;
+}
 
 export interface IntegrationService<T> {
   readonly name: IntegrationTypeNames;
@@ -19,7 +23,7 @@ export interface IntegrationService<T> {
     deviceInfo: T,
     deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
-  ): Promise<string>;
+  ): Promise<DeviceState>;
   tryRunAction(
     memoizationContext: Memoizer,
     deviceInfo: T,
@@ -47,7 +51,7 @@ export class IntegrationServiceWithContext<T> {
     );
   }
 
-  async getDeviceState(memoizationContext: Memoizer, actions: DeviceAction[]) {
+  async getDeviceState(memoizationContext: Memoizer, actions: DeviceAction[]): Promise<DeviceState> {
     return this.service.getDeviceState(
       memoizationContext,
       this.context.info,

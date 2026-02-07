@@ -6,6 +6,7 @@ export type Device = {
   type: 'air_conditioner' | 'smart_switch' | 'smart_light' | string;
   actions: Action[];
   state?: string;
+  online?: boolean;
 }
 export type Room = {
   id: string;

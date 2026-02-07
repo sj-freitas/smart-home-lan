@@ -19,6 +19,7 @@ export interface HomeState {
         name: string;
       }[];
       state: string;
+      online?: boolean;
     }[];
   }[];
 }

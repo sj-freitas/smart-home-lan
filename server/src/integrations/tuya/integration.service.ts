@@ -1,5 +1,6 @@
 import { TuyaIntegrationDevice } from "../../config/integration.zod";
 import {
+  DeviceState,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
@@ -58,9 +59,12 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
     memoizationContext: Memoizer,
     deviceInfo: TuyaIntegrationDevice,
     deviceType: RoomDeviceTypes,
-  ): Promise<string> {
+  ): Promise<DeviceState> {
     if (deviceType !== "smart_switch") {
-      return "off";
+      return {
+        state: "off",
+        online: false,
+      };
     }
 
     try {
@@ -99,10 +103,16 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
         );
       }
 
-      return switchOne.value ? "on" : "off";
+      return {
+        state: switchOne.value ? "on" : "off",
+        online: true,
+      };
     } catch (error: unknown) {
       console.error(error);
-      return "off";
+      return {
+        state: "off",
+        online: false,
+      };
     }
   }
 

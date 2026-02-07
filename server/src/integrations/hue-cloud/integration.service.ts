@@ -1,5 +1,6 @@
 import { HueCloudIntegrationDevice } from "../../config/integration.zod";
 import {
+  DeviceState,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
@@ -88,7 +89,7 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     deviceInfo: HueCloudIntegrationDevice,
     deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
-  ): Promise<string> {
+  ): Promise<DeviceState> {
     const hueDevices = await memoizationContext.run(
       HUE_STATE_CACHE_KEY,
       async () => this.hueClient.getLights(),
@@ -98,7 +99,10 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     const currDevice = hueDevices[firstDevice];
 
     if (!currDevice) {
-      return "off";
+      return {
+        online: false,
+        state: "off",
+      };
     }
 
     if (deviceType === "smart_light") {
@@ -110,14 +114,27 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
       );
 
       const currentDeviceState = currDevice.state;
-      return tryFindBestMatchingAction(currentDeviceState, actionParametersMap);
+      const action = tryFindBestMatchingAction(
+        currentDeviceState,
+        actionParametersMap,
+      );
+      return {
+        state: action,
+        online: currDevice.state.reachable,
+      };
     }
 
     if (deviceType === "smart_switch") {
-      return currDevice.state.on ? "on" : "off";
+      return {
+        state: currDevice.state.on ? "on" : "off",
+        online: currDevice.state.reachable,
+      };
     }
 
-    return "off";
+    return {
+      state: "off",
+      online: false,
+    };
   }
 
   async tryRunAction(

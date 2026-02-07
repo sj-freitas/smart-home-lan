@@ -27,6 +27,7 @@ export interface ApplicationState {
         name: string;
       }[];
       state: string;
+      online: boolean;
     }[];
   }[];
 }
@@ -81,8 +82,11 @@ export class ApplicationStateService {
               );
               const currentDeviceState =
                 deviceInfo === null
-                  ? "off"
-                  : await deviceInfo.getDeviceState(memoizationContext, Array.from(device.actions));
+                  ? { state: "off", online: false }
+                  : await deviceInfo.getDeviceState(
+                      memoizationContext,
+                      Array.from(device.actions),
+                    );
 
               return {
                 id: device.id,
@@ -94,7 +98,8 @@ export class ApplicationStateService {
                     id: t.id,
                     name: t.name,
                   })) ?? [],
-                state: currentDeviceState,
+                state: currentDeviceState.state,
+                online: currentDeviceState.online,
               };
             }),
           ),

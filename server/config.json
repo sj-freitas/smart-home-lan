@@ -236,7 +236,7 @@
           {
             "id": "table_light",
             "name": "Table Light",
-            "icon": "ceiling_light",
+            "icon": "dining_table",
             "type": "smart_light",
             "integration": {
               "name": "hue_cloud",

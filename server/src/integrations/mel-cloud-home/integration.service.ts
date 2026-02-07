@@ -2,6 +2,7 @@ import { Memoizer } from "../../services/memoizer";
 import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { MelCloudHomeIntegrationDevice } from "../../config/integration.zod";
 import {
+  DeviceState,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
@@ -113,9 +114,12 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
     deviceInfo: MelCloudHomeIntegrationDevice,
     deviceType: RoomDeviceTypes,
     actionDescriptions: DeviceAction[],
-  ): Promise<string> {
+  ): Promise<DeviceState> {
     if (deviceType !== "air_conditioner") {
-      return "off";
+      return {
+        state: "off",
+        online: false,
+      };
     }
     const allDevices = await memoizationContext.run(
       MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
@@ -124,7 +128,10 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
     const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
 
     if (!foundDevice) {
-      return "off";
+      return {
+        state: "off",
+        online: false,
+      };
     }
 
     const currentDeviceState = mapSettingsRecordToParameters(
@@ -140,7 +147,14 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
       ),
     );
 
-    return tryFindBestMatchingAction(currentDeviceState, actionParametersMap);
+    const action = tryFindBestMatchingAction(
+      currentDeviceState,
+      actionParametersMap,
+    );
+    return {
+      state: action,
+      online: true,
+    };
   }
 
   async tryRunAction(

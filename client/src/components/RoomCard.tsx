@@ -178,6 +178,21 @@ export default function RoomCard({
                   <div style={{ fontWeight: 700 }} className="device-name">
                     {device.name}
                   </div>
+                  {!device.online && (
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 13,
+                          color: "var(--muted)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Offline
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                   {device.actions.map((a) => {
@@ -186,7 +201,11 @@ export default function RoomCard({
                       <button
                         key={a.id}
                         className={"btn " + (active ? "" : "btn-ghost")}
-                        disabled={readonly || loadingDevice === device.id}
+                        disabled={
+                          readonly ||
+                          loadingDevice === device.id ||
+                          !device.online
+                        }
                         onClick={() => runAction(device, a.id)}
                       >
                         {a.name}
