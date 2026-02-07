@@ -7,7 +7,6 @@ export interface ApplicationSession {
   email: string;
 }
 
-// TODO Rename no need for the cookie name here.
 export class GoogleSessionService {
   constructor(
     private readonly googleAuthService: GoogleAuthService,

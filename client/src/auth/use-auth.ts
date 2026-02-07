@@ -25,8 +25,7 @@ export type UseAuthenticationReturnType = {
   appMode: AppModes;
   shouldRenderLogoutButton: boolean;
   logout: () => Promise<void>;
-  startLogin: () => void; // call from "Sign in" button
-  triggerAuthCheck: () => void; // optional: programmatic re-check
+  startLogin: () => void;
 };
 
 export const useAuthentication = (): UseAuthenticationReturnType => {
@@ -74,18 +73,9 @@ export const useAuthentication = (): UseAuthenticationReturnType => {
   // run once on mount
   useEffect(() => {
     runCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startLogin = useCallback(() => {
-    // TODO maybe remove?
-    // Mark "auth in progress" to avoid accidental double-redirects or loopbacks.
-    try {
-      localStorage.setItem("auth_in_progress", Date.now().toString());
-    } catch (e) {
-      // ignore localStorage errors
-    }
-
     const redirectUri = `${API_BASE}/google/callback`;
     const url = buildGoogleAuthUrl(CLIENT_ID, redirectUri);
     window.location.href = url;
@@ -114,6 +104,5 @@ export const useAuthentication = (): UseAuthenticationReturnType => {
     shouldRenderLogoutButton,
     logout,
     startLogin,
-    triggerAuthCheck,
   };
 };
