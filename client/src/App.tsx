@@ -123,7 +123,11 @@ export default function App() {
         }}
       />
 
-      {shouldRenderLogoutButton && <button onClick={logout}>Logout</button>}
+      {shouldRenderLogoutButton && (
+        <button type="button" className="logout-link" onClick={logout}>
+          Log out
+        </button>
+      )}
     </div>
   );
 }

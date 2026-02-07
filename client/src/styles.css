@@ -200,3 +200,31 @@ h1 {
 .collapse-content .controls {
   padding-top: 12px;
 }
+
+.logout-link {
+  background: none;
+  border: none;
+  padding: unset;
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.12s ease, opacity 0.12s ease;
+}
+
+.logout-link:hover {
+  color: var(--accent);
+}
+
+.logout-link:active {
+  opacity: 0.85;
+}
+
+.logout-link:focus-visible {
+  outline: none;
+  text-decoration: underline;
+}
