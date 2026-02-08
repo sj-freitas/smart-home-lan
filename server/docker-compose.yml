@@ -21,6 +21,9 @@ services:
     build:
       context: ..
       dockerfile: server/dockerfile
+      args:
+        VITE_API_HOSTNAME: "http://localhost:3001/api"
+        VITE_GOOGLE_CLIENT_ID: ${AUTH_GOOGLE_CLIENT_ID}
     image: palais-freitas:latest
     restart: unless-stopped
     depends_on:

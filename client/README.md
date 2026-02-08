@@ -18,7 +18,7 @@ Vite uses a `.env` naming convention:
 
 ## Auth
 
-The application requests a GET: `curl 'https://smart-home-lan.onrender.com/api/auth/check'` to make sure that the user has access to the API.
+The application requests a GET: `curl 'https://palais-freitas.xyz/api/auth/check'` to make sure that the user has access to the API.
 This request can return a 401, the app handles the login, 403, the app shows the state but should run in ReadOnly mode. 200, all the actions can be executed normally.
 The login is handled by Google by redirecting the page to the login page, once the flow is complete the API will set a `session` cookie. The API will persist the cookies
 in the database. So the client doesn't need to handle any of the session logic as long as the `credentials` are sent to the API.

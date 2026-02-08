@@ -3,6 +3,10 @@ FROM node:18 AS client-builder
 
 WORKDIR /client
 
+# Build-time args expected from Render (or docker build)
+ARG VITE_API_HOSTNAME
+ARG VITE_GOOGLE_CLIENT_ID
+
 # copy client package files first for layer caching
 COPY client/package.json client/package-lock.json* ./
 
@@ -10,9 +14,13 @@ RUN npm ci --no-progress
 
 # copy client source and build
 COPY client/ .
-
 # build the Vite React app (output to client/dist by default)
-RUN npm run build
+RUN printf '%s\n' \
+  "VITE_API_HOSTNAME=${VITE_API_HOSTNAME:-}" \
+  "VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID:-}" \
+  > .env.production \
+  && npm run build \
+  && rm -f .env.production
 
 # ---- server-builder ----
 FROM timbru31/node-chrome:latest AS server-builder
