@@ -37,7 +37,6 @@ export function useHomeState() {
 
     socket.on("state:update", (msg: ServerMessage<HomeState>) => {
       if (suppressRef.current) {
-        console.log(`Suppressed state update due to pending call.`, msg);
         return;
       }
 

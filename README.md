@@ -21,6 +21,7 @@ These are used internally to track development features. Can move these to a bet
 
 ### Backend
 
+- [MEDIUM] Add proper logging
 - [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
 - [MEDIUM] Humidity and Temperature sensor integration.
 - [MEDIUM] Custom Scripts for devices via EVAL (plugin system) for example runScript: {PATH_TO_SCRIPT} -> Runs that code with the device context. Allows the script to do several things like animations. Need to think of the API design for this. Actions can also trigger scripts.

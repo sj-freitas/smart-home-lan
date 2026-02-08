@@ -57,16 +57,10 @@ export const useAuthentication = (): UseAuthenticationReturnType => {
         cache: "no-store",
       });
 
-      console.log("AUTH CHECK: res", res.status, res.statusText, [
-        ...res.headers.entries(),
-      ]);
-
       const text = await res.text().catch((err) => {
         console.error("Failed to read body as text", err);
         return null;
       });
-
-      console.log("AUTH CHECK: body text:", text);
 
       if (res.status === 200) {
         try {
