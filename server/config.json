@@ -178,7 +178,7 @@
       },
       {
         "id": "kitchen_and_corridor",
-        "name": "Kitchen Corridor",
+        "name": "Kitchen & Corridor",
         "icon": "pan",
         "roomInfo": {
           "sourceDeviceId": "living_room/ac"
