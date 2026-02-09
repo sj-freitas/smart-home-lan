@@ -9,6 +9,7 @@ import { Memoizer } from "../services/memoizer";
 
 export interface ApplicationState {
   name: string;
+  pageTitle: string;
   logo: string;
   faviconUrl: string;
   subTitle: string;
@@ -63,6 +64,7 @@ export class ApplicationStateService {
 
     return {
       name: this.homeConfig.name,
+      pageTitle: this.homeConfig.pageTitle,
       subTitle: this.homeConfig.subTitle,
       logo: this.homeConfig.iconUrl,
       faviconUrl: this.homeConfig.faviconUrl,

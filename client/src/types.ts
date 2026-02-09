@@ -16,6 +16,7 @@ export type Room = {
   devices: Device[];
 }
 export type Home = {
+  pageTitle?: string;
   name: string;
   subTitle?: string;
   logo?: string;

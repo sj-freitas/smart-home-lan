@@ -4,7 +4,8 @@ export interface HomeState {
   name: string;
   subTitle: string;
   logo: string;
-  faviconUrl: string;
+  faviconUrl?: string;
+  pageTitle?: string;
   rooms: {
     id: string;
     name: string;

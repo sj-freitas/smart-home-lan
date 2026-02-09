@@ -5,7 +5,9 @@ import { useHomeState } from "./sockets/use-home-state";
 import { useAuthentication } from "./auth/use-auth";
 
 function setFavicon(href: string | null) {
-  if (!href) return;
+  if (!href) {
+    return;
+  }
   let link: HTMLLinkElement | null =
     document.querySelector("link[rel~='icon']");
   if (!link) {
@@ -16,12 +18,20 @@ function setFavicon(href: string | null) {
   link.href = href;
 }
 
+function setTitle(title: string | null) {
+  if (!title) {
+    return;
+  }
+  document.title = title;
+}
+
 export default function App() {
   const [home, setHome] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
   const { state, setStateSuppressSocket } = useHomeState();
   const API_BASE = import.meta.env.VITE_API_HOSTNAME;
   const iconUrlFromServer = state?.faviconUrl;
+  const titleFromServer = state?.pageTitle;
   const { appMode, shouldRenderLogoutButton, logout, startLogin } =
     useAuthentication();
 
@@ -37,6 +47,12 @@ export default function App() {
     }
     setFavicon(iconUrlFromServer);
   }, [iconUrlFromServer]);
+  useEffect(() => {
+    if (!titleFromServer) {
+      return;
+    }
+    setTitle(titleFromServer);
+  }, [titleFromServer]);
 
   useEffect(() => {
     setHome(state);
