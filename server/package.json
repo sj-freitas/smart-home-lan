@@ -1,5 +1,5 @@
 {
-  "name": "smart-home-lan-server",
+  "name": "smart-home-server",
   "version": "0.1.0",
   "private": true,
   "scripts": {
