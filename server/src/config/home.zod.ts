@@ -5,6 +5,7 @@ const RoomDeviceTypesZod = z.union([
   z.literal("air_conditioner"),
   z.literal("smart_switch"),
   z.literal("smart_light"),
+  z.literal("temperature_humidity_sensor"),
 ]);
 
 export const DeviceActionZod = z.object({
@@ -35,7 +36,8 @@ export const RoomConfigZod = z.object({
   icon: z.string().readonly().optional(),
   roomInfo: z
     .object({
-      sourceDeviceId: z.string().readonly(),
+      temperatureDeviceId: z.string().optional().readonly(),
+      humidityDeviceId: z.string().optional().readonly(),
     })
     .optional()
     .readonly(),

@@ -75,36 +75,41 @@ export class ApplicationStateService {
           icon: room.icon,
           temperature:
             (await this.getIntegrationServiceForDevice(
-              room.roomInfo.sourceDeviceId,
+              room.roomInfo.temperatureDeviceId,
             )?.getDeviceTemperature(memoizationContext)) ?? NaN,
-          devices: await Promise.all(
-            room.devices.map(async (device) => {
-              const deviceInfo = this.getIntegrationServiceForDevice(
-                `${room.id}/${device.id}`,
-              );
-              const currentDeviceState =
-                deviceInfo === null
-                  ? { state: "off", online: false }
-                  : await deviceInfo.getDeviceState(
-                      memoizationContext,
-                      Array.from(device.actions),
-                    );
 
-              return {
-                id: device.id,
-                name: device.name,
-                icon: device.icon,
-                type: device.type,
-                actions:
-                  device.actions.map((t) => ({
-                    id: t.id,
-                    name: t.name,
-                  })) ?? [],
-                state: currentDeviceState.state,
-                online: currentDeviceState.online,
-              };
-            }),
-          ),
+          devices: (
+            await Promise.all(
+              room.devices.map(async (device) => {
+                const deviceInfo = this.getIntegrationServiceForDevice(
+                  `${room.id}/${device.id}`,
+                );
+                const currentDeviceState =
+                  deviceInfo === null
+                    ? { state: "off", online: false }
+                    : await deviceInfo.getDeviceState(
+                        memoizationContext,
+                        Array.from(device.actions),
+                      );
+
+                return {
+                  id: device.id,
+                  name: device.name,
+                  icon: device.icon,
+                  type: device.type,
+                  actions:
+                    device.actions.map((t) => ({
+                      id: t.id,
+                      name: t.name,
+                    })) ?? [],
+                  state: currentDeviceState.state,
+                  online: currentDeviceState.online,
+                };
+              }),
+            )
+          )
+            // Devices with no actions aren't listed, such as temperature sensors.
+            .filter((t) => t.actions.length > 0),
         })),
       ),
     };

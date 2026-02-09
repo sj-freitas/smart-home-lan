@@ -1,6 +1,6 @@
 # Important
 
-The backend reads the config file, store the file anywhere, you can set the path to it using CONFIG_PATH, it needs to be a JSON file,
+The backend reads the config file. Store the file anywhere, you can set the path to it using CONFIG_PATH, it needs to be a JSON file,
 the schema is written in zod here: [base-config.zod.ts](./src/config/base-config.zod.ts) the types are all referenced there. Each integration
 can have their own types specified within the [integrations directory](./src/integrations).
 
@@ -29,7 +29,7 @@ Currently these are the supported integrations:
 
 - [Philips Hue](./src/integrations/hue-cloud/README.md)
 - [MEL Cloud Home](./src/integrations/mel-cloud-home/README.md)
-- [Tuya (Nedis Smart Life)](./src/integrations/tuya/README.md)
+- [Tuya (Nedis Smart Life)](./src/integrations/tuya/README.md) *This integration won't be supported anymore and just exists as an exercise even though it's working*.
 
 ### Device
 
@@ -129,4 +129,5 @@ for Mac ARM just set to `"linux/arm64"`.
 ### Running
 
 Building: `docker compose -f docker-compose.yml --env-file .env up -d --no-deps --build`
-It'll run the server and you can access it on the same way as usual. This will run both server and API on port 3001.
+It'll run the server and you can access it on the same way as usual. This will run both Client and API on port 3001.
+The Client is served as static files on the `/*` route, you can see more on [the StaticController](./src/controllers/static.controller.ts).

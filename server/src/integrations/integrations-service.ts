@@ -18,6 +18,11 @@ export interface IntegrationService<T> {
     deviceInfo: T,
     deviceType: RoomDeviceTypes,
   ): Promise<number>;
+  getDeviceHumidity(
+    memoizationContext: Memoizer,
+    deviceInfo: T,
+    deviceType: RoomDeviceTypes,
+  ): Promise<number>;
   getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: T,
@@ -49,6 +54,14 @@ export class IntegrationServiceWithContext<T> {
       this.context.info,
       this.context.type,
     );
+  }
+
+  async getDeviceHumidity(memoizationContext: Memoizer) {
+    return this.service.getDeviceHumidity(
+      memoizationContext,
+      this.context.info,
+      this.context.type,
+    )
   }
 
   async getDeviceState(memoizationContext: Memoizer, actions: DeviceAction[]): Promise<DeviceState> {

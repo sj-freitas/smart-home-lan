@@ -84,6 +84,10 @@ export class HueCloudIntegrationService implements IntegrationService<HueCloudIn
     return NaN;
   }
 
+  async getDeviceHumidity(): Promise<number> {
+    return NaN;
+  }
+
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: HueCloudIntegrationDevice,

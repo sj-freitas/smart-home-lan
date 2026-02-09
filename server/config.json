@@ -29,7 +29,7 @@
         "name": "Living Room",
         "icon": "sofa",
         "roomInfo": {
-          "sourceDeviceId": "living_room/ac"
+          "temperatureDeviceId": "living_room/ac"
         },
         "devices": [
           {
@@ -182,7 +182,7 @@
         "name": "Kitchen & Corridor",
         "icon": "pan",
         "roomInfo": {
-          "sourceDeviceId": "living_room/ac"
+          "temperatureDeviceId": "living_room/ac"
         },
         "devices": [
           {
@@ -339,7 +339,7 @@
         "name": "Bathroom",
         "icon": "bathtub",
         "roomInfo": {
-          "sourceDeviceId": "living_room/ac"
+          "temperatureDeviceId": "living_room/ac"
         },
         "devices": [
           {
@@ -398,7 +398,7 @@
         "name": "Lisbon",
         "icon": "double_bed",
         "roomInfo": {
-          "sourceDeviceId": "main_bedroom/ac"
+          "temperatureDeviceId": "main_bedroom/ac"
         },
         "devices": [
           {
@@ -560,7 +560,7 @@
         "name": "Lviv",
         "icon": "single_bed",
         "roomInfo": {
-          "sourceDeviceId": "guest_room/ac"
+          "temperatureDeviceId": "guest_room/ac"
         },
         "devices": [
           {

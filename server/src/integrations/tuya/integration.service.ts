@@ -55,6 +55,11 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
   async getDeviceTemperature(): Promise<number> {
     return NaN;
   }
+
+  async getDeviceHumidity(): Promise<number> {
+    return NaN;
+  }
+
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: TuyaIntegrationDevice,

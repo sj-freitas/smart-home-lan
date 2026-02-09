@@ -39,7 +39,7 @@ These devices can be used for the `room.roomInfo` data:
 
 ```json
 "roomInfo": {
-  "sourceDeviceId": "{room}/{device}"
+  "temperatureDeviceId": "{room}/{device}"
 }
 ```
 

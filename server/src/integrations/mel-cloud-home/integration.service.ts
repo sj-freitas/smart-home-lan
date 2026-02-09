@@ -109,6 +109,11 @@ export class MelCloudHomeIntegrationService implements IntegrationService<MelClo
 
     return foundDevice.room.temperature;
   }
+
+  async getDeviceHumidity(): Promise<number> {
+    return NaN;
+  }
+
   async getDeviceState(
     memoizationContext: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,

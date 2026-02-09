@@ -1,9 +1,9 @@
 # Getting Started
 
-UI is built using Vite and React. Everything is written in Typescript.
+The UI is built using Vite and uses React. Everything is written in Typescript.
 
-The frontend works in a similar way to HATEOAS (although not entirely the same). The main principle is that the API feeds a state on `/api/home` which is fed from the
-config file. The sample config file is [here](../server/config.json). The UI will now how to render Rooms (collapsible cards) and Devices (rows).
+The frontend works in a similar way to HATEOAS (although not entirely the same). The main principle is that the API feeds a state from `/api/home` which is fed from the
+config file. The sample config file is [here](../server/config.json). The UI will know how to render Rooms (collapsible cards) and Devices (rows).
 Each device has a set of presets (actions) which will be rendered as buttons with a state, showing the current preset.
 API Calls to any action will follow `/api/actions/{roomId}/{deviceId}/{actionId}`.
 
@@ -19,7 +19,7 @@ Vite uses a `.env` naming convention:
 ## Auth
 
 The application requests a GET: `curl 'https://palais-freitas.xyz/api/auth/check'` to make sure that the user has access to the API.
-This request can return a 401, the app handles the login, 403, the app shows the state but should run in ReadOnly mode. 200, all the actions can be executed normally.
+This request can return a 401, the app handles the login via GoogleAuth, 403, the app shows the state but should run in ReadOnly mode. 200, all the actions can be executed normally.
 The login is handled by Google by redirecting the page to the login page, once the flow is complete the API will set a `session` cookie. The API will persist the cookies
 in the database. So the client doesn't need to handle any of the session logic as long as the `credentials` are sent to the API.
 
@@ -32,3 +32,5 @@ To run in production:
 
 - Build using `npm run build:prod`
 - Run using `npm run preview`
+
+The application is designed to be hosted via the NestJS API, you can see more on the [Server's Dockerfile](../server/dockerfile).
