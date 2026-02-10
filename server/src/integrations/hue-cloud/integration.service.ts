@@ -1,13 +1,13 @@
 import { HueCloudIntegrationDevice } from "../../config/integration.zod";
 import {
   DeviceState,
+  IntegratedDeviceConfig,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
 import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { HueClient } from "./hue.client";
 import { LightState, LightStateZod } from "./hue.types.zod";
-import { Memoizer } from "../../services/memoizer";
 
 function normalizeDeviceIds(deviceId: string | string[]): string[] {
   if (Array.isArray(deviceId)) {
@@ -73,76 +73,75 @@ function tryFindBestMatchingAction(
   return bestMatch.actionId;
 }
 
-const HUE_STATE_CACHE_KEY = Symbol("HUE_STATE_CACHE_KEY");
-
 export class HueCloudIntegrationService implements IntegrationService<HueCloudIntegrationDevice> {
   public name: "hue_cloud" = "hue_cloud";
 
   constructor(private readonly hueClient: HueClient) {}
 
-  async getDeviceTemperature(): Promise<number> {
-    return NaN;
-  }
+  public async consolidateDeviceStates(
+    devices: IntegratedDeviceConfig<HueCloudIntegrationDevice>[],
+  ): Promise<DeviceState[]> {
+    const hueDevices = await this.hueClient.getLights();
 
-  async getDeviceHumidity(): Promise<number> {
-    return NaN;
-  }
+    return devices.map((currDevice) => {
+      const [firstId] = normalizeDeviceIds(currDevice.info.id);
+      const matchingDevice = hueDevices[firstId];
+      if (!matchingDevice) {
+        console.warn(
+          `MelCloudHome Device ${currDevice.info.id} wasn't found - device not associated with home.`,
+        );
+        return {
+          online: false,
+          state: "off",
+          temperature: null,
+          humidity: null,
+        };
+      }
 
-  async getDeviceState(
-    memoizationContext: Memoizer,
-    deviceInfo: HueCloudIntegrationDevice,
-    deviceType: RoomDeviceTypes,
-    actionDescriptions: DeviceAction[],
-  ): Promise<DeviceState> {
-    const hueDevices = await memoizationContext.run(
-      HUE_STATE_CACHE_KEY,
-      async () => this.hueClient.getLights(),
-    );
-    const ids = normalizeDeviceIds(deviceInfo.id);
-    const [firstDevice] = ids;
-    const currDevice = hueDevices[firstDevice];
+      if (currDevice.type === "smart_light") {
+        // Find the matching action for this color combination
+        const actionParametersMap = new Map(
+          currDevice.actions.map(
+            (t) =>
+              [t.id, LightStateZod.parse(t.parameters)] as [string, LightState],
+          ),
+        );
 
-    if (!currDevice) {
+        const currentDeviceState = matchingDevice.state;
+        const action = tryFindBestMatchingAction(
+          currentDeviceState,
+          actionParametersMap,
+        );
+
+        return {
+          state: action,
+          online: matchingDevice.state.reachable,
+          temperature: null,
+          humidity: null,
+        };
+      }
+      if (currDevice.type === "smart_switch") {
+        return {
+          state: matchingDevice.state.on ? "on" : "off",
+          online: matchingDevice.state.reachable,
+          temperature: null,
+          humidity: null,
+        };
+      }
+
+      console.warn(
+        `Unsupported device type ${currDevice.type} for Philips Hue`,
+      );
       return {
         online: false,
         state: "off",
+        temperature: null,
+        humidity: null,
       };
-    }
-
-    if (deviceType === "smart_light") {
-      const actionParametersMap = new Map(
-        actionDescriptions.map(
-          (t) =>
-            [t.id, LightStateZod.parse(t.parameters)] as [string, LightState],
-        ),
-      );
-
-      const currentDeviceState = currDevice.state;
-      const action = tryFindBestMatchingAction(
-        currentDeviceState,
-        actionParametersMap,
-      );
-      return {
-        state: action,
-        online: currDevice.state.reachable,
-      };
-    }
-
-    if (deviceType === "smart_switch") {
-      return {
-        state: currDevice.state.on ? "on" : "off",
-        online: currDevice.state.reachable,
-      };
-    }
-
-    return {
-      state: "off",
-      online: false,
-    };
+    });
   }
 
   async tryRunAction(
-    _: Memoizer,
     deviceInfo: HueCloudIntegrationDevice,
     deviceType: RoomDeviceTypes,
     action: DeviceAction,

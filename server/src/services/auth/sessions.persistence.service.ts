@@ -1,6 +1,6 @@
 import { Pool } from "pg";
 import { toSequence, toUuid } from "../../helpers/uuid.helper";
-import z from "zod";
+import { z } from "zod";
 
 export const SessionZod = z
   .object({

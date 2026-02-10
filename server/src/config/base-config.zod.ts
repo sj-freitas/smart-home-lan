@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 import { HomeConfigZod } from "./home.zod";
 import { IntegrationsConfigZod as IntegrationConfigZod } from "./integration.zod";
 

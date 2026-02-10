@@ -1,4 +1,4 @@
-import { Module, Scope } from "@nestjs/common";
+import { Module, Scope, UseFilters } from "@nestjs/common";
 import { REQUEST } from "@nestjs/core";
 import { Pool } from "pg";
 import { OAuth2Client } from "google-auth-library";
@@ -15,6 +15,8 @@ import { AuthorizationHeaderVerificationService } from "./auth/authorization-hea
 import { GoogleSessionService } from "./auth/google-session.service";
 import { SessionsPersistenceService } from "./auth/sessions.persistence.service";
 import { GoogleAuthConfig } from "./auth/google-auth";
+import { StatePersistenceService } from "./state/state.persistence.service";
+import { StateService } from "./state/state.service";
 
 const HOME_CONFIG = "HOME_CONFIG";
 
@@ -154,6 +156,19 @@ const IPValidationServiceProvider = {
   },
 };
 
+const StatePersistenceServiceProvider = {
+  provide: StatePersistenceService,
+  inject: [Pool],
+  useFactory: (pool: Pool) => new StatePersistenceService(pool),
+};
+
+const StateServiceProvider = {
+  provide: StateService,
+  inject: [StatePersistenceService, ConfigService],
+  useFactory: (service: StatePersistenceService, config: ConfigService) =>
+    new StateService(config.getConfig().home, service),
+};
+
 @Module({
   imports: [ConfigModule],
   providers: [
@@ -170,6 +185,8 @@ const IPValidationServiceProvider = {
     RequestContextProvider,
     HomeConfigProvider,
     PgPoolProvider,
+    StatePersistenceServiceProvider,
+    StateServiceProvider,
   ],
   exports: [
     OAuth2ClientProvider,
@@ -185,6 +202,8 @@ const IPValidationServiceProvider = {
     RequestContextProvider,
     HomeConfigProvider,
     PgPoolProvider,
+    StatePersistenceServiceProvider,
+    StateServiceProvider,
   ],
 })
 export class ServicesModule {}
