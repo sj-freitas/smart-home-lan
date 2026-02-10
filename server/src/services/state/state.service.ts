@@ -56,8 +56,8 @@ function alterHomeState(
       id: matchingRoomInState.id,
       name: matchingRoomInState.name,
       icon: matchingRoomInState.icon,
-      temperature: matchingRoomInState.temperature,
-      humidity: matchingRoomInState.humidity,
+      temperature: matchingRoomInState.temperature ?? null,
+      humidity: matchingRoomInState.humidity ?? null,
       devices: matchingRoomInState.devices,
     };
   });
@@ -67,11 +67,11 @@ function alterHomeState(
   for (const currRoom of rooms) {
     const humidityDevice = mappedDevices.get(currRoom.roomInfo.humidityDeviceId);
     if (humidityDevice) {
-      currRoom.humidity = humidityDevice.humidity;
+      currRoom.humidity = humidityDevice.humidity ?? null;
     }
     const temperatureDevice = mappedDevices.get(currRoom.roomInfo.temperatureDeviceId);
     if (temperatureDevice) {
-      currRoom.temperature = temperatureDevice.temperature;
+      currRoom.temperature = temperatureDevice.temperature ?? null;
     }
   }
 

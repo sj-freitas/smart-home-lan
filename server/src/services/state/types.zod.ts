@@ -16,8 +16,8 @@ export const DeviceStateZod = z.object({
 
   // The actual data for the state
   state: z.union([z.literal("off"), z.string()]).optional(),
-  temperature: z.number().optional(),
-  humidity: z.number().optional(),
+  temperature: z.number().nullable().optional(),
+  humidity: z.number().nullable().optional(),
   online: z.boolean().optional(),
 });
 
@@ -25,8 +25,8 @@ export const RoomStateZod = z.object({
   id: z.string(),
   name: z.string(),
   icon: z.string(),
-  temperature: z.number().nullable(),
-  humidity: z.number().nullable(),
+  temperature: z.number().nullable().optional().default(null),
+  humidity: z.number().nullable().optional().default(null),
   devices: z.array(
     z.object({
       id: z.string(),
