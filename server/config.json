@@ -124,13 +124,13 @@
                 }
               },
               {
-                "id": "on_romantic",
-                "name": "Romantic",
+                "id": "on_sunset",
+                "name": "Sunset",
                 "parameters": {
                   "on": true,
                   "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
+                  "hue": 3010,
+                  "sat": 232
                 }
               }
             ]
@@ -144,7 +144,7 @@
               "name": "hue_cloud",
               "id": "19"
             },
-                        "actions": [
+            "actions": [
               {
                 "id": "off",
                 "name": "Off",
@@ -173,13 +173,13 @@
                 }
               },
               {
-                "id": "on_romantic",
-                "name": "Romantic",
+                "id": "on_sunset",
+                "name": "Sunset",
                 "parameters": {
                   "on": true,
                   "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
+                  "hue": 3010,
+                  "sat": 232
                 }
               }
             ]
@@ -222,13 +222,13 @@
                 }
               },
               {
-                "id": "on_romantic",
-                "name": "Romantic",
+                "id": "on_sunset",
+                "name": "Sunset",
                 "parameters": {
                   "on": true,
                   "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
+                  "hue": 3010,
+                  "sat": 232
                 }
               }
             ]
@@ -281,13 +281,13 @@
                 }
               },
               {
-                "id": "on_romantic",
-                "name": "Romantic",
+                "id": "on_sunset",
+                "name": "Sunset",
                 "parameters": {
                   "on": true,
                   "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
+                  "hue": 3010,
+                  "sat": 232
                 }
               }
             ]
@@ -330,13 +330,13 @@
                 }
               },
               {
-                "id": "on_romantic",
-                "name": "Romantic",
+                "id": "on_sunset",
+                "name": "Sunset",
                 "parameters": {
                   "on": true,
                   "bri": 115,
-                  "hue": 62965,
-                  "sat": 254
+                  "hue": 3010,
+                  "sat": 232
                 }
               }
             ]
