@@ -14,40 +14,10 @@ import { TuyaCloudModule } from "./tuya/module";
 import { HueCloudIntegrationService } from "./hue-cloud/integration.service";
 import { HUE_REFRESH_TOKEN, HueCloudModule } from "./hue-cloud/module";
 import { ConfigService } from "../config/config-service";
-import { ApplicationStateService } from "./application-state.service";
 import {
   IntegrationTypeNames,
   IntegrationTypeNamesZod,
 } from "../config/integration.zod";
-
-const ApplicationStateServiceProvider = {
-  provide: ApplicationStateService,
-  inject: [ConfigService, IntegrationsService],
-  useFactory: (config: ConfigService, integrations: IntegrationsService) =>
-    new ApplicationStateService(config, integrations),
-};
-
-// const IntegrationsServiceProvider = {
-//   provide: IntegrationsService,
-//   inject: [
-//     MelCloudHomeIntegrationService,
-//     TuyaCloudIntegrationService,
-//     HueCloudIntegrationService,
-//     MEL_CLOUD_AUTHENTICATION_COOKIES,
-//     HUE_REFRESH_TOKEN,
-//   ],
-//   useFactory: async (
-//     melCloudIntegrationService: MelCloudHomeIntegrationService,
-//     tuyaCloudIntegrationService: TuyaCloudIntegrationService,
-//     hueCloudIntegrationService: HueCloudIntegrationService,
-//   ) => {
-//     return new IntegrationsService([
-//       melCloudIntegrationService,
-//       tuyaCloudIntegrationService,
-//       hueCloudIntegrationService,
-//     ]);
-//   },
-// };
 
 type ModuleHelper = {
   module: any;
@@ -92,8 +62,11 @@ function initDynamicIntegrationsProvider() {
     providers: [
       {
         provide: IntegrationsService,
-        inject: [...integrationProviders.flatMap((t) => t.services)],
-        useFactory: async (...params: any[]) => {
+        inject: [
+          ConfigService,
+          ...integrationProviders.flatMap((t) => t.services),
+        ],
+        useFactory: async (configService: ConfigService, ...params: any[]) => {
           const integrationServices = params.filter(
             (t) =>
               IntegrationTypeNamesZod.safeParse(
@@ -101,7 +74,10 @@ function initDynamicIntegrationsProvider() {
               ).success,
           );
 
-          return new IntegrationsService(integrationServices);
+          return new IntegrationsService(
+            configService.getConfig().home,
+            integrationServices,
+          );
         },
       },
     ],
@@ -112,11 +88,7 @@ const metaModule = initDynamicIntegrationsProvider();
 
 @Module({
   imports: [ConfigModule, ...metaModule.imports],
-  providers: [ApplicationStateServiceProvider, ...metaModule.providers],
-  exports: [
-    ...metaModule.providers,
-    ...metaModule.imports,
-    ApplicationStateServiceProvider,
-  ],
+  providers: [...metaModule.providers],
+  exports: [...metaModule.providers, ...metaModule.imports],
 })
 export class IntegrationsModule {}

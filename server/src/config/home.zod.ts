@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { IntegrationDeviceTypesZod } from "./integration.zod";
 
-const RoomDeviceTypesZod = z.union([
+export const RoomDeviceTypesZod = z.union([
   z.literal("air_conditioner"),
   z.literal("smart_switch"),
   z.literal("smart_light"),

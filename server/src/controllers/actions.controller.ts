@@ -1,118 +1,93 @@
 import { Controller, HttpCode, Param, Post, UseGuards } from "@nestjs/common";
-import { DeviceAction } from "../config/home.zod";
-import {
-  IntegrationServiceWithContext,
-  IntegrationsService,
-} from "../integrations/integrations-service";
-import {
-  ApplicationState,
-  ApplicationStateService,
-} from "../integrations/application-state.service";
+import { IntegrationsService } from "../integrations/integrations-service";
 import { ConfigService } from "../config/config-service";
 import { DeviceHelper } from "../helpers/device-helpers";
 import { HomeStateGateway } from "../sockets/home.state.gateway";
 import { AuthGuard } from "../services/auth-guard";
-import { Memoizer } from "../services/memoizer";
-
-interface IntegratedDevice<T> {
-  integrationService: IntegrationServiceWithContext<T>;
-  actions: Map<string, DeviceAction>;
-}
+import { StateService } from "../services/state/state.service";
 
 @Controller("api/actions")
 export class ActionsController {
   private readonly deviceHelper: DeviceHelper;
+  private readonly homeName: string;
 
   constructor(
     configService: ConfigService,
-    private readonly applicationStateService: ApplicationStateService,
     private readonly integrations: IntegrationsService,
     private readonly homeStateGateway: HomeStateGateway,
+    private readonly stateService: StateService,
   ) {
     const config = configService.getConfig();
     this.deviceHelper = new DeviceHelper(config.home);
+    this.homeName = config.home.name;
   }
 
-  private getIntegratedDeviceFromId(
-    devicePath: string,
-  ): IntegratedDevice<unknown> | null {
+  private getIntegratedDeviceFromId(devicePath: string) {
     const deviceInfo = this.deviceHelper.getDevice(devicePath);
     if (!deviceInfo) {
       return null;
     }
 
-    const deviceActions = deviceInfo.actions;
+    const integrationService = this.integrations.getIntegrationService(
+      deviceInfo.integration.name,
+    );
     return {
-      integrationService: this.integrations.getIntegration({
-        integration: deviceInfo.integration,
-        deviceType: deviceInfo.type,
-      }),
-      actions: new Map(deviceActions.map((action) => [action.id, action])),
+      device: deviceInfo,
+      integration: integrationService,
     };
   }
 
   @UseGuards(AuthGuard)
-  @Post("/:room/:deviceId/:action")
+  @Post("/:roomId/:deviceId/:actionId")
   @HttpCode(200)
   public async performAction(
-    @Param("room") room: string,
+    @Param("roomId") roomId: string,
     @Param("deviceId") deviceId: string,
-    @Param("action") action: string,
+    @Param("actionId") actionId: string,
   ) {
-    const device = this.getIntegratedDeviceFromId(`${room}/${deviceId}`);
-    if (!device) {
+    const integratedDevice = this.getIntegratedDeviceFromId(
+      `${roomId}/${deviceId}`,
+    );
+    if (!integratedDevice) {
       return {
-        room,
+        room: roomId,
         deviceId: deviceId,
-        action,
+        action: actionId,
         message: `Device with id ${deviceId} not found`,
         runStatus: "failure",
       };
     }
-    const actionDescription = device.actions.get(action);
+    const actionDescription = integratedDevice.device.actions.find(
+      (t) => t.id === actionId,
+    );
     if (!actionDescription) {
       return {
-        room,
+        room: roomId,
         deviceId: deviceId,
-        action,
-        message: `Action ${action} not found`,
+        action: actionId,
+        message: `Action ${actionId} not found`,
         runStatus: "failure",
       };
     }
 
-    const actionRunStatus = await device.integrationService.tryRunAction(
-      new Memoizer(),
+    const actionRunStatus = await integratedDevice.integration.tryRunAction(
+      integratedDevice.device.integration,
+      integratedDevice.device.type,
       actionDescription,
     );
-
-    // New state should include the action that was performed.
-    const currentState = await this.applicationStateService.getHomeState();
-    const newState: ApplicationState = {
-      ...currentState,
-      rooms: currentState.rooms.map((currRoom) => ({
-        ...currRoom,
-        devices: currRoom.devices.map((currDevice) => {
-          const isCurrDevice =
-            currDevice.id === deviceId && currRoom.id === room;
-
-          if (isCurrDevice) {
-            return {
-              ...currDevice,
-              state: action,
-            };
-          }
-
-          return currDevice;
-        }),
-      })),
-    };
-
+    const newState = await this.stateService.addToState([
+      {
+        id: deviceId,
+        roomId: roomId,
+        state: actionId,
+      },
+    ]);
     this.homeStateGateway.updateState(newState);
 
     return {
-      room,
+      room: roomId,
       deviceId: deviceId,
-      action,
+      action: actionId,
       message: actionRunStatus === true ? undefined : actionRunStatus,
       runStatus: actionRunStatus === true ? "success" : "failure",
     };

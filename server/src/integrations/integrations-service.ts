@@ -1,81 +1,51 @@
-import { Memoizer } from "../services/memoizer";
-import { DeviceAction, RoomDeviceTypes } from "../config/home.zod";
-import {
-  IntegrationDeviceTypes,
-  IntegrationTypeNames,
-} from "../config/integration.zod";
+import { DeviceAction, HomeConfig, RoomDeviceTypes } from "../config/home.zod";
+import { IntegrationTypeNames } from "../config/integration.zod";
 
 export type TryRunActionResult = true | string;
+
 export interface DeviceState {
   online: boolean;
   state: "off" | string;
+  temperature: number;
+  humidity: number;
+}
+
+export interface IntegratedDeviceConfig<T> {
+  info: T;
+  type: RoomDeviceTypes;
+  actions: DeviceAction[];
+}
+
+export interface LoadedDeviceConfig<T> {
+  path: string;
+  type: RoomDeviceTypes;
+  info: T;
+  state: DeviceState;
 }
 
 export interface IntegrationService<T> {
   readonly name: IntegrationTypeNames;
-  getDeviceTemperature(
-    memoizationContext: Memoizer,
-    deviceInfo: T,
-    deviceType: RoomDeviceTypes,
-  ): Promise<number>;
-  getDeviceHumidity(
-    memoizationContext: Memoizer,
-    deviceInfo: T,
-    deviceType: RoomDeviceTypes,
-  ): Promise<number>;
-  getDeviceState(
-    memoizationContext: Memoizer,
-    deviceInfo: T,
-    deviceType: RoomDeviceTypes,
-    actionDescriptions: DeviceAction[],
-  ): Promise<DeviceState>;
+
+  consolidateDeviceStates(
+    devices: IntegratedDeviceConfig<T>[],
+  ): Promise<DeviceState[]>;
+
   tryRunAction(
-    memoizationContext: Memoizer,
     deviceInfo: T,
     deviceType: RoomDeviceTypes,
     action: DeviceAction,
   ): Promise<TryRunActionResult>;
 }
 
-interface DeviceContext<T> {
-  info: T;
-  type: RoomDeviceTypes;
-}
-
+// POINT here remove everything except context.
 export class IntegrationServiceWithContext<T> {
   constructor(
     private readonly service: IntegrationService<T>,
-    private readonly context: DeviceContext<T>,
+    public readonly context: LoadedDeviceConfig<T>,
   ) {}
 
-  async getDeviceTemperature(memoizationContext: Memoizer) {
-    return this.service.getDeviceTemperature(
-      memoizationContext,
-      this.context.info,
-      this.context.type,
-    );
-  }
-
-  async getDeviceHumidity(memoizationContext: Memoizer) {
-    return this.service.getDeviceHumidity(
-      memoizationContext,
-      this.context.info,
-      this.context.type,
-    )
-  }
-
-  async getDeviceState(memoizationContext: Memoizer, actions: DeviceAction[]): Promise<DeviceState> {
-    return this.service.getDeviceState(
-      memoizationContext,
-      this.context.info,
-      this.context.type,
-      actions,
-    );
-  }
-
-  async tryRunAction(memoizationContext: Memoizer, action: DeviceAction) {
+  public async tryRunAction(action: DeviceAction) {
     return this.service.tryRunAction(
-      memoizationContext,
       this.context.info,
       this.context.type,
       action,
@@ -83,26 +53,70 @@ export class IntegrationServiceWithContext<T> {
   }
 }
 
-interface IntegrationInfo {
-  integration: IntegrationDeviceTypes;
-  deviceType: RoomDeviceTypes;
-}
-
 export class IntegrationsService {
-  getIntegration(
-    info: IntegrationInfo,
-  ): IntegrationServiceWithContext<unknown> {
+  constructor(
+    private readonly homeConfig: HomeConfig,
+    private readonly integrations: IntegrationService<unknown>[],
+  ) {}
+
+  getIntegrationService(
+    integrationName: IntegrationTypeNames,
+  ): IntegrationService<unknown> {
     const found = this.integrations.find(
-      (t) => t.name === info.integration.name,
+      (t) => t.name === integrationName,
     );
     if (!found) {
-      throw new Error(`Integration ${info.integration.name} not supported.`);
+      throw new Error(`Integration ${integrationName} not supported.`);
     }
-    return new IntegrationServiceWithContext(found, {
-      info: info.integration,
-      type: info.deviceType,
-    });
+    
+    return found;
   }
 
-  constructor(private readonly integrations: IntegrationService<unknown>[]) {}
+  public async getAllDevices(): Promise<
+    IntegrationServiceWithContext<unknown>[]
+  > {
+    const allDeviceConfigs = this.homeConfig.rooms
+      .map((currRoom) =>
+        currRoom.devices.map((currDevice) => ({
+          path: `${currRoom.id}/${currDevice.id}`,
+          device: currDevice,
+        })),
+      )
+      .flatMap((t) => t);
+
+    const allDevices = await Promise.all(
+      this.integrations.map(async (currIntegration) => {
+        const deviceConfigsOfIntegration = allDeviceConfigs
+          .filter((t) => t.device.integration.name === currIntegration.name)
+          .map((t) => ({
+            path: t.path,
+            info: t.device.integration,
+            type: t.device.type,
+            actions: [...t.device.actions],
+          }));
+
+        const data = await currIntegration.consolidateDeviceStates(
+          deviceConfigsOfIntegration,
+        );
+
+        // Merge both
+        const merged = data.map((t, idx) => ({
+          state: t,
+          config: deviceConfigsOfIntegration[idx],
+        }));
+
+        return merged.map(
+          (t) =>
+            new IntegrationServiceWithContext(currIntegration, {
+              path: t.config.path,
+              type: t.config.type,
+              info: t.config.info,
+              state: t.state,
+            }),
+        );
+      }),
+    );
+
+    return allDevices.flatMap((t) => t);
+  }
 }

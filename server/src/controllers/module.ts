@@ -9,7 +9,6 @@ import { AuthController } from "./auth.controller";
 import { SandboxController } from "./sandbox.controller";
 import { StaticController } from "./static.controller";
 import { AuthConfig } from "./auth.config";
-import { AuthHueController } from "./auth-hue/auth-hue.controller";
 import { AuthGoogleController } from "./auth-google/auth-google.controller";
 
 const AuthConfigProvider = {
@@ -24,7 +23,6 @@ const AuthConfigProvider = {
     HomeController,
     ActionsController,
     AuthController,
-    AuthHueController,
     AuthGoogleController,
     SandboxController,
     StaticController,

@@ -1,6 +1,7 @@
 import { TuyaIntegrationDevice } from "../../config/integration.zod";
 import {
   DeviceState,
+  IntegratedDeviceConfig,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
@@ -9,96 +10,48 @@ import {
   TuyaBatchStatusResponseZod,
   TuyaDeviceCommandResultZod,
 } from "./types.zod";
-import {
-  DeviceAction,
-  HomeConfig,
-  RoomDeviceTypes,
-} from "../../config/home.zod";
-import { Memoizer } from "../../services/memoizer";
-import { ConfigService } from "../../config/config-service";
-
-function getAllTuyaDeviceIdsFromConfig(home: HomeConfig) {
-  const allRoomsFlat = home.rooms.flatMap((t) => t);
-  const allDevices = allRoomsFlat.flatMap((t) => t.devices);
-
-  const allTuyaDevices = allDevices
-    .filter((t) => t.integration.name === "tuya_cloud")
-    .map((t) => ({
-      deviceId: (t.integration as TuyaIntegrationDevice).deviceId,
-      deviceType: t.type,
-    }));
-
-  return allTuyaDevices;
-}
-
-interface TuyaDeviceMetadata {
-  deviceId: string;
-  deviceType: RoomDeviceTypes;
-}
-
-const TUYA_DEVICE_MEMOIZATION_KEY = Symbol("TUYA_DEVICE_MEMOIZATION_KEY");
+import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 
 export class TuyaCloudIntegrationService implements IntegrationService<TuyaIntegrationDevice> {
-  private readonly allTuyaDeviceIds: TuyaDeviceMetadata[];
-
-  constructor(
-    private readonly tuyaContext: TuyaContext,
-    config: ConfigService,
-  ) {
-    this.allTuyaDeviceIds = getAllTuyaDeviceIdsFromConfig(
-      config.getConfig().home,
-    );
-  }
+  constructor(private readonly tuyaContext: TuyaContext) {}
 
   public name: "tuya_cloud" = "tuya_cloud";
 
-  async getDeviceTemperature(): Promise<number> {
-    return NaN;
-  }
+  public async consolidateDeviceStates(
+    devices: IntegratedDeviceConfig<TuyaIntegrationDevice>[],
+  ): Promise<DeviceState[]> {
+    const tuyaDeviceIds = devices.map((t) => t.info.deviceId);
+    const unparsedBatchedResponse = await this.tuyaContext.request({
+      method: "GET",
+      path: `/v1.0/iot-03/devices/status?device_ids=${encodeURIComponent(tuyaDeviceIds.join(","))}`,
+      body: {},
+    });
+    const parsedBatchStatus = TuyaBatchStatusResponseZod.parse(
+      unparsedBatchedResponse,
+    );
 
-  async getDeviceHumidity(): Promise<number> {
-    return NaN;
-  }
-
-  async getDeviceState(
-    memoizationContext: Memoizer,
-    deviceInfo: TuyaIntegrationDevice,
-    deviceType: RoomDeviceTypes,
-  ): Promise<DeviceState> {
-    if (deviceType !== "smart_switch") {
-      return {
-        state: "off",
-        online: false,
-      };
-    }
-
-    try {
-      const deviceIds = this.allTuyaDeviceIds.map((t) => t.deviceId);
-      const unparsedBatchedResponse = await memoizationContext.run(
-        TUYA_DEVICE_MEMOIZATION_KEY,
-        async () => {
-          return await this.tuyaContext.request({
-            method: "GET",
-            path: `/v1.0/iot-03/devices/status?device_ids=${encodeURIComponent(deviceIds.join(","))}`,
-            body: {},
-          });
-        },
-      );
-      const parsedBatchStatus = TuyaBatchStatusResponseZod.parse(
-        unparsedBatchedResponse,
-      );
-
-      // Find specific device
-      const matchingDevice = parsedBatchStatus.result.find(
-        (t) => t.id === deviceInfo.deviceId,
-      );
-
-      if (!matchingDevice) {
-        throw new Error(
-          `Device with id ${deviceInfo.deviceId} was not found on Tuya Cloud.`,
-        );
+    return devices.map((t) => {
+      if (t.type !== "smart_switch") {
+        console.warn(`Unsupported device type ${t.type} for Tuya`);
+        return {
+          online: false,
+          state: "off",
+          temperature: null,
+          humidity: null,
+        };
       }
 
+      const matchingDevice = parsedBatchStatus.result.find(
+        (currTuyaDevice) => t.info.deviceId === currTuyaDevice.id,
+      );
+      if (!matchingDevice) {
+        return {
+          online: false,
+          state: "off",
+          temperature: null,
+          humidity: null,
+        };
+      }
       const switchOne = matchingDevice.status.find(
         (t) => t.code === "switch_1",
       );
@@ -111,18 +64,13 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
       return {
         state: switchOne.value ? "on" : "off",
         online: true,
+        temperature: null,
+        humidity: null,
       };
-    } catch (error: unknown) {
-      console.error(error);
-      return {
-        state: "off",
-        online: false,
-      };
-    }
+    });
   }
 
   async tryRunAction(
-    _: Memoizer,
     deviceInfo: TuyaIntegrationDevice,
     deviceType: RoomDeviceTypes,
     actionDescription: DeviceAction,
@@ -131,32 +79,22 @@ export class TuyaCloudIntegrationService implements IntegrationService<TuyaInteg
       return `Integrations for actions for Tuya devices do not support ${deviceType}.`;
     }
 
-    // Could we get all Tuya device IDS here from the config? A bit cheating but we can try.
-
     try {
-      if (actionDescription.id === "on") {
-        const response = await this.tuyaContext.request({
-          path: `/v1.0/iot-03/devices/${deviceInfo.deviceId}/commands`,
-          method: "POST",
-          body: { commands: [{ code: "switch_1", value: true }] },
-        });
+      const response = await this.tuyaContext.request({
+        path: `/v1.0/iot-03/devices/${deviceInfo.deviceId}/commands`,
+        method: "POST",
+        body: {
+          commands: [
+            { code: "switch_1", value: actionDescription.id === "on" },
+          ],
+        },
+      });
 
-        const parsedResponse = TuyaDeviceCommandResultZod.parse(response);
-        return parsedResponse.success ? true : "Failed to turn on the device.";
-      }
-      if (actionDescription.id === "off") {
-        const response = await this.tuyaContext.request({
-          path: `/v1.0/iot-03/devices/${deviceInfo.deviceId}/commands`,
-          method: "POST",
-          body: { commands: [{ code: "switch_1", value: false }] },
-        });
-        const parsedResponse = TuyaDeviceCommandResultZod.parse(response);
-        return parsedResponse.success ? true : "Failed to turn off the device.";
-      }
+      const parsedResponse = TuyaDeviceCommandResultZod.parse(response);
+      return parsedResponse.success ? true : "Failed to turn on the device.";
     } catch (error: unknown) {
       console.error(error);
       return "Tuya Cloud connection failed.";
     }
-    return "Tuya Cloud connection failed.";
   }
 }

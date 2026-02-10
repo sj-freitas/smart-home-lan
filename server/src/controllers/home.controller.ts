@@ -1,16 +1,19 @@
 import { Controller, Get } from "@nestjs/common";
-import { ApplicationStateService } from "../integrations/application-state.service";
+import { StatePersistenceService } from "../services/state/state.persistence.service";
+import { ConfigService } from "../config/config-service";
 
 @Controller("api/home")
 export class HomeController {
   constructor(
-    private readonly applicationStateService: ApplicationStateService,
+    private readonly configService: ConfigService,
+    private readonly statePersistenceService: StatePersistenceService,
   ) {}
 
   @Get("/")
   public async getHomeInfo() {
-    const appState = await this.applicationStateService.getHomeState();
+    const homeName = this.configService.getConfig().home.name;
+    const currState = await this.statePersistenceService.getHomeState(homeName);
 
-    return appState;
+    return currState;
   }
 }

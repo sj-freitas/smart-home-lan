@@ -1,15 +1,17 @@
 import { Controller, Get, HttpCode, Query } from "@nestjs/common";
-import { HueOAuth2ClientService } from "../../integrations/hue-cloud/oauth2/hue-oauth2.client.service";
-import { HueOAuth2PersistenceService } from "../../integrations/hue-cloud/oauth2/hue-oauth2.persistence.service";
+import { HueOAuth2ClientService } from "../oauth2/hue-oauth2.client.service";
+import { HueOAuth2PersistenceService } from "../oauth2/hue-oauth2.persistence.service";
+import { HueClient } from "../hue.client";
 
-@Controller("api/auth/oauth2-hue")
-export class AuthHueController {
+@Controller()
+export class HueController {
   constructor(
+    private readonly hueClient: HueClient,
     private readonly hueOauth2Service: HueOAuth2ClientService,
     private readonly huePersistenceService: HueOAuth2PersistenceService,
   ) {}
 
-  @Get()
+  @Get("api/auth/oauth2-hue")
   @HttpCode(200)
   public async oauth2(@Query("code") code: string) {
     console.log(`OAuth2 Hue endpoint hit code = ${code}`);
@@ -31,4 +33,17 @@ export class AuthHueController {
       codeConsumed: code,
     };
   }
+
+  @Get("api/sandbox/hue-lights")
+  public async getHueLightsState() {
+    // Very useful to get the HUE light configs to create presets.
+    return await this.hueClient.getLights();
+  }
+
+  // public async webHookExample(changes: []) {
+    // Set the state via the service
+    // Map the changes with the config mappedChanges = mapChanges(config, changes);
+    // const newState = await this.stateService.consolidateDeviceStates(mappedChanges);
+    // await this.websocketService.update(newState);
+  // }
 }

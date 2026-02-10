@@ -1,8 +1,8 @@
-import { Memoizer } from "../../services/memoizer";
 import { DeviceAction, RoomDeviceTypes } from "../../config/home.zod";
 import { MelCloudHomeIntegrationDevice } from "../../config/integration.zod";
 import {
   DeviceState,
+  IntegratedDeviceConfig,
   IntegrationService,
   TryRunActionResult,
 } from "../integrations-service";
@@ -79,91 +79,72 @@ function tryFindBestMatchingAction(
   return bestMatch.actionId;
 }
 
-const MEL_CLOUD_HOME_CONTEXT_CACHE_KEY = Symbol(
-  "MEL_CLOUD_HOME_CONTEXT_CACHE_KEY",
-);
-
 export class MelCloudHomeIntegrationService implements IntegrationService<MelCloudHomeIntegrationDevice> {
   constructor(private readonly melCloudHomeClient: MelCloudHomeClient) {}
 
   public name: "mel_cloud_home" = "mel_cloud_home";
 
-  async getDeviceTemperature(
-    memoizationContext: Memoizer,
-    deviceInfo: MelCloudHomeIntegrationDevice,
-    deviceType: RoomDeviceTypes,
-  ): Promise<number> {
-    if (deviceType !== "air_conditioner") {
-      return NaN;
-    }
+  public async consolidateDeviceStates(
+    devices: IntegratedDeviceConfig<MelCloudHomeIntegrationDevice>[],
+  ): Promise<DeviceState[]> {
+    const context = await this.melCloudHomeClient.getContext();
 
-    const allDevices = await memoizationContext.run(
-      MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
-      async () => await this.melCloudHomeClient.getContext(),
-    );
-    const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
-    if (!foundDevice) {
-      console.log(`Device not found: ${deviceInfo.deviceId}`);
-      return NaN;
-    }
+    return devices.map((currDevice) => {
+      if (currDevice.type !== "air_conditioner") {
+        console.warn(
+          `Unsupported device type ${currDevice.type} for MelCloudHome`,
+        );
+        return {
+          online: false,
+          state: "off",
+          temperature: null,
+          humidity: null,
+        };
+      }
 
-    return foundDevice.room.temperature;
-  }
+      const matchingDevice = context.find(
+        (t) => t.id === currDevice.info.deviceId,
+      );
+      if (!matchingDevice) {
+        console.warn(
+          `MelCloudHome Device ${currDevice.info.deviceId} wasn't found - device not associated with home.`,
+        );
+        return {
+          online: false,
+          state: "off",
+          temperature: null,
+          humidity: null,
+        };
+      }
 
-  async getDeviceHumidity(): Promise<number> {
-    return NaN;
-  }
+      const currentDeviceState = mapSettingsRecordToParameters(
+        matchingDevice.settings,
+      );
+      const actionParametersMap = new Map(
+        currDevice.actions.map(
+          (t) =>
+            [t.id, AirToAirUnitStateChangeZod.parse(t.parameters)] as [
+              string,
+              AirToAirUnitStateChange,
+            ],
+        ),
+      );
 
-  async getDeviceState(
-    memoizationContext: Memoizer,
-    deviceInfo: MelCloudHomeIntegrationDevice,
-    deviceType: RoomDeviceTypes,
-    actionDescriptions: DeviceAction[],
-  ): Promise<DeviceState> {
-    if (deviceType !== "air_conditioner") {
+      const action = tryFindBestMatchingAction(
+        currentDeviceState,
+        actionParametersMap,
+      );
+
       return {
-        state: "off",
-        online: false,
+        online: true,
+        state: action,
+        temperature: matchingDevice.room.temperature,
+        humidity: null,
       };
-    }
-    const allDevices = await memoizationContext.run(
-      MEL_CLOUD_HOME_CONTEXT_CACHE_KEY,
-      async () => await this.melCloudHomeClient.getContext(),
-    );
-    const foundDevice = allDevices.find((d) => d.id === deviceInfo.deviceId);
-
-    if (!foundDevice) {
-      return {
-        state: "off",
-        online: false,
-      };
-    }
-
-    const currentDeviceState = mapSettingsRecordToParameters(
-      foundDevice.settings,
-    );
-    const actionParametersMap = new Map(
-      actionDescriptions.map(
-        (t) =>
-          [t.id, AirToAirUnitStateChangeZod.parse(t.parameters)] as [
-            string,
-            AirToAirUnitStateChange,
-          ],
-      ),
-    );
-
-    const action = tryFindBestMatchingAction(
-      currentDeviceState,
-      actionParametersMap,
-    );
-    return {
-      state: action,
-      online: true,
-    };
+    });
   }
 
   async tryRunAction(
-    _: Memoizer,
     deviceInfo: MelCloudHomeIntegrationDevice,
     deviceType: RoomDeviceTypes,
     actionDescription: DeviceAction,

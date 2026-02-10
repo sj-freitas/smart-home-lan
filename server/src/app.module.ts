@@ -8,10 +8,10 @@ import { SocketsModule } from "./sockets/module";
 @Module({
   imports: [
     ConfigModule,
-    IntegrationsModule,
-    ControllersModule,
     ServicesModule,
     SocketsModule,
+    IntegrationsModule,
+    ControllersModule,
   ],
 })
 export class AppModule {}

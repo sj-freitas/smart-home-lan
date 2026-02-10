@@ -5,6 +5,13 @@ import { ConfigService } from "../../config/config-service";
 import { MelCloudHomeClient } from "./client";
 import { MelCloudAuthCookiesPersistenceService } from "./auth-cookies.persistence.service";
 import { spinCookieRefresher } from "./cookie-refresher";
+import { MelCLoudHomeController } from "./controllers/mel-cloud-home.controller";
+import { updateStateForDevicesOfIntegration } from "../../helpers/state-updater.helper";
+import { StateService } from "../../services/state/state.service";
+import { HomeStateGateway } from "../../sockets/home.state.gateway";
+import { ServicesModule } from "../../services/module";
+import { SocketsModule } from "../../sockets/module";
+import { startScheduler } from "../../helpers/scheduler";
 
 const MelCloudAuthCookiesPersistenceServiceProvider = {
   provide: MelCloudAuthCookiesPersistenceService,
@@ -23,6 +30,35 @@ const MelCloudHomeAuthenticationCookiesProvider = {
     authCookiesService: MelCloudAuthCookiesPersistenceService,
   ) => {
     return await spinCookieRefresher(config, authCookiesService);
+  },
+};
+
+export const MEL_CLOUD_HOME_STATE_POLLING = "MelCloudHomeStatePolling";
+const MelCloudHomePollingProvider = {
+  provide: MEL_CLOUD_HOME_STATE_POLLING,
+  inject: [
+    ConfigService,
+    MelCloudHomeIntegrationService,
+    StateService,
+    HomeStateGateway,
+    MEL_CLOUD_AUTHENTICATION_COOKIES,
+  ],
+  useFactory: async (
+    config: ConfigService,
+    melCLoudHomeIntegration: MelCloudHomeIntegrationService,
+    stateService: StateService,
+    homeStateGateway: HomeStateGateway,
+  ) => {
+    const homeConfig = config.getConfig().home;
+
+    await startScheduler(async () => {
+      await updateStateForDevicesOfIntegration(
+        homeConfig,
+        melCLoudHomeIntegration,
+        stateService,
+        homeStateGateway,
+      );
+    }, 120_000);
   },
 };
 
@@ -50,26 +86,26 @@ const MelCloudHomeClientProvider = {
 const MelCloudHomeIntegrationServiceProvider = {
   provide: MelCloudHomeIntegrationService,
   inject: [MelCloudHomeClient],
-  useFactory: async (
-    client: MelCloudHomeClient,
-  ) => {
+  useFactory: async (client: MelCloudHomeClient) => {
     return new MelCloudHomeIntegrationService(client);
   },
 };
 
 @Module({
-  imports: [ConfigModule],
-  controllers: [],
+  imports: [ConfigModule, ServicesModule, SocketsModule],
+  controllers: [MelCLoudHomeController],
   providers: [
     MelCloudAuthCookiesPersistenceServiceProvider,
     MelCloudHomeAuthenticationCookiesProvider,
     MelCloudHomeIntegrationServiceProvider,
     MelCloudHomeClientProvider,
+    MelCloudHomePollingProvider,
   ],
   exports: [
     MelCloudHomeIntegrationServiceProvider,
     MelCloudHomeAuthenticationCookiesProvider,
     MelCloudHomeClientProvider,
+    MelCloudHomePollingProvider,
   ],
 })
 export class MelCloudHomeModule {}

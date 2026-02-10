@@ -9,6 +9,12 @@ import { HueClient } from "./hue.client";
 import { ServicesModule } from "../../services/module";
 import { Pool } from "pg";
 import { spinTokenRefresher } from "./oauth2/token-refresher";
+import { HueController } from "./controllers/hue.controller";
+import { startScheduler } from "../../helpers/scheduler";
+import { updateStateForDevicesOfIntegration } from "../../helpers/state-updater.helper";
+import { StateService } from "../../services/state/state.service";
+import { SocketsModule } from "../../sockets/module";
+import { HomeStateGateway } from "../../sockets/home.state.gateway";
 
 const HUE_CONFIG = "HUE_CONFIG";
 
@@ -22,6 +28,35 @@ const HueRefreshTokenProvider = {
     authCookiesService: HueOAuth2PersistenceService,
   ) => {
     return await spinTokenRefresher(hueOAuth2Client, authCookiesService);
+  },
+};
+
+export const HUE_STATE_POLLING = "HueStatePolling";
+const HueStatePollingProvider = {
+  provide: HUE_STATE_POLLING,
+  inject: [
+    ConfigService,
+    HueCloudIntegrationService,
+    StateService,
+    HomeStateGateway,
+    HUE_REFRESH_TOKEN,
+  ],
+  useFactory: async (
+    config: ConfigService,
+    hueCloudIntegrationService: HueCloudIntegrationService,
+    stateService: StateService,
+    homeStateGateway: HomeStateGateway,
+  ) => {
+    const homeConfig = config.getConfig().home;
+
+    await startScheduler(async () => {
+      await updateStateForDevicesOfIntegration(
+        homeConfig,
+        hueCloudIntegrationService,
+        stateService,
+        homeStateGateway,
+      );
+    }, 10_000);
   },
 };
 
@@ -79,7 +114,7 @@ const HueClientProvider = {
 };
 
 @Module({
-  imports: [ConfigModule, ServicesModule],
+  imports: [ConfigModule, ServicesModule, SocketsModule],
   providers: [
     HueConfigProvider,
     HueRefreshTokenProvider,
@@ -87,7 +122,9 @@ const HueClientProvider = {
     HueOAuth2ClientServiceProvider,
     HueOAuth2PersistenceServiceProvider,
     HueClientProvider,
+    HueStatePollingProvider,
   ],
+  controllers: [HueController],
   exports: [
     HueConfigProvider,
     HueRefreshTokenProvider,
@@ -95,6 +132,7 @@ const HueClientProvider = {
     HueOAuth2ClientServiceProvider,
     HueOAuth2PersistenceServiceProvider,
     HueClientProvider,
+    HueStatePollingProvider,
   ],
 })
 export class HueCloudModule {}

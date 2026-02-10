@@ -9,14 +9,9 @@ import {
 import { Server, Socket } from "socket.io";
 import { BehaviorSubject } from "rxjs";
 import { ServerMessage } from "./message";
-import {
-  ApplicationState,
-  ApplicationStateService,
-} from "../integrations/application-state.service";
-
-// Unfortunately there are many restrictions on integrations that have polling limits.
-// This is the case with HUE (50k per day) and even worse with Tuya (30k per month)
-const POLLING_INTERVAL = 120_000;
+import { HomeState } from "../services/state/types.zod";
+import { StatePersistenceService } from "../services/state/state.persistence.service";
+import { ConfigService } from "../config/config-service";
 
 @WebSocketGateway({
   namespace: "/api/state",
@@ -30,16 +25,26 @@ export class HomeStateGateway
   // Effectively state is an in-memory cache as the updates always trigger a change in it.
   // The state gets updated every POLLING_INTERVAL (120s) to sync it. This would not work
   // so well if we had multiple backend instances but that isn't the case.
-  private state: BehaviorSubject<ApplicationState>;
+  private state: BehaviorSubject<HomeState>;
   private activeConnections = 0;
   private pollHandle: NodeJS.Timeout | null = null;
 
-  constructor(readonly applicationStateService: ApplicationStateService) {}
+  public get isInitialized(): boolean {
+    return Boolean(this.server);
+  }
+
+  constructor(
+    readonly statePersistenceService: StatePersistenceService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async afterInit(server: Server) {
+    console.log(`Sockets are Initialized`);
+    const home = this.configService.getConfig().home;
+
     this.server = server;
     this.state = new BehaviorSubject(
-      await this.applicationStateService.getHomeState(),
+      await this.statePersistenceService.getHomeState(home.name),
     );
     this.state.subscribe((state) => this.broadcastSnapshot(state));
   }
@@ -51,7 +56,7 @@ export class HomeStateGateway
     return { ts: new Date().toISOString(), type, payload };
   }
 
-  private broadcastSnapshot(state: ApplicationState | { empty: true }) {
+  private broadcastSnapshot(state: HomeState | { empty: true }) {
     if ((state as any).empty) {
       console.log(`Initial state - can't broadcast.`);
       return;
@@ -61,18 +66,6 @@ export class HomeStateGateway
 
     // Send the full state as an update.
     this.server.emit("state:update", stateMessage);
-  }
-
-  private startPolling() {
-    if (this.pollHandle) {
-      return;
-    }
-
-    this.pollHandle = setInterval(async () => {
-      const newState = await this.applicationStateService.getHomeState();
-
-      this.updateState(newState);
-    }, POLLING_INTERVAL);
   }
 
   private stopPolling() {
@@ -93,12 +86,6 @@ export class HomeStateGateway
       const msg = this.makeMessage("snapshot", this.state.value);
       client.emit("state:update", msg);
     }
-
-    // Start polling only when first client connects
-    // Flushing the state every once in a while (?)
-    if (this.activeConnections === 1) {
-      this.startPolling();
-    }
   }
 
   public handleDisconnect(client: Socket) {
@@ -108,7 +95,7 @@ export class HomeStateGateway
     }
   }
 
-  public updateState(next: ApplicationState) {
+  public updateState(next: HomeState) {
     this.state.next(next);
   }
 
