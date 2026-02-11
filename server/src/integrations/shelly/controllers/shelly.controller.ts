@@ -1,8 +1,23 @@
 import { Controller, Get, Query } from "@nestjs/common";
+import { StateService } from "../../../services/state/state.service";
+import { ShellyAuthService } from "../auth.service";
+import { ConfigService } from "../../../config/config-service";
+import { DeviceHelper } from "../../../helpers/device-helpers";
+import { ShellyIntegrationDevice } from "../../../config/integration.zod";
+import { HomeStateGateway } from "../../../sockets/home.state.gateway";
 
 @Controller("api/shelly")
 export class ShellyController {
-  constructor() {}
+  private readonly deviceHelper: DeviceHelper;
+
+  constructor(
+    configService: ConfigService,
+    private readonly stateService: StateService,
+    private readonly stateGateway: HomeStateGateway,
+    private readonly shellyAuthService: ShellyAuthService,
+  ) {
+    this.deviceHelper = new DeviceHelper(configService.getConfig().home);
+  }
 
   @Get("/webhooks")
   public async getMelCloudHomeContext(
@@ -11,11 +26,64 @@ export class ShellyController {
     @Query("token") token: string,
     @Query("device_id") deviceId: string,
   ) {
-    // Validate the token (proof that the device is legit)
-    // Store the state changes in the array
-    // That's it I guess?
+    if (!deviceId) {
+      return {
+        eventConsumed: false,
+      };
+    }
 
-    console.log(`Webhook shelly request received, tc=${tc} rh=${rh} token=${token} device_id=${deviceId}`);
+    if (this.shellyAuthService.isTokenValid(token)) {
+      console.warn(`Malicious request to Shelly Webhook detected.`);
+      return {
+        eventConsumed: false,
+      };
+    }
+
+    const matchedDevicePath =
+      this.deviceHelper.getDeviceFromIntegration<ShellyIntegrationDevice>(
+        "shelly",
+        (t) => t.id === deviceId,
+      );
+
+    if (!matchedDevicePath) {
+      console.warn(`Shelly Device ${deviceId} does not exist.`);
+      return {
+        eventConsumed: false,
+      };
+    }
+
+    const device = this.deviceHelper.getDevice(matchedDevicePath);
+    const [roomId, homeDeviceId] = matchedDevicePath.split("/");
+
+    const parsedTemperatureInCelsius = Number.parseFloat(tc);
+    const parsedRelativeHumidity = Number.parseFloat(rh);
+
+    const newState = await this.stateService.addToState([
+      {
+        id: homeDeviceId,
+        roomId: roomId,
+        name: device.name,
+        icon: device.icon,
+        type: device.type,
+        actions: device.actions.map((t) => ({
+          name: t.name,
+          id: t.id,
+        })),
+
+        // The actual data for the state
+        state: "on",
+        online: true,
+        temperature: !Number.isNaN(parsedTemperatureInCelsius)
+          ? parsedTemperatureInCelsius
+          : undefined,
+        humidity: !Number.isNaN(parsedRelativeHumidity)
+          ? parsedRelativeHumidity
+          : undefined,
+      },
+    ]);
+    this.stateGateway.updateState(newState);
+
+    console.log(`Update the state of device ${matchedDevicePath}.`);
 
     return {
       eventConsumed: true,

@@ -35,7 +35,7 @@ export const TuyaIntegrationZod = z.object({
 
 export const ShellyIntegrationZod = z.object({
   name: z.literal(SHELLY).readonly(),
-  token: z.string().readonly(),
+  webhookSecret: z.string().readonly(),
 });
 
 export const ShellyIntegrationDeviceZod = z.object({

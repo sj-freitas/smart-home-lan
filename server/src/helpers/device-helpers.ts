@@ -1,3 +1,7 @@
+import {
+  IntegrationDeviceTypes,
+  IntegrationTypeNames,
+} from "../config/integration.zod";
 import { HomeConfig, RoomDeviceConfig } from "../config/home.zod";
 
 function getDevicesFromHome(home: HomeConfig): Map<string, RoomDeviceConfig> {
@@ -26,5 +30,19 @@ export class DeviceHelper {
       return null;
     }
     return deviceInfo;
+  }
+
+  public getDeviceFromIntegration<T extends IntegrationDeviceTypes>(
+    integration: IntegrationTypeNames,
+    picker: (deviceOfType: T) => boolean,
+  ): string | null {
+    const allDevices = Array.from(this.deviceMap.entries()).filter(
+      ([_, device]) => device.integration.name === integration,
+    );
+
+    const found = allDevices.find(([_, device]) =>
+      picker(device.integration as T),
+    );
+    return found ? found[0] : null;
   }
 }

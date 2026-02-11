@@ -17,7 +17,7 @@
     },
     {
       "name": "shelly",
-      "token": "potato"
+      "webhookSecret": "{{SHELLY_WEBHOOK_SECRET}}"
     }
   ],
   "home": {
@@ -33,9 +33,20 @@
         "name": "Living Room",
         "icon": "sofa",
         "roomInfo": {
-          "temperatureDeviceId": "living_room/ac"
+          "temperatureDeviceId": "living_room/sensor"
         },
         "devices": [
+          {
+            "id": "sensor",
+            "name": "Temperature and Humidity Sensor",
+            "icon": "",
+            "type": "temperature_humidity_sensor",
+            "integration": {
+              "name": "shelly",
+              "id": "0"
+            },
+            "actions": []
+          },
           {
             "id": "ac",
             "name": "Air Conditioner",

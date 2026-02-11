@@ -23,11 +23,11 @@ export const DeviceActionZod = z.object({
 
 export const RoomDeviceConfigZod = z.object({
   id: z.string().readonly(),
-  icon: z.string().readonly(),
+  icon: z.string().readonly().optional(),
   name: z.string().readonly(),
   type: RoomDeviceTypesZod.readonly(),
   integration: IntegrationDeviceTypesZod.readonly(),
-  actions: z.array(DeviceActionZod).readonly(),
+  actions: z.array(DeviceActionZod).readonly().optional().default([]),
 });
 
 export const RoomConfigZod = z.object({
