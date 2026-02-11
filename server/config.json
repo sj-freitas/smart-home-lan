@@ -14,6 +14,10 @@
       "clientSecret": "{{HUE_CLOUD_SECRET}}",
       "redirectUri": "{{APP_DOMAIN_URL}}/api/auth/oauth2-hue",
       "bridgeUsername": "{{HUE_CLOUD_BRIDGE_USERNAME}}"
+    },
+    {
+      "name": "shelly",
+      "token": "potato"
     }
   ],
   "home": {

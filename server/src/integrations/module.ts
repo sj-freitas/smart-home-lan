@@ -18,6 +18,8 @@ import {
   IntegrationTypeNames,
   IntegrationTypeNamesZod,
 } from "../config/integration.zod";
+import { ShellyModule } from "./shelly/module";
+import { ShellyIntegrationService } from "./shelly/integration.service";
 
 type ModuleHelper = {
   module: any;
@@ -49,6 +51,13 @@ const integrationsMap = new Map<IntegrationTypeNames, ModuleHelper>([
       services: [HueCloudIntegrationService, HUE_REFRESH_TOKEN],
     },
   ],
+  [
+    "shelly",
+    {
+      module: ShellyModule,
+      services: [ShellyIntegrationService],
+    }
+  ]
 ]);
 
 function initDynamicIntegrationsProvider() {

@@ -3,11 +3,13 @@ import { z } from "zod";
 const TUYA_CLOUD = "tuya_cloud";
 const HUE_CLOUD = "hue_cloud";
 const MEL_CLOUD_HOME = "mel_cloud_home";
+const SHELLY = "shelly";
 
 export const IntegrationTypeNamesZod = z.union([
   z.literal(TUYA_CLOUD),
   z.literal(HUE_CLOUD),
   z.literal(MEL_CLOUD_HOME),
+  z.literal(SHELLY),
 ]);
 
 export const HueCloudIntegrationZod = z.object({
@@ -25,10 +27,20 @@ export const HueCloudIntegrationDeviceZod = z.object({
 });
 
 export const TuyaIntegrationZod = z.object({
-  name: z.literal(TUYA_CLOUD),
-  baseUrl: z.string(),
-  accessKey: z.string(),
+  name: z.literal(TUYA_CLOUD).readonly(),
+  baseUrl: z.string().readonly(),
+  accessKey: z.string().readonly(),
   secretKey: z.string().readonly(),
+});
+
+export const ShellyIntegrationZod = z.object({
+  name: z.literal(SHELLY).readonly(),
+  token: z.string().readonly(),
+});
+
+export const ShellyIntegrationDeviceZod = z.object({
+  name: z.literal(SHELLY).readonly(),
+  id: z.string(),
 });
 
 export const TuyaIntegrationDeviceZod = z.object({
@@ -53,12 +65,14 @@ export const IntegrationDeviceTypesZod = z.union([
   MelCloudHomeIntegrationDeviceZod,
   TuyaIntegrationDeviceZod,
   HueCloudIntegrationDeviceZod,
+  ShellyIntegrationDeviceZod,
 ]);
 
 export const IntegrationTypesZod = z.union([
   MelCloudCHomeIntegrationZod,
   TuyaIntegrationZod,
   HueCloudIntegrationZod,
+  ShellyIntegrationZod,
 ]);
 
 export const IntegrationsConfigZod = z.array(IntegrationTypesZod);
@@ -74,6 +88,10 @@ export type MelCloudHomeIntegration = z.infer<
 >;
 export type MelCloudHomeIntegrationDevice = z.infer<
   typeof MelCloudHomeIntegrationDeviceZod
+>;
+export type ShellyIntegration = z.infer<typeof ShellyIntegrationZod>;
+export type ShellyIntegrationDevice = z.infer<
+  typeof ShellyIntegrationDeviceZod
 >;
 
 export type IntegrationTypeNames = z.infer<typeof IntegrationTypeNamesZod>;
