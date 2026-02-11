@@ -13,6 +13,7 @@ export type Room = {
   name: string;
   icon?: string;
   temperature?: number;
+  humidity?: number;
   devices: Device[];
 }
 export type Home = {

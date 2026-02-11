@@ -62,15 +62,29 @@ function alterHomeState(
     };
   });
 
-  const mappedDevices = new Map(Array.from(allDeviceChanges).map((t) => [`${t.roomId}/${t.id}`, t]));
-  // Update rooms infos (Tempeartures and Humidity)
+  const mappedDevices = new Map(
+    Array.from(allDeviceChanges).map((t) => [`${t.roomId}/${t.id}`, t]),
+  );
+  // Update rooms infos (Temperatures and Humidity)
   for (const currRoom of rooms) {
-    const humidityDevice = mappedDevices.get(currRoom.roomInfo.humidityDeviceId);
-    if (humidityDevice) {
+    const humidityDevice = mappedDevices.get(
+      currRoom.roomInfo.humidityDeviceId,
+    );
+    if (
+      humidityDevice &&
+      humidityDevice.humidity !== null &&
+      humidityDevice.humidity !== undefined
+    ) {
       currRoom.humidity = humidityDevice.humidity ?? null;
     }
-    const temperatureDevice = mappedDevices.get(currRoom.roomInfo.temperatureDeviceId);
-    if (temperatureDevice) {
+    const temperatureDevice = mappedDevices.get(
+      currRoom.roomInfo.temperatureDeviceId,
+    );
+    if (
+      temperatureDevice &&
+      temperatureDevice.temperature !== null &&
+      temperatureDevice.temperature !== undefined
+    ) {
       currRoom.temperature = temperatureDevice.temperature ?? null;
     }
   }

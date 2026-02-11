@@ -33,7 +33,8 @@
         "name": "Living Room",
         "icon": "sofa",
         "roomInfo": {
-          "temperatureDeviceId": "living_room/sensor"
+          "temperatureDeviceId": "living_room/sensor",
+          "humidityDeviceId": "living_room/sensor"
         },
         "devices": [
           {
@@ -461,6 +462,26 @@
                   "hue": 62965,
                   "sat": 254
                 }
+              }
+            ]
+          },
+          {
+            "id": "heater",
+            "name": "Heater",
+            "icon": "heater",
+            "type": "smart_switch",
+            "integration": {
+              "name": "hue_cloud",
+              "id": "13"
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off"
+              },
+              {
+                "id": "on",
+                "name": "On"
               }
             ]
           }

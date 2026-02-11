@@ -12,6 +12,9 @@ import { SingleBedIcon } from "./single-bed.icon";
 import { BathtubIcon } from "./bathtub.icon";
 import { RecessedLightIcon } from "./recessed_light";
 import { DiningTableIcon } from "./dining-table.icon";
+import { HeaterIcon } from "./heater.icon";
+import { ThermometerIcon } from "./thermometer.icon";
+import { WaterDropIcon } from "./water-drop.icon";
 
 export function getIconFromId(icon?: string, size: string = "18") {
   if (!icon) {
@@ -50,6 +53,12 @@ export function getIconFromId(icon?: string, size: string = "18") {
       return <RecessedLightIcon size={size} />;
     case "dining_table":
       return <DiningTableIcon size={size} />;
+    case "heater":
+      return <HeaterIcon size={size} />;
+    case "thermometer":
+      return <ThermometerIcon size={size} />;
+    case "water_drop":
+      return <WaterDropIcon size={size} />;
     default:
       return <FiHome size={size} />;
   }

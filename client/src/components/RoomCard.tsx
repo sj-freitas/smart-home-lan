@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Room, Device } from "../types";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { getIconFromId } from "../icons/icon-mapper";
+import { WaterDropIcon } from "../icons/water-drop.icon";
+import { ThermometerIcon } from "../icons/thermometer.icon";
+
+function formatTemperature(temperature: number) {
+  return `${temperature}°C`;
+}
+
+function formatHumidity(humidity: number) {
+  return `${humidity}%`;
+}
 
 export default function RoomCard({
   room,
@@ -117,18 +127,6 @@ export default function RoomCard({
           {room.icon && getIconFromId(room.icon, "1.7rem")} {room.name}
         </h2>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {typeof room.temperature === "number" && (
-            <span
-              style={{
-                fontSize: 13,
-                color: "var(--muted)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {room.temperature}°C
-            </span>
-          )}
-
           {isCollapsible && (
             <button
               className="collapse-toggle"
@@ -150,6 +148,44 @@ export default function RoomCard({
         </div>
       </div>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          paddingTop: "0.4REM",
+          gap: 10,
+        }}
+      >
+        {room.humidity && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              fontSize: 13,
+              color: "var(--muted)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <WaterDropIcon size={13} /> {formatHumidity(room.humidity)}
+          </div>
+        )}
+        {room.temperature && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              fontSize: 13,
+              color: "var(--muted)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <ThermometerIcon size={13} /> {formatTemperature(room.temperature)}
+          </div>
+        )}
+      </div>
+
       {/* Collapsible content container */}
       <div
         id={`room-${room.id}-content`}
@@ -163,59 +199,67 @@ export default function RoomCard({
         }}
       >
         <div className="controls" style={{ paddingTop: 12 }}>
-          {room.devices.map((device) => (
-            <div key={device.id} style={{ marginTop: 8 }}>
-              <div
-                className="row"
-                style={{
-                  justifyContent: "space-between",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  {getIconFromId(device.icon)}
-                  <div style={{ fontWeight: 700 }} className="device-name">
-                    {device.name}
-                  </div>
-                  {!device.online && (
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
-                    >
-                      <span
+          {room.devices
+            .filter((t) => t.actions.length > 0) // Do not render items with no actions
+            .map((device) => (
+              <div key={device.id} style={{ marginTop: 8 }}>
+                <div
+                  className="row"
+                  style={{
+                    justifyContent: "space-between",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 10 }}
+                  >
+                    {getIconFromId(device.icon)}
+                    <div style={{ fontWeight: 700 }} className="device-name">
+                      {device.name}
+                    </div>
+                    {!device.online && (
+                      <div
                         style={{
-                          fontSize: 13,
-                          color: "var(--muted)",
-                          whiteSpace: "nowrap",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
                         }}
                       >
-                        Offline
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                  {device.actions.map((a) => {
-                    const active = device.state === a.id;
-                    return (
-                      <button
-                        key={a.id}
-                        className={"btn " + (active ? "" : "btn-ghost")}
-                        disabled={
-                          readonly ||
-                          loadingDevice === device.id ||
-                          !device.online
-                        }
-                        onClick={() => runAction(device, a.id)}
-                      >
-                        {a.name}
-                      </button>
-                    );
-                  })}
+                        <span
+                          style={{
+                            fontSize: 13,
+                            color: "var(--muted)",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Offline
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    {device.actions.map((a) => {
+                      const active = device.state === a.id;
+                      return (
+                        <button
+                          key={a.id}
+                          className={"btn " + (active ? "" : "btn-ghost")}
+                          disabled={
+                            readonly ||
+                            loadingDevice === device.id ||
+                            !device.online
+                          }
+                          onClick={() => runAction(device, a.id)}
+                        >
+                          {a.name}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>

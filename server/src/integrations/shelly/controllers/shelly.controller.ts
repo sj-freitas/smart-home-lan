@@ -32,7 +32,7 @@ export class ShellyController {
       };
     }
 
-    if (this.shellyAuthService.isTokenValid(token)) {
+    if (!this.shellyAuthService.isTokenValid(token)) {
       console.warn(`Malicious request to Shelly Webhook detected.`);
       return {
         eventConsumed: false,
@@ -57,30 +57,29 @@ export class ShellyController {
 
     const parsedTemperatureInCelsius = Number.parseFloat(tc);
     const parsedRelativeHumidity = Number.parseFloat(rh);
+    const updateEvent = {
+      id: homeDeviceId,
+      roomId: roomId,
+      name: device.name,
+      icon: device.icon,
+      type: device.type,
+      actions: device.actions.map((t) => ({
+        name: t.name,
+        id: t.id,
+      })),
 
-    const newState = await this.stateService.addToState([
-      {
-        id: homeDeviceId,
-        roomId: roomId,
-        name: device.name,
-        icon: device.icon,
-        type: device.type,
-        actions: device.actions.map((t) => ({
-          name: t.name,
-          id: t.id,
-        })),
+      // The actual data for the state
+      state: "on",
+      online: true,
+      temperature: !Number.isNaN(parsedTemperatureInCelsius)
+        ? parsedTemperatureInCelsius
+        : undefined,
+      humidity: !Number.isNaN(parsedRelativeHumidity)
+        ? parsedRelativeHumidity
+        : undefined,
+    };
 
-        // The actual data for the state
-        state: "on",
-        online: true,
-        temperature: !Number.isNaN(parsedTemperatureInCelsius)
-          ? parsedTemperatureInCelsius
-          : undefined,
-        humidity: !Number.isNaN(parsedRelativeHumidity)
-          ? parsedRelativeHumidity
-          : undefined,
-      },
-    ]);
+    const newState = await this.stateService.addToState([updateEvent]);
     this.stateGateway.updateState(newState);
 
     console.log(`Update the state of device ${matchedDevicePath}.`);

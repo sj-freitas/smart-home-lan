@@ -12,7 +12,7 @@ Philips Hue uses OAUth2 to register their apps. This requires a few steps and so
 
 1. The application needs a Code to start requesting Refresh and Authorization Tokens.
 1. When you first run this server if there are on valid tokens it'll trigger the flow, but you can do it first.
-1. Go to: [https://api.meethue.com/oauth2/auth?client_id=6d0ac389-2de5-4e22-a7d7-50711d9ae9d7&response_type=code&scope=remote_control&redirect_uri={{APP_DOMAIN_URL}}/api/auth/oauth2-hue](https://api.meethue.com/oauth2/auth?client_id=6d0ac389-2de5-4e22-a7d7-50711d9ae9d7&response_type=code&scope=remote_control&redirect_uri={{APP_DOMAIN_URL}}/api/auth/oauth2-hue) This link will be correctly formed in theory if you have an expired refresh token in the database when the server bootstraps.
+1. Go to: [https://api.meethue.com/oauth2/auth?client_id={{HUE_CLOUD_CLIENT_ID}}&response_type=code&scope=remote_control&redirect_uri={{APP_DOMAIN_URL}}/api/auth/oauth2-hue](https://api.meethue.com/oauth2/auth?client_id={{HUE_CLOUD_CLIENT_ID}}&response_type=code&scope=remote_control&redirect_uri={{APP_DOMAIN_URL}}/api/auth/oauth2-hue) This link will be correctly formed in theory if you have an expired refresh token in the database when the server bootstraps.
 1. Give access to your bridge, just follow the instructions and you'll get the call to the callback you set on the Hue Apps page.
 1. The callback will then send a code, on the [AuthHueController](./../../controllers/auth-hue/auth-hue.controller.ts) you can see the `oauth2` function that should return the next steps and print the code.
 1. Follow the steps written in the API, but you can instead do the following Curls:
