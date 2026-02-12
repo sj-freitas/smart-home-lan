@@ -27,14 +27,14 @@ DeviceId is also arbitrary since Shelly's webhooks don't need a real device ID, 
 
 1. Name: `Humidity Event`.
 2. Condition: `Humidity Change`, `Any`.
-3. URLs: `https://palais-freitas.xyz/api/shelly/webhooks?rh=${ev.rh}&device_id=<DEVICE_ID>&token=<SHELLY_WEBHOOK_SECRET>`
+3. URLs: `<YOUR_API_DOMAIN>/api/shelly/webhooks?rh=${ev.rh}&device_id=<DEVICE_ID>&token=<SHELLY_WEBHOOK_SECRET>`
    Make sure the replace `DEVICE_ID` and `SHELLY_WEBHOOK_SECRET` with the correct values when setting it up.
 
 #### Temperature Event Action
 
 1. Name: `Temperature Event`.
 2. Condition: `Temperature Change`, `Any`.
-3. URLs: `https://palais-freitas.xyz/api/shelly/webhooks?tc=${ev.tc}&device_id=<DEVICE_ID>&token=<SHELLY_WEBHOOK_SECRET>`
+3. URLs: `<YOUR_API_DOMAIN>/api/shelly/webhooks?tc=${ev.tc}&device_id=<DEVICE_ID>&token=<SHELLY_WEBHOOK_SECRET>`
    Make sure the replace `DEVICE_ID` and `SHELLY_WEBHOOK_SECRET` with the correct values when setting it up.
    I'm using `tc` as we only want the temperatures in celsius. I'd say that we can convert celsius to fahrenheit on the server side.
 

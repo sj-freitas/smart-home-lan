@@ -21,8 +21,8 @@ export class ShellyController {
 
   @Get("/webhooks")
   public async getMelCloudHomeContext(
-    @Query("tc") tc: string,
-    @Query("rh") rh: string,
+    @Query("tc") temperature: string,
+    @Query("rh") relativeHumidity: string,
     @Query("token") token: string,
     @Query("device_id") deviceId: string,
   ) {
@@ -55,8 +55,8 @@ export class ShellyController {
     const device = this.deviceHelper.getDevice(matchedDevicePath);
     const [roomId, homeDeviceId] = matchedDevicePath.split("/");
 
-    const parsedTemperatureInCelsius = Number.parseFloat(tc);
-    const parsedRelativeHumidity = Number.parseFloat(rh);
+    const parsedTemperatureInCelsius = Number.parseFloat(temperature);
+    const parsedRelativeHumidity = Number.parseFloat(relativeHumidity);
     const updateEvent = {
       id: homeDeviceId,
       roomId: roomId,
@@ -82,7 +82,14 @@ export class ShellyController {
     const newState = await this.stateService.addToState([updateEvent]);
     this.stateGateway.updateState(newState);
 
-    console.log(`Update the state of device ${matchedDevicePath}.`);
+    console.log(
+      `Update the state of device ${matchedDevicePath}: ${[
+        [`temperature`, temperature],
+        [`relative humidity`, relativeHumidity],
+      ]
+        .filter(([_, value]) => value)
+        .map(([key, value]) => `${key} -> ${value}`)}`,
+    );
 
     return {
       eventConsumed: true,
