@@ -29,6 +29,7 @@ Currently these are the supported integrations:
 
 - [Philips Hue](./src/integrations/hue-cloud/README.md)
 - [MEL Cloud Home](./src/integrations/mel-cloud-home/README.md)
+- [Shelly](./src/integrations/shelly/README.md)
 - [Tuya (Nedis Smart Life)](./src/integrations/tuya/README.md) *This integration won't be supported anymore and just exists as an exercise even though it's working*.
 
 ### Device
