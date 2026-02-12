@@ -49,60 +49,6 @@
             "actions": []
           },
           {
-            "id": "ac",
-            "name": "Air Conditioner",
-            "icon": "air_conditioner",
-            "type": "air_conditioner",
-            "integration": {
-              "name": "mel_cloud_home",
-              "deviceId": "1966b3d3-5633-4932-a82e-fb7d3b00fec3"
-            },
-            "actions": [
-              {
-                "id": "off",
-                "name": "Off",
-                "parameters": {
-                  "power": false,
-                  "operationMode": null,
-                  "setFanSpeed": null,
-                  "vaneHorizontalDirection": null,
-                  "vaneVerticalDirection": null,
-                  "setTemperature": null,
-                  "temperatureIncrementOverride": null,
-                  "inStandbyMode": null
-                }
-              },
-              {
-                "id": "on_heat",
-                "name": "Heat",
-                "parameters": {
-                  "power": true,
-                  "operationMode": "Heat",
-                  "setFanSpeed": "Auto",
-                  "vaneHorizontalDirection": "LeftCentre",
-                  "vaneVerticalDirection": "Two",
-                  "setTemperature": 27,
-                  "temperatureIncrementOverride": null,
-                  "inStandbyMode": null
-                }
-              },
-              {
-                "id": "on_cool",
-                "name": "Cool",
-                "parameters": {
-                  "power": true,
-                  "operationMode": "Cool",
-                  "setFanSpeed": "Auto",
-                  "vaneHorizontalDirection": "LeftCentre",
-                  "vaneVerticalDirection": "Two",
-                  "setTemperature": 21,
-                  "temperatureIncrementOverride": null,
-                  "inStandbyMode": null
-                }
-              }
-            ]
-          },
-          {
             "id": "ceiling_light",
             "name": "Ceiling Light",
             "icon": "ceiling_light",
@@ -248,6 +194,26 @@
                 }
               }
             ]
+          },
+          {
+            "id": "sofa_light",
+            "name": "Sofa Light",
+            "icon": "sofa",
+            "type": "smart_switch",
+            "integration": {
+              "name": "hue_cloud",
+              "id": "14"
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off"
+              },
+              {
+                "id": "on",
+                "name": "On"
+              }
+            ]
           }
         ]
       },
@@ -256,9 +222,64 @@
         "name": "Kitchen & Corridor",
         "icon": "pan",
         "roomInfo": {
-          "temperatureDeviceId": "living_room/ac"
+          "temperatureDeviceId": "living_room/sensor",
+          "humidityDeviceId": "living_room/sensor"
         },
         "devices": [
+          {
+            "id": "ac",
+            "name": "Air Conditioner",
+            "icon": "air_conditioner",
+            "type": "air_conditioner",
+            "integration": {
+              "name": "mel_cloud_home",
+              "deviceId": "1966b3d3-5633-4932-a82e-fb7d3b00fec3"
+            },
+            "actions": [
+              {
+                "id": "off",
+                "name": "Off",
+                "parameters": {
+                  "power": false,
+                  "operationMode": null,
+                  "setFanSpeed": null,
+                  "vaneHorizontalDirection": null,
+                  "vaneVerticalDirection": null,
+                  "setTemperature": null,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "on_heat",
+                "name": "Heat",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Heat",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "LeftCentre",
+                  "vaneVerticalDirection": "Two",
+                  "setTemperature": 27,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              },
+              {
+                "id": "on_cool",
+                "name": "Cool",
+                "parameters": {
+                  "power": true,
+                  "operationMode": "Cool",
+                  "setFanSpeed": "Auto",
+                  "vaneHorizontalDirection": "LeftCentre",
+                  "vaneVerticalDirection": "Two",
+                  "setTemperature": 21,
+                  "temperatureIncrementOverride": null,
+                  "inStandbyMode": null
+                }
+              }
+            ]
+          },
           {
             "id": "kitchen_light",
             "name": "Kitchen Light",
@@ -413,7 +434,7 @@
         "name": "Bathroom",
         "icon": "bathtub",
         "roomInfo": {
-          "temperatureDeviceId": "living_room/ac"
+          "temperatureDeviceId": "kitchen_and_corridor/ac"
         },
         "devices": [
           {
