@@ -38,17 +38,6 @@
         },
         "devices": [
           {
-            "id": "sensor",
-            "name": "Temperature and Humidity Sensor",
-            "icon": "",
-            "type": "temperature_humidity_sensor",
-            "integration": {
-              "name": "shelly",
-              "id": "0"
-            },
-            "actions": []
-          },
-          {
             "id": "ceiling_light",
             "name": "Ceiling Light",
             "icon": "ceiling_light",
@@ -66,16 +55,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -83,6 +62,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -115,16 +104,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -132,6 +111,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -164,16 +153,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -181,6 +160,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -214,6 +203,17 @@
                 "name": "On"
               }
             ]
+          },
+          {
+            "id": "sensor",
+            "name": "Temperature and Humidity Sensor",
+            "icon": "",
+            "type": "temperature_humidity_sensor",
+            "integration": {
+              "name": "shelly",
+              "id": "0"
+            },
+            "actions": []
           }
         ]
       },
@@ -298,16 +298,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -315,6 +305,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -347,16 +347,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -364,6 +354,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -396,16 +396,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -413,6 +403,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -434,7 +434,8 @@
         "name": "Bathroom",
         "icon": "bathtub",
         "roomInfo": {
-          "temperatureDeviceId": "kitchen_and_corridor/ac"
+          "temperatureDeviceId": "bathroom/sensor",
+          "humidityDeviceId": "bathroom/sensor"
         },
         "devices": [
           {
@@ -455,16 +456,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -472,6 +463,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -505,6 +506,17 @@
                 "name": "On"
               }
             ]
+          },
+          {
+            "id": "sensor",
+            "name": "Temperature and Humidity Sensor",
+            "icon": "",
+            "type": "temperature_humidity_sensor",
+            "integration": {
+              "name": "shelly",
+              "id": "1"
+            },
+            "actions": []
           }
         ]
       },
@@ -513,7 +525,8 @@
         "name": "Lisbon",
         "icon": "double_bed",
         "roomInfo": {
-          "temperatureDeviceId": "main_bedroom/ac"
+          "temperatureDeviceId": "main_bedroom/sensor",
+          "humidityDeviceId": "main_bedroom/sensor"
         },
         "devices": [
           {
@@ -588,16 +601,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -605,6 +608,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -637,16 +650,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -654,6 +657,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -667,6 +680,17 @@
                 }
               }
             ]
+          },
+          {
+            "id": "sensor",
+            "name": "Temperature and Humidity Sensor",
+            "icon": "",
+            "type": "temperature_humidity_sensor",
+            "integration": {
+              "name": "shelly",
+              "id": "2"
+            },
+            "actions": []
           }
         ]
       },
@@ -675,7 +699,8 @@
         "name": "Lviv",
         "icon": "single_bed",
         "roomInfo": {
-          "temperatureDeviceId": "guest_room/ac"
+          "temperatureDeviceId": "guest_room/sensor",
+          "humidityDeviceId": "guest_room/sensor"
         },
         "devices": [
           {
@@ -770,16 +795,6 @@
                 }
               },
               {
-                "id": "on_bright",
-                "name": "Bright",
-                "parameters": {
-                  "on": true,
-                  "bri": 254,
-                  "hue": 6924,
-                  "sat": 129
-                }
-              },
-              {
                 "id": "on_dim",
                 "name": "Dim",
                 "parameters": {
@@ -787,6 +802,16 @@
                   "bri": 44,
                   "hue": 7985,
                   "sat": 107
+                }
+              },
+              {
+                "id": "on_bright",
+                "name": "Bright",
+                "parameters": {
+                  "on": true,
+                  "bri": 254,
+                  "hue": 6924,
+                  "sat": 129
                 }
               },
               {
@@ -800,6 +825,17 @@
                 }
               }
             ]
+          },
+          {
+            "id": "sensor",
+            "name": "Temperature and Humidity Sensor",
+            "icon": "",
+            "type": "temperature_humidity_sensor",
+            "integration": {
+              "name": "shelly",
+              "id": "3"
+            },
+            "actions": []
           }
         ]
       }
