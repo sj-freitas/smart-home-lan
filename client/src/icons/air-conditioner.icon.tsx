@@ -1,4 +1,8 @@
-export const AirConditionerIcon = ({ size = 18 }: { size?: string | number }) => (
+export const AirConditionerIcon = ({
+  size = 18,
+}: {
+  size?: string | number;
+}) => (
   <svg
     width={size}
     height={size}

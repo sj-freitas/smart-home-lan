@@ -26,13 +26,17 @@ export class ConfigService {
     return this.config;
   }
 
-  public static create(): ConfigService {
+  public static create(configPath = process.env.CONFIG_PATH): ConfigService {
     if (existingInstance) {
       return existingInstance;
     }
+    if (!configPath) {
+      throw new Error(
+        `Config could not be loaded because CONFIG_PATH env var doesn't exist.`,
+      );
+    }
 
     // Read and validate the config
-    const configPath = process.env.CONFIG_PATH;
     const filePath = resolve(configPath);
 
     let raw = readFileSync(filePath, "utf-8");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Home } from "./types";
-import RoomList from "./components/RoomList";
+import RoomList from "./components/room-list";
 import { useHomeState } from "./sockets/use-home-state";
 import { useAuthentication } from "./auth/use-auth";
 
@@ -25,7 +25,7 @@ function setTitle(title: string | null) {
   document.title = title;
 }
 
-export default function App() {
+export default function Application() {
   const [home, setHome] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
   const { state, setStateSuppressSocket } = useHomeState();
@@ -94,8 +94,12 @@ export default function App() {
     });
   }
 
-  if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
-  if (!home) return <div style={{ padding: 20 }}>No state</div>;
+  if (loading) {
+    return <div style={{ padding: 20 }}>Loading...</div>;
+  }
+  if (!home) {
+    return <div style={{ padding: 20 }}>No state</div>;
+  }
 
   return (
     <div className="app-shell">

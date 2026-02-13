@@ -7,13 +7,6 @@ const DEFAULT_USER_AGENT =
   "(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36";
 
 async function buildBrowser(): Promise<Browser> {
-  const wsEndpoint = process.env.CHROME_WS_ENDPOINT;
-
-  if (wsEndpoint) {
-    console.log(`Connecting to remote Chrome: ${wsEndpoint}`);
-    return puppeteer.connect({ browserWSEndpoint: wsEndpoint });
-  }
-
   console.log("Launching local headless Chrome");
   return puppeteer.launch({
     headless: true,

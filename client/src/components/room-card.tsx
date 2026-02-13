@@ -153,23 +153,9 @@ export default function RoomCard({
           display: "flex",
           alignItems: "center",
           paddingTop: "0.4REM",
-          gap: 10,
+          gap: "1REM",
         }}
       >
-        {room.humidity && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              fontSize: 13,
-              color: "var(--muted)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <WaterDropIcon size={13} /> {formatHumidity(room.humidity)}
-          </div>
-        )}
         {room.temperature && (
           <div
             style={{
@@ -184,9 +170,22 @@ export default function RoomCard({
             <ThermometerIcon size={13} /> {formatTemperature(room.temperature)}
           </div>
         )}
+        {room.humidity && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              fontSize: 13,
+              color: "var(--muted)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <WaterDropIcon size={13} /> {formatHumidity(room.humidity)}
+          </div>
+        )}
       </div>
 
-      {/* Collapsible content container */}
       <div
         id={`room-${room.id}-content`}
         aria-hidden={!isOpen && isCollapsible}

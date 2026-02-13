@@ -1,6 +1,5 @@
-import React from "react";
 import { Room } from "../types";
-import RoomCard from "./RoomCard";
+import RoomCard from "./room-card";
 
 export default function RoomList({
   rooms,
@@ -11,7 +10,7 @@ export default function RoomList({
 }: {
   rooms: Room[];
   readonly: boolean;
-  setStateSuppressSocket: (value: boolean) => void,
+  setStateSuppressSocket: (value: boolean) => void;
   onDeviceAction: (
     roomId: string,
     deviceId: string,
