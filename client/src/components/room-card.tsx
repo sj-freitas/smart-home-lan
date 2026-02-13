@@ -56,6 +56,14 @@ export default function RoomCard({
     }
   }
 
+  // Ensures that whenever the window is resized that the collapsed elements
+  // are opened again.
+  useEffect(() => {
+    if (!isCollapsible) {
+      setIsOpen(true);
+    }
+  }, [isCollapsible]);
+
   // Add observer for the .grid class which can detect if the element is in
   // vertical list mode. (one column)
   useEffect(() => {
@@ -116,74 +124,85 @@ export default function RoomCard({
     <div className="card" ref={cardRef}>
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
+          cursor: isCollapsible ? "pointer" : "default",
         }}
         onClick={() => isCollapsible && setIsOpen((s) => !s)}
       >
-        <h2 style={{ margin: 0 }}>
-          {room.icon && getIconFromId(room.icon, "1.7rem")} {room.name}
-        </h2>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {isCollapsible && (
-            <button
-              className="collapse-toggle"
-              aria-expanded={isOpen}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <h2 style={{ margin: 0 }}>
+            {room.icon && getIconFromId(room.icon, "1.7rem")} {room.name}
+          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {isCollapsible && (
+              <button
+                className="collapse-toggle"
+                aria-expanded={isOpen}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: 6,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  color: "var(--muted)",
+                  borderRadius: 8,
+                }}
+              >
+                {isOpen ? (
+                  <FiChevronUp size={20} />
+                ) : (
+                  <FiChevronDown size={20} />
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            paddingTop: "0.4REM",
+            gap: "1REM",
+          }}
+        >
+          {room.temperature && (
+            <div
               style={{
-                background: "transparent",
-                border: "none",
-                padding: 6,
-                cursor: "pointer",
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
+                gap: 2,
+                fontSize: 13,
                 color: "var(--muted)",
-                borderRadius: 8,
+                whiteSpace: "nowrap",
               }}
             >
-              {isOpen ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
-            </button>
+              <ThermometerIcon size={13} />{" "}
+              {formatTemperature(room.temperature)}
+            </div>
+          )}
+          {room.humidity && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                fontSize: 13,
+                color: "var(--muted)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <WaterDropIcon size={13} /> {formatHumidity(room.humidity)}
+            </div>
           )}
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          paddingTop: "0.4REM",
-          gap: "1REM",
-        }}
-      >
-        {room.temperature && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              fontSize: 13,
-              color: "var(--muted)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <ThermometerIcon size={13} /> {formatTemperature(room.temperature)}
-          </div>
-        )}
-        {room.humidity && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              fontSize: 13,
-              color: "var(--muted)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <WaterDropIcon size={13} /> {formatHumidity(room.humidity)}
-          </div>
-        )}
       </div>
 
       <div
