@@ -22,11 +22,8 @@ These are used internally to track development features. Can move these to a bet
 
 ### Backend
 
-- [MEDIUM] State consolidation refactor. Make it so that the state is generate by different types and consolidated into a single object that is stored in the DB and successive state reads will check this state:
-    - This makes the application do less polling requests
-    - Better support for webhooks
-    - Better loading performance
-- [MEDIUM] Humidity and Temperature sensor integration.
+- [BUG] State keeps "zombie" devices because they are never deleted from the DB, instead it should use the config, also temp/humid sensors should not show in the state object.
+- [IMPORTANT] Implement a /health endpoint
 - [MEDIUM] Add proper logging
 - [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
 - [MEDIUM] Custom Scripts for devices via EVAL (plugin system) for example runScript: {PATH_TO_SCRIPT} -> Runs that code with the device context. Allows the script to do several things like animations. Need to think of the API design for this. Actions can also trigger scripts.

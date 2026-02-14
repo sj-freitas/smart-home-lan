@@ -118,8 +118,9 @@
                 "name": "Bright",
                 "parameters": {
                   "on": true,
-                  "xy": [0.4366, 0.4042],
-                  "bri": 254
+                  "bri": 254,
+                  "hue": 8725,
+                  "sat": 107
                 }
               },
               {
@@ -166,8 +167,9 @@
                 "name": "Bright",
                 "parameters": {
                   "on": true,
-                  "xy": [0.4366, 0.4042],
-                  "bri": 254
+                  "bri": 254,
+                  "hue": 8725,
+                  "sat": 107
                 }
               },
               {
