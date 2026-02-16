@@ -3,7 +3,7 @@ import { IntegrationsService } from "../integrations/integrations-service";
 import { ConfigService } from "../config/config-service";
 import { DeviceHelper } from "../helpers/device-helpers";
 import { HomeStateGateway } from "../sockets/home.state.gateway";
-import { AuthGuard } from "../services/auth-guard";
+import { AuthGuard } from "../services/auth.guard";
 import { StateService } from "../services/state/state.service";
 
 @Controller("api/actions")

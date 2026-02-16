@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
-import { AuthGuard } from "../services/auth-guard";
+import { AuthGuard } from "../services/auth.guard";
 import { IpValidationService } from "../services/ip-validation.service";
 
 @Controller("api/auth")

@@ -46,4 +46,20 @@ export class EmailsPersistenceService {
     const [matchingEmailAddress] = rows;
     return Boolean(matchingEmailAddress);
   }
+
+  public async addEmail(emailAddress: string, startDate: Date, endDate: Date) {
+    const { rows } = await this.pool.query(
+      `
+        INSERT INTO auth_emails
+          (starts_at, expires_at, email_address)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `,
+      [startDate, endDate, emailAddress],
+    );
+
+    const [inserted] = rows;
+
+    return AuthEmailsZod.parse(inserted);
+  }
 }

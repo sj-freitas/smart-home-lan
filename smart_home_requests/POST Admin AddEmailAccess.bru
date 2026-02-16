@@ -1,0 +1,28 @@
+meta {
+  name: POST Admin AddEmailAccess
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3001/api/admin/access
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer TEST
+}
+
+body:json {
+  {
+    "emailAddress": "sergio.freitas@reaktor.com",
+    "startDate": "2026-02-01T00:00:00Z",
+    "endDate": "2100-02-01T00:00:00Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
