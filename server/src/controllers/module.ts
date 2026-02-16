@@ -10,6 +10,7 @@ import { SandboxController } from "./sandbox.controller";
 import { StaticController } from "./static.controller";
 import { AuthConfig } from "./auth.config";
 import { AuthGoogleController } from "./auth-google/auth-google.controller";
+import { ApiController } from "./api.controller";
 
 const AuthConfigProvider = {
   provide: AuthConfig,
@@ -20,6 +21,7 @@ const AuthConfigProvider = {
   providers: [AuthConfigProvider],
   imports: [ConfigModule, IntegrationsModule, ServicesModule, SocketsModule],
   controllers: [
+    ApiController,
     HomeController,
     ActionsController,
     AuthController,
