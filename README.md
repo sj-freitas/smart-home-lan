@@ -12,17 +12,6 @@ The whole system is highly modifiable with a config file as the source of truth,
 - [Client](./client/README.md)
 - [Bruno Requests](./smart_home_requests/README.md)
 
-## Backlog
+## Backlog and Contributing
 
-These are used internally to track development features. Can move these to a better tool within Github.
-
-### Client
-
-- [MEDIUM] Add tests (collapsible flow etc.)
-
-### Backend
-- [BUG] State keeps "zombie" devices because they are never deleted from the DB, instead it should use the config, also temp/humid sensors should not show in the state object.
-- [IMPORTANT] Metrics and Circuit Breaker - we need to check if MelCloud, etc are working fine, show this on /health-integrations for example.
-- [MEDIUM] Add proper logging
-- [MEDIUM] Add unit tests (integration stuff, algorithms, helpers and services.)
-- [MEDIUM] Custom Scripts for devices via EVAL (plugin system) for example runScript: {PATH_TO_SCRIPT} -> Runs that code with the device context. Allows the script to do several things like animations. Need to think of the API design for this. Actions can also trigger scripts.
+Check [issues in the Github page](https://github.com/sj-freitas/smart-home-lan/issues), contributions are welcomed but not expected.
